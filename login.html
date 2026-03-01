@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>myLineage — Entrar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+  <script src="remote-storage.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg-main);
+      padding: 16px;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px 32px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    }
+    .login-logo {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; font-size: 1.5rem; font-weight: 700;
+      color: var(--text-main); margin-bottom: 32px;
+    }
+    .login-logo i { font-size: 2rem; color: #4493f8; }
+    /* Steps */
+    .step { display: none; }
+    .step.active { display: block; }
+    .step-title { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+    .step-sub { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.52; }
+    /* Inputs */
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+    .field input {
+      width: 100%; padding: 10px 14px;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-main);
+      font-size: 0.95rem; font-family: var(--font-main); outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: #4493f8; }
+    /* Buttons */
+    .btn-primary {
+      width: 100%; padding: 11px 16px; margin-top: 10px;
+      background: #4493f8; color: #fff; border: none;
+      border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 7px; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #2d7de0; }
+    .btn-primary:disabled { background: #2a4060; cursor: not-allowed; color: #6890b8; }
+    /* Error */
+    .err { color: #e06060; font-size: 0.8rem; margin-top: 8px; min-height: 18px; }
+    /* Link */
+    .login-link { text-align: center; margin-top: 16px; font-size: 0.8rem; color: var(--text-secondary); }
+    .login-link a { color: #4493f8; cursor: pointer; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+    /* OTP digits */
+    .otp-row {
+      display: flex; gap: 7px; justify-content: center; margin: 12px 0;
+    }
+    .otp-row input {
+      width: 46px; height: 54px; text-align: center;
+      font-size: 1.5rem; font-weight: 700;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-main); outline: none;
+      transition: border-color 0.15s;
+    }
+    .otp-row input:focus { border-color: #4493f8; }
+    /* QR */
+    .qr-wrap { text-align: center; margin: 16px 0; }
+    .qr-wrap img { width: 180px; height: 180px; border-radius: 8px; border: 3px solid #4493f8; }
+    .qr-secret { font-family: monospace; font-size: 0.75rem; color: #888; word-break: break-all; margin-top: 6px; }
+    /* Success / info box */
+    .info-box {
+      background: rgba(68,147,248,0.08); border: 1px solid rgba(68,147,248,0.22);
+      border-radius: var(--radius-sm); padding: 14px 16px;
+      font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55;
+      margin-bottom: 16px;
+    }
+    .info-box i { color: #4493f8; }
+    .big-icon { text-align: center; font-size: 3rem; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-logo"><i class="mdi mdi-tree"></i>myLineage</div>
+
+  <!-- ── STEP 1: Phone ── -->
+  <div class="step active" id="stepPhone">
+    <div class="step-title">Bem-vindo</div>
+    <div class="step-sub">Introduza o seu número de telemóvel para continuar.</div>
+    <div class="field">
+      <label>Telemóvel</label>
+      <input id="inPhone" type="tel" placeholder="+351 910 000 000" autocomplete="tel"/>
+    </div>
+    <div class="err" id="errPhone"></div>
+    <button class="btn-primary" id="btnPhone">
+      <i class="mdi mdi-arrow-right"></i> Continuar
+    </button>
+    <div class="login-link">Número não registado? <a id="linkRequest">Pedir acesso</a></div>
+  </div>
+
+  <!-- ── STEP 2: QR Setup (first login for this phone) ── -->
+  <div class="step" id="stepQR">
+    <div class="step-title">Configurar Microsoft Authenticator</div>
+    <div class="step-sub">
+      é a primeira vez que entra com este número.<br>
+      Abra o <strong>Microsoft Authenticator</strong>, toque em <strong>"+"</strong>
+      → <strong>"Outra conta"</strong> e leia o QR Code:
+    </div>
+    <div class="qr-wrap">
+      <img id="qrImg" src="" alt="QR Code"/>
+      <div class="qr-secret" id="qrSecret"></div>
+    </div>
+    <div class="step-sub" style="margin-bottom:6px;">Depois, introduza o código de 6 dígitos:</div>
+    <div class="otp-row" id="otpQR">
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+    </div>
+    <div class="err" id="errQR"></div>
+    <button class="btn-primary" id="btnQR"><i class="mdi mdi-shield-check"></i> Verificar e Entrar</button>
+    <div class="login-link"><a id="backQR">← Voltar</a></div>
+  </div>
+
+  <!-- ── STEP 3: TOTP (returning user) ── -->
+  <div class="step" id="stepOTP">
+    <div class="step-title">Código do Authenticator</div>
+    <div class="step-sub">
+      Abra a app <strong>Microsoft Authenticator</strong>
+      e introduza o código de 6 dígitos da conta <em>myLineage</em>.
+    </div>
+    <div class="otp-row" id="otpOTP">
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+    </div>
+    <div class="err" id="errOTP"></div>
+    <button class="btn-primary" id="btnOTP"><i class="mdi mdi-login"></i> Entrar</button>
+    <div class="login-link"><a id="backOTP">← Voltar</a></div>
+  </div>
+
+  <!-- ── STEP 4: Access Request ── -->
+  <div class="step" id="stepRequest">
+    <div class="step-title">Pedir acesso</div>
+    <div class="step-sub">
+      O seu número não está registado.<br>
+      Preencha os dados e aguarde aprovação do administrador.
+    </div>
+    <div class="field"><label>O seu nome</label><input id="reqName" type="text" placeholder="Nome completo"/></div>
+    <div class="field"><label>Telemóvel</label><input id="reqPhone" type="tel" placeholder="+351 910 000 000"/></div>
+    <div class="err" id="errReq"></div>
+    <button class="btn-primary" id="btnRequest"><i class="mdi mdi-send"></i> Enviar Pedido</button>
+    <div class="login-link"><a id="backRequest">← Voltar</a></div>
+  </div>
+
+  <!-- ── STEP 5: Pending ── -->
+  <div class="step" id="stepPending">
+    <div class="big-icon"><i class="mdi mdi-clock-check-outline" style="color:#4493f8;"></i></div>
+    <div class="step-title" style="text-align:center;">Pedido pendente</div>
+    <div class="step-sub" style="text-align:center;">
+      O seu pedido de acesso está pendente. Aguarde a aprovação do administrador.
+      Quando aprovado, pode entrar com o seu número de telemóvel.
+    </div>
+    <button class="btn-primary" id="btnPendingBack"><i class="mdi mdi-arrow-left"></i> Voltar</button>
+  </div>
+
+  <!-- ── STEP 6: Rejected ── -->
+  <div class="step" id="stepRejected">
+    <div class="big-icon"><i class="mdi mdi-cancel" style="color:#e06060;"></i></div>
+    <div class="step-title" style="text-align:center;">Acesso negado</div>
+    <div class="step-sub" style="text-align:center;">
+      O seu pedido foi rejeitado.<br>Contacte o administrador da família para mais informações.
+    </div>
+    <button class="btn-primary" id="btnRejectedBack"><i class="mdi mdi-arrow-left"></i> Voltar</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const Auth = window.MLAuth;
+  const DB   = window.GedcomDB;
+
+  // If already logged in → go to app
+  if (Auth.getSession()) {
+    window.location.replace('index.html');
+    return;
+  }
+
+  let _phone = '';
+
+  /* ── helpers ── */
+  function show(id) {
+    document.querySelectorAll('.step').forEach(function(el){ el.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function norm(p){ return Auth.normalizePhone(p); }
+
+  function getPendingRequests() {
+    return (DB.getSetting('accessRequests') || []);
+  }
+
+  function getQRUrl(otpauthUri) {
+    return 'https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl='
+      + encodeURIComponent(otpauthUri);
+  }
+
+  /* ── OTP digit helpers ── */
+  function wireDigits(rowId, onFull) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    const inputs = row.querySelectorAll('input');
+    inputs.forEach(function(inp, i) {
+      inp.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(-1);
+        if (this.value && i < inputs.length - 1) inputs[i + 1].focus();
+        var code = Array.from(inputs).map(function(x){ return x.value; }).join('');
+        if (code.length === 6) onFull(code);
+      });
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && i > 0) inputs[i - 1].focus();
+      });
+      inp.addEventListener('paste', function(e) {
+        e.preventDefault();
+        var pasted = (e.clipboardData || window.clipboardData).getData('text')
+          .replace(/\D/g, '').slice(0, 6);
+        pasted.split('').forEach(function(ch, j){ if (inputs[j]) inputs[j].value = ch; });
+        var last = inputs[Math.min(pasted.length, inputs.length) - 1];
+        if (last) last.focus();
+        var code = Array.from(inputs).map(function(x){ return x.value; }).join('');
+        if (code.length === 6) onFull(code);
+      });
+    });
+  }
+
+  function clearDigits(rowId) {
+    var row = document.getElementById(rowId);
+    if (!row) return;
+    row.querySelectorAll('input').forEach(function(inp){ inp.value = ''; });
+    var first = row.querySelector('input');
+    if (first) setTimeout(function(){ first.focus(); }, 40);
+  }
+
+  function getDigits(rowId) {
+    var row = document.getElementById(rowId);
+    if (!row) return '';
+    return Array.from(row.querySelectorAll('input')).map(function(x){ return x.value; }).join('');
+  }
+
+  /* ── STEP 1: Phone ── */
+  var inPhone = document.getElementById('inPhone');
+  inPhone.focus();
+  inPhone.addEventListener('keydown', function(e){ if (e.key === 'Enter') goPhone(); });
+  document.getElementById('btnPhone').addEventListener('click', goPhone);
+
+  function goPhone() {
+    var raw   = inPhone.value.trim();
+    var phone = norm(raw);
+    var err   = document.getElementById('errPhone');
+    if (!phone || phone.length < 6) { err.textContent = 'Introduza um número válido.'; return; }
+    err.textContent = '';
+    _phone = phone;
+
+    // Check access-request state
+    var reqs = getPendingRequests();
+    var myReq = reqs.find(function(r){ return norm(r.phone) === phone; });
+    if (myReq) {
+      if (myReq.status === 'rejected') { show('stepRejected'); return; }
+      if (myReq.status === 'pending')  { show('stepPending');  return; }
+      // approved → fall through to normal login
+    }
+
+    // Phone must exist as admin or in a person's contacts
+    var isAdmin = Auth.isAdminPhone(phone);
+    var person  = Auth.findPersonByPhone(phone);
+
+    if (!isAdmin && !person) {
+      document.getElementById('reqPhone').value = raw;
+      show('stepRequest');
+      return;
+    }
+
+    // Check TOTP secret
+    var secret = Auth.getTotpSecret(phone);
+    if (!secret) {
+      // First login – generate QR
+      var newSecret = Auth.generateSecret();
+      Auth.saveTotpSecret(phone, newSecret + '|unverified');
+      var uri = Auth.otpAuthUri(phone, newSecret);
+      document.getElementById('qrImg').src = getQRUrl(uri);
+      document.getElementById('qrSecret').textContent = 'Chave manual: ' + newSecret;
+      clearDigits('otpQR');
+      show('stepQR');
+    } else {
+      // Returning user
+      clearDigits('otpOTP');
+      show('stepOTP');
+    }
+  }
+
+  /* ── STEP 2: QR Setup ── */
+  wireDigits('otpQR', function(code){ verifyQR(code); });
+  document.getElementById('btnQR').addEventListener('click', function(){ verifyQR(getDigits('otpQR')); });
+  document.getElementById('backQR').addEventListener('click', function(){ show('stepPhone'); });
+
+  function verifyQR(code) {
+    var err = document.getElementById('errQR');
+    if (code.length < 6) { err.textContent = 'Introduza os 6 dígitos.'; return; }
+    err.textContent = '';
+    document.getElementById('btnQR').disabled = true;
+
+    // Secret stored as "SECRET|unverified" until first verify
+    var stored = Auth.getTotpSecret(_phone) || '';
+    var secret = stored.replace('|unverified', '');
+
+    Auth.verifyTOTP(secret, code).then(function(ok) {
+      document.getElementById('btnQR').disabled = false;
+      if (!ok) {
+        err.textContent = 'Código inválido. Verifique a app e tente novamente.';
+        clearDigits('otpQR');
+        return;
+      }
+      // Mark as verified (remove |unverified flag)
+      Auth.saveTotpSecret(_phone, secret);
+      doLogin();
+    });
+  }
+
+  /* ── STEP 3: TOTP ── */
+  wireDigits('otpOTP', function(code){ verifyOTP(code); });
+  document.getElementById('btnOTP').addEventListener('click', function(){ verifyOTP(getDigits('otpOTP')); });
+  document.getElementById('backOTP').addEventListener('click', function(){ show('stepPhone'); });
+
+  function verifyOTP(code) {
+    var err = document.getElementById('errOTP');
+    if (code.length < 6) { err.textContent = 'Introduza os 6 dígitos.'; return; }
+    err.textContent = '';
+    document.getElementById('btnOTP').disabled = true;
+
+    var stored = Auth.getTotpSecret(_phone) || '';
+    // If still marked unverified (edge case), strip the flag
+    var secret = stored.replace('|unverified', '');
+
+    Auth.verifyTOTP(secret, code).then(function(ok) {
+      document.getElementById('btnOTP').disabled = false;
+      if (!ok) {
+        err.textContent = 'Código inválido. Verifique a app e tente novamente.';
+        clearDigits('otpOTP');
+        return;
+      }
+      doLogin();
+    });
+  }
+
+  function doLogin() {
+    var isAdmin = Auth.isAdminPhone(_phone);
+    var person  = Auth.findPersonByPhone(_phone);
+    var name    = person ? DB.getDisplayName(person) : _phone;
+    Auth.setSession({ phone: _phone, name: name, isAdmin: isAdmin, personId: person ? person.id : null });
+    var params  = new URLSearchParams(window.location.search);
+    var from    = params.get('from');
+    window.location.replace(from || 'index.html');
+  }
+
+  /* ── STEP 4: Access Request ── */
+  document.getElementById('linkRequest').addEventListener('click', function(){ show('stepRequest'); });
+  document.getElementById('backRequest').addEventListener('click', function(){ show('stepPhone'); });
+  document.getElementById('btnRequest').addEventListener('click', function() {
+    var name  = document.getElementById('reqName').value.trim();
+    var phone = norm(document.getElementById('reqPhone').value.trim());
+    var err   = document.getElementById('errReq');
+    if (!name)  { err.textContent = 'Introduza o seu nome.'; return; }
+    if (!phone) { err.textContent = 'Introduza o seu número de telemóvel.'; return; }
+    err.textContent = '';
+
+    var reqs = DB.getSetting('accessRequests') || [];
+    var already = reqs.find(function(r){ return norm(r.phone) === phone && r.status === 'pending'; });
+    if (!already) {
+      reqs.push({
+        id: 'req_' + Date.now(),
+        name: name,
+        phone: phone,
+        requestedAt: new Date().toISOString(),
+        status: 'pending',
+        linkedPersonId: null
+      });
+      DB.setSetting('accessRequests', reqs);
+    }
+    show('stepPending');
+  });
+
+  /* ── STEP 5/6 backs ── */
+  document.getElementById('btnPendingBack').addEventListener('click',  function(){ show('stepPhone'); });
+  document.getElementById('btnRejectedBack').addEventListener('click', function(){ show('stepPhone'); });
+
+})();
+</script>
+</body>
+</html>

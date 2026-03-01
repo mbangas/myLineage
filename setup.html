@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>myLineage — Configuração Inicial</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+  <script src="remote-storage.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg-main); padding:16px; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 40px 36px 32px; width: 100%; max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    }
+    .logo { display:flex; align-items:center; justify-content:center; gap:10px; font-size:1.5rem; font-weight:700; color:var(--text-main); margin-bottom:8px; }
+    .logo i { font-size:2rem; color:#4493f8; }
+    .tagline { text-align:center; color:var(--text-secondary); font-size:0.83rem; margin-bottom:32px; }
+    .step { display:none; } .step.active { display:block; }
+    .step-title { font-size:1rem; font-weight:700; color:var(--text-main); margin-bottom:6px; }
+    .step-sub { font-size:0.83rem; color:var(--text-secondary); margin-bottom:20px; line-height:1.55; }
+    .field { margin-bottom:14px; }
+    .field label { display:block; font-size:0.78rem; color:var(--text-secondary); margin-bottom:4px; font-weight:500; }
+    .field input {
+      width:100%; padding:10px 14px; background:var(--bg-surface); border:1px solid var(--border);
+      border-radius:var(--radius-sm); color:var(--text-main); font-size:0.95rem; font-family:var(--font-main); outline:none; transition:border-color .15s;
+    }
+    .field input:focus { border-color:#4493f8; }
+    .btn-primary {
+      width:100%; padding:11px 16px; margin-top:8px;
+      background:#4493f8; color:#fff; border:none; border-radius:var(--radius-sm);
+      font-size:0.9rem; font-weight:600; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:7px; transition:background .15s;
+    }
+    .btn-primary:hover { background:#2d7de0; }
+    .btn-primary:disabled { background:#2a4060; cursor:not-allowed; color:#6890b8; }
+    .err { color:#e06060; font-size:0.8rem; margin-top:6px; min-height:18px; }
+    .info-box {
+      background:rgba(68,147,248,0.08); border:1px solid rgba(68,147,248,0.22);
+      border-radius:var(--radius-sm); padding:14px 16px;
+      font-size:0.83rem; color:var(--text-secondary); line-height:1.6; margin-bottom:20px;
+    }
+    .info-box strong { color:var(--text-main); }
+    .otp-row { display:flex; gap:7px; justify-content:center; margin:12px 0; }
+    .otp-row input {
+      width:46px; height:54px; text-align:center; font-size:1.5rem; font-weight:700;
+      background:var(--bg-surface); border:1px solid var(--border);
+      border-radius:var(--radius-sm); color:var(--text-main); outline:none; transition:border-color .15s;
+    }
+    .otp-row input:focus { border-color:#4493f8; }
+    .qr-wrap { text-align:center; margin:16px 0; }
+    .qr-wrap img { width:180px; height:180px; border-radius:8px; border:3px solid #4493f8; }
+    .qr-secret { font-family:monospace; font-size:0.75rem; color:#888; word-break:break-all; margin-top:6px; }
+    .done-icon { text-align:center; font-size:3rem; margin-bottom:12px; color:#4493f8; }
+    .back-link { text-align:center; margin-top:14px; font-size:0.8rem; color:var(--text-secondary); }
+    .back-link a { color:#4493f8; cursor:pointer; text-decoration:none; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo"><i class="mdi mdi-tree"></i>myLineage</div>
+  <div class="tagline">Configuração inicial da aplicação</div>
+
+  <!-- Step 1: Admin phone -->
+  <div class="step active" id="s1">
+    <div class="step-title">Configurar Administrador</div>
+    <div class="info-box">
+      <strong>Bem-vindo ao myLineage!</strong><br>
+      Defina o número de telemóvel do <strong>administrador</strong>.
+      Este número terá sempre acesso e poderá gerir pedidos de outros membros da família.
+    </div>
+    <div class="field">
+      <label>Telemóvel do administrador</label>
+      <input id="s1Phone" type="tel" placeholder="+351 910 000 000" autocomplete="tel"/>
+    </div>
+    <div class="err" id="s1Err"></div>
+    <button class="btn-primary" id="s1Btn"><i class="mdi mdi-arrow-right"></i> Continuar</button>
+  </div>
+
+  <!-- Step 2: Confirm & setup Authenticator -->
+  <div class="step" id="s2">
+    <div class="step-title">Configurar Microsoft Authenticator</div>
+    <div class="step-sub">
+      Número registado: <strong id="s2PhoneLabel"></strong><br><br>
+      Abra o <strong>Microsoft Authenticator</strong>, toque em <strong>"+"</strong>
+      → <strong>"Outra conta"</strong> e leia o QR Code abaixo.
+    </div>
+    <div class="qr-wrap">
+      <img id="s2QRImg" src="" alt="QR Code"/>
+      <div class="qr-secret" id="s2QRSecret"></div>
+    </div>
+    <div class="step-sub" style="margin-bottom:6px;">Introduza o código de 6 dígitos para confirmar:</div>
+    <div class="otp-row" id="s2OTP">
+      <input type="tel" maxlength="1"/><input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/><input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/><input type="tel" maxlength="1"/>
+    </div>
+    <div class="err" id="s2Err"></div>
+    <button class="btn-primary" id="s2Btn"><i class="mdi mdi-shield-check"></i> Verificar e Concluir</button>
+    <div class="back-link"><a id="s2Back">← Corrigir número</a></div>
+  </div>
+
+  <!-- Step 3: Done -->
+  <div class="step" id="s3">
+    <div class="done-icon"><i class="mdi mdi-check-circle"></i></div>
+    <div class="step-title" style="text-align:center;">Configuração concluída!</div>
+    <div class="step-sub" style="text-align:center;">
+      O administrador foi configurado com sucesso.<br>
+      Pode agora entrar com o Microsoft Authenticator.
+    </div>
+    <button class="btn-primary" id="s3Btn"><i class="mdi mdi-login"></i> Ir para o Login</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var Auth = window.MLAuth;
+  var DB   = window.GedcomDB;
+
+  // If admin already configured → go to login
+  if (DB && DB.getSetting('adminPhone')) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  var _phone  = '';
+  var _secret = '';
+
+  function show(id){
+    document.querySelectorAll('.step').forEach(function(el){ el.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function getQRUrl(uri){
+    return 'https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=' + encodeURIComponent(uri);
+  }
+
+  /* ── Step 1 ── */
+  document.getElementById('s1Phone').focus();
+  document.getElementById('s1Phone').addEventListener('keydown', function(e){ if(e.key==='Enter') go1(); });
+  document.getElementById('s1Btn').addEventListener('click', go1);
+
+  function go1(){
+    var phone = Auth.normalizePhone(document.getElementById('s1Phone').value.trim());
+    var err   = document.getElementById('s1Err');
+    if (!phone || phone.length < 6){ err.textContent = 'Introduza um número válido.'; return; }
+    err.textContent = '';
+    _phone  = phone;
+    _secret = Auth.generateSecret();
+
+    // Save admin phone and TOTP secret
+    DB.setSetting('adminPhone', _phone);
+    Auth.saveTotpSecret(_phone, _secret + '|unverified');
+
+    document.getElementById('s2PhoneLabel').textContent = _phone;
+    var uri = Auth.otpAuthUri(_phone, _secret);
+    document.getElementById('s2QRImg').src = getQRUrl(uri);
+    document.getElementById('s2QRSecret').textContent = 'Chave manual: ' + _secret;
+    clearOTP();
+    show('s2');
+    setTimeout(function(){ document.querySelector('#s2OTP input').focus(); }, 80);
+  }
+
+  /* ── Step 2 ── */
+  wireOTP();
+  document.getElementById('s2Btn').addEventListener('click', function(){ verify(otp()); });
+  document.getElementById('s2Back').addEventListener('click', function(e){ e.preventDefault(); show('s1'); });
+
+  function verify(code){
+    var err = document.getElementById('s2Err');
+    if (code.length < 6){ err.textContent = 'Introduza os 6 dígitos.'; return; }
+    err.textContent = '';
+    document.getElementById('s2Btn').disabled = true;
+    Auth.verifyTOTP(_secret, code).then(function(ok){
+      document.getElementById('s2Btn').disabled = false;
+      if (!ok){
+        err.textContent = 'Código inválido. Verifique a app e tente novamente.';
+        clearOTP();
+        return;
+      }
+      Auth.saveTotpSecret(_phone, _secret);
+      show('s3');
+    });
+  }
+
+  /* ── Step 3 ── */
+  document.getElementById('s3Btn').addEventListener('click', function(){ window.location.replace('login.html'); });
+
+  /* ── OTP wiring ── */
+  function wireOTP(){
+    var row    = document.getElementById('s2OTP');
+    var inputs = row.querySelectorAll('input');
+    inputs.forEach(function(inp, i){
+      inp.addEventListener('input', function(){
+        this.value = this.value.replace(/\D/g,'').slice(-1);
+        if (this.value && i < inputs.length-1) inputs[i+1].focus();
+        if (otp().length === 6) verify(otp());
+      });
+      inp.addEventListener('keydown', function(e){
+        if (e.key==='Backspace' && !this.value && i>0) inputs[i-1].focus();
+      });
+    });
+  }
+  function otp(){
+    return Array.from(document.querySelectorAll('#s2OTP input')).map(function(x){ return x.value; }).join('');
+  }
+  function clearOTP(){
+    document.querySelectorAll('#s2OTP input').forEach(function(x){ x.value=''; });
+  }
+})();
+</script>
+</body>
+</html>

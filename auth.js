@@ -158,7 +158,13 @@
 
   function requireAuth() {
     const page = getCurrentPage();
-    if (page === LOGIN_URL || page === '') return;  // login page is open
+    if (page === LOGIN_URL || page === 'setup.html' || page === '') return;
+    // First run: no admin phone configured
+    const DB = window.GedcomDB;
+    if (DB && !DB.getSetting('adminPhone')) {
+      window.location.replace('setup.html');
+      return;
+    }
     const sess = getSession();
     if (!sess) {
       window.location.replace(LOGIN_URL + '?from=' + encodeURIComponent(page));

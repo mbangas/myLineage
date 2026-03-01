@@ -32,6 +32,8 @@ VOL_DOCS="/data/mylineage/documentos"
 VOL_GEDCOM="/data/mylineage/gedcom"
 VOL_DATA="/data/mylineage/data"
 
+ADMIN_PHONE=""
+
 OS_ID=""
 OS_VER=""
 OS_NAME=""
@@ -199,6 +201,36 @@ será instalado no servidor.
 
 Directório de instalação:" \
         12 62 "/opt/mylineage" 3>&1 1>&2 2>&3) || exit 0
+
+    # Telemóvel do administrador
+    ADMIN_PHONE=$(whiptail \
+        --backtitle "myLineage Installer  v2.0" \
+        --title "🔐  Configuração — Administrador" \
+        --inputbox \
+"Telemóvel do administrador do myLineage.
+
+Este número terá acesso total à aplicação
+e será o primeiro a configurar o
+Microsoft Authenticator (TOTP).
+
+Formato: +351910000000
+Telemóvel do administrador:" \
+        16 62 "" 3>&1 1>&2 2>&3) || exit 0
+
+    # Validar número de telefone (deve começar com + e ter pelo menos 8 dígitos)
+    while [[ ! "$ADMIN_PHONE" =~ ^\+[0-9]{7,} ]]; do
+        ADMIN_PHONE=$(whiptail \
+            --backtitle "myLineage Installer  v2.0" \
+            --title "⚠️   Telemóvel Inválido" \
+            --inputbox \
+"Número inválido. Deve começar com +
+e ter pelo menos 8 dígitos.
+
+Exemplo: +351910000000
+
+Telemóvel do administrador:" \
+            14 62 "" 3>&1 1>&2 2>&3) || exit 0
+    done
 }
 
 # ── Perguntar volumes ──────────────────────────────────────────────────────────
@@ -500,6 +532,47 @@ COMPOSE_CONTENT
     log "docker-compose.yml criado em $APP_DIR/docker-compose.yml"
 }
 
+# ── PASSO 7b: Semear dados iniciais + adminPhone ─────────────────────────────
+step_seed_data() {
+    log "=== PASSO 7b: Semear dados iniciais ==="
+
+    # Copiar ficheiros JSON de seed para o volume (apenas se ainda não existirem)
+    local src="$APP_DIR/JSON-DATA"
+    if [[ -d "$src" ]]; then
+        for f in "$src"/*.json; do
+            [[ -f "$f" ]] || continue
+            local dest="$VOL_DATA/$(basename "$f")"
+            if [[ ! -f "$dest" ]]; then
+                cp "$f" "$dest"
+                log "Copiado: $dest"
+            fi
+        done
+    fi
+
+    # Injectar adminPhone em settings.json
+    local settings="$VOL_DATA/settings.json"
+    if [[ ! -f "$settings" ]]; then
+        echo '{"adminPhone":"'"$ADMIN_PHONE"'"}' > "$settings"
+        log "settings.json criado com adminPhone=$ADMIN_PHONE"
+    else
+        # Usar python3 para atualizar o campo adminPhone
+        python3 - <<PYEOF
+import json, sys
+path = "$settings"
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception:
+    data = {}
+data['adminPhone'] = "$ADMIN_PHONE"
+with open(path, 'w') as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+print('adminPhone definido:', "$ADMIN_PHONE")
+PYEOF
+        log "settings.json actualizado: adminPhone=$ADMIN_PHONE"
+    fi
+}
+
 # ── PASSO 8: Build e arranque ──────────────────────────────────────────────────
 step_build_and_start() {
     log "=== PASSO 7: Build e arranque Docker ==="
@@ -549,6 +622,16 @@ show_next_steps() {
   ║                                                  ║
   ║  Referência das APIs REST:                       ║
   ║    http://${SERVER_IP}:${APP_PORT}/apis.html    ║
+  ╠══════════════════════════════════════════════════╣
+  ║  🔐  PRIMEIRO LOGIN (Microsoft Authenticator)   ║
+  ╠══════════════════════════════════════════════════╣
+  ║  Administrador: ${ADMIN_PHONE}
+  ║                                                  ║
+  ║  1. Abra a aplicação no browser                  ║
+  ║  2. Introduza o telem. acima                     ║
+  ║  3. Leia o QR code com o Microsoft               ║
+  ║     Authenticator no telemóvel                   ║
+  ║  4. Valide o código de 6 dígitos                 ║
   ╠══════════════════════════════════════════════════╣
   ║  🐳  PORTAINER (Gestão Docker)                  ║
   ╠══════════════════════════════════════════════════╣
@@ -618,7 +701,7 @@ fi
 ask_config
 ask_volumes
 
-log "Configuração: APP_DIR=$APP_DIR  PORT=$APP_PORT"
+log "Configuração: APP_DIR=$APP_DIR  PORT=$APP_PORT  ADMIN_PHONE=$ADMIN_PHONE"
 log "Volumes: FOTOS=$VOL_FOTOS  DOCS=$VOL_DOCS  GEDCOM=$VOL_GEDCOM  DATA=$VOL_DATA"
 
 # ─── Execução com barra de progresso ──────────────────────────────────────────
@@ -639,14 +722,17 @@ step_create_volumes
 gauge_update 58 "[ 5 / 8 ]  A descarregar myLineage do GitHub..."
 step_clone_repo
 
-gauge_update 68 "[ 6 / 8 ]  A gerar Dockerfile e docker-compose.yml..."
+gauge_update 68 "[ 6 / 9 ]  A gerar Dockerfile e docker-compose.yml..."
 step_create_dockerfile
 step_create_compose
 
-gauge_update 75 "[ 7 / 8 ]  A compilar a imagem Docker (pode demorar...)..."
+gauge_update 73 "[ 7 / 9 ]  A semear dados e configurar administrador..."
+step_seed_data
+
+gauge_update 78 "[ 8 / 9 ]  A compilar a imagem Docker (pode demorar...)..."
 step_build_and_start
 
-gauge_update 93 "[ 8 / 8 ]  A verificar se o serviço está disponível..."
+gauge_update 95 "[ 9 / 9 ]  A verificar se o serviço está disponível..."
 wait_for_service
 
 gauge_update 100 "  ✅  Instalação concluída com sucesso!"

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
     <script src="remote-storage.js"></script>
+    <script src="auth.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -87,6 +88,34 @@
             <div style="display:flex;gap:8px;margin-top:6px;">
               <button class="btn" id="clearFocusBtn">Remover foco</button>
             </div>
+          </div>
+        </div>
+
+        <!-- ── Pedidos de Acesso ──────────────────────────────────────────── -->
+        <div class="card centered-panel" id="cardPedidos" style="max-width:760px;width:100%;margin-top:16px;display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h2 style="margin:0;"><i class="mdi mdi-account-clock-outline" style="color:#4493f8;margin-right:8px;"></i>Pedidos de Acesso</h2>
+            <span id="pedidosBadge" style="display:none;padding:2px 10px;border-radius:12px;background:rgba(224,96,96,0.12);border:1px solid rgba(224,96,96,0.3);color:#e06060;font-size:0.78rem;font-weight:700;"></span>
+          </div>
+          <div id="pedidosBody"><div style="color:var(--text-disabled);font-size:0.85rem;">A carregar...</div></div>
+        </div>
+
+        <!-- ── Administrador ────────────────────────────────────────────────── -->
+        <div class="card centered-panel" id="cardAdmin" style="max-width:760px;width:100%;margin-top:16px;display:none;">
+          <h2 style="margin:0 0 12px;"><i class="mdi mdi-shield-crown" style="color:#d29922;margin-right:8px;"></i>Administrador</h2>
+          <div style="font-size:0.83rem;color:var(--text-secondary);margin-bottom:12px;">
+            Número de telemóvel com acesso de administrador:
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="tel" id="adminPhoneInput" placeholder="+351 910 000 000"
+              style="flex:1;min-width:180px;padding:8px 12px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-main);font-family:var(--font-main);font-size:0.9rem;outline:none;"/>
+            <button class="btn btn-sm" id="adminPhoneSaveBtn"><i class="mdi mdi-content-save-outline"></i> Guardar</button>
+          </div>
+          <div id="adminPhoneMsg" style="font-size:0.8rem;margin-top:6px;min-height:16px;"></div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-subtle);font-size:0.83rem;color:var(--text-secondary);">
+            <i class="mdi mdi-information-outline" style="color:#4493f8;"></i>
+            Alterar o número de administrador invalida imediatamente o acesso do número anterior.
+            O novo número terá de configurar o Microsoft Authenticator no próximo login.
           </div>
         </div>
 
@@ -310,5 +339,144 @@
       });
     </script>
     <script src="history-logger.js"></script>
+    <script>
+    /* ── Pedidos de Acesso + Admin ────────────────────────────────────────── */
+    (function(){
+      'use strict';
+      var Auth = window.MLAuth;
+      var DB   = window.GedcomDB;
+      if (!Auth || !DB) return;
+
+      var sess = Auth.getSession();
+      if (!sess || !sess.isAdmin) return;  // only admin sees these sections
+
+      var cardPedidos = document.getElementById('cardPedidos');
+      var cardAdmin   = document.getElementById('cardAdmin');
+      if (cardPedidos) cardPedidos.style.display = '';
+      if (cardAdmin)   cardAdmin.style.display   = '';
+
+      /* scroll to #pedidos if anchor present */
+      if (window.location.hash === '#pedidos') {
+        setTimeout(function(){ var el = document.getElementById('cardPedidos'); if(el) el.scrollIntoView({behavior:'smooth'}); }, 400);
+      }
+
+      /* ─── Pedidos ─── */
+      function fmtDate(iso){
+        if (!iso) return '';
+        try{
+          var d = new Date(iso);
+          return d.getDate().toString().padStart(2,'0') + '-' +
+            (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getFullYear() +
+            ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }catch(e){ return iso; }
+      }
+
+      function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){ return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
+
+      function renderPedidos(){
+        var body  = document.getElementById('pedidosBody');
+        var badge = document.getElementById('pedidosBadge');
+        if (!body) return;
+
+        var reqs    = DB.getSetting('accessRequests') || [];
+        var pending = reqs.filter(function(r){ return r.status === 'pending'; });
+
+        if (badge){
+          if (pending.length){ badge.style.display=''; badge.textContent = pending.length + ' pendente' + (pending.length>1?'s':''); }
+          else badge.style.display='none';
+        }
+
+        if (!reqs.length){
+          body.innerHTML = '<div style="color:var(--text-disabled);font-size:0.85rem;">Nenhum pedido de acesso registado.</div>';
+          return;
+        }
+
+        var people     = DB.getIndividuals(false);
+        var personOpts = people.map(function(i){ return '<option value="'+esc(i.id)+'">'+esc(DB.getDisplayName(i))+'</option>'; }).join('');
+
+        var stColors = { pending:'#c97c28', approved:'#4caf50', rejected:'#e06060' };
+        var stLabels = { pending:'Pendente', approved:'Aprovado', rejected:'Rejeitado' };
+
+        var html = '<div class="mini-list">';
+        reqs.slice().reverse().forEach(function(r){
+          var st = r.status || 'pending';
+          html += '<div class="mini-card" style="padding:14px 16px;margin-bottom:8px;">'
+            + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
+            + '<div style="flex:1;">'
+            + '<div style="font-weight:600;font-size:0.9rem;">'+esc(r.name)+'</div>'
+            + '<div style="font-size:0.82rem;color:#aaa;margin-top:2px;"><i class="mdi mdi-phone-outline"></i> '+esc(r.phone)+'</div>'
+            + '<div style="font-size:0.78rem;color:var(--text-disabled);margin-top:2px;">'+fmtDate(r.requestedAt)+'</div>'
+            + '</div>'
+            + '<span style="padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;background:'+stColors[st]+'22;color:'+stColors[st]+';border:1px solid '+stColors[st]+'44;white-space:nowrap;">'+stLabels[st]+'</span>'
+            + '</div>';
+
+          if (st === 'pending'){
+            html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-subtle);">'
+              + '<div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:6px;">Associar a pessoa existente (opcional):</div>'
+              + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+              + '<select id="rp_'+esc(r.id)+'" style="flex:1;min-width:160px;padding:6px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-main);font-family:var(--font-main);font-size:0.82rem;">'
+              + '<option value="">(nenhuma — adicionar o número agora)</option>'+personOpts
+              + '</select>'
+              + '<button class="btn btn-sm" style="background:rgba(76,175,80,0.12);color:#4caf50;border-color:rgba(76,175,80,0.35);" onclick="_pedidoAprovar(\''+esc(r.id)+'\')" ><i class="mdi mdi-check"></i> Aprovar</button>'
+              + '<button class="btn btn-sm" style="background:rgba(224,96,96,0.10);color:#e06060;border-color:rgba(224,96,96,0.3);" onclick="_pedidoRejeitar(\''+esc(r.id)+'\')" ><i class="mdi mdi-close"></i> Rejeitar</button>'
+              + '</div></div>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+        body.innerHTML = html;
+      }
+
+      window._pedidoAprovar = function(reqId){
+        var sel      = document.getElementById('rp_'+reqId);
+        var personId = sel ? sel.value : '';
+        var reqs     = DB.getSetting('accessRequests') || [];
+        var req      = reqs.find(function(r){ return r.id === reqId; });
+        if (!req) return;
+        req.status          = 'approved';
+        req.approvedAt      = new Date().toISOString();
+        req.linkedPersonId  = personId || null;
+        // Add phone to person if selected
+        if (personId){
+          var indi = DB.getIndividual(personId);
+          if (indi){
+            if (!indi.contacts) indi.contacts = [];
+            var normPhone = Auth.normalizePhone(req.phone);
+            var already   = indi.contacts.some(function(c){ return c.type==='phone' && Auth.normalizePhone(c.value)===normPhone; });
+            if (!already) indi.contacts.push({ type:'phone', value:req.phone, label:'Telemóvel' });
+            DB.saveIndividual(indi);
+          }
+        }
+        DB.setSetting('accessRequests', reqs);
+        renderPedidos();
+      };
+
+      window._pedidoRejeitar = function(reqId){
+        if (!confirm('Rejeitar este pedido de acesso?')) return;
+        var reqs = DB.getSetting('accessRequests') || [];
+        var req  = reqs.find(function(r){ return r.id === reqId; });
+        if (req){ req.status = 'rejected'; req.rejectedAt = new Date().toISOString(); }
+        DB.setSetting('accessRequests', reqs);
+        renderPedidos();
+      };
+
+      renderPedidos();
+
+      /* ─── Admin phone ─── */
+      var adminInput = document.getElementById('adminPhoneInput');
+      var adminMsg   = document.getElementById('adminPhoneMsg');
+      if (adminInput) adminInput.value = DB.getSetting('adminPhone') || '';
+
+      document.getElementById('adminPhoneSaveBtn').addEventListener('click', function(){
+        var v = Auth.normalizePhone((adminInput.value || '').trim());
+        if (!v || v.length < 6){ adminMsg.style.color='#e06060'; adminMsg.textContent='Número inválido.'; return; }
+        DB.setSetting('adminPhone', v);
+        adminMsg.style.color = '#4caf50';
+        adminMsg.textContent = 'Guardado!';
+        setTimeout(function(){ adminMsg.textContent=''; }, 2500);
+      });
+
+    })();
+    </script>
   </body>
 </html>

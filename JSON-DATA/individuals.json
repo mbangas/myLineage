@@ -4146,7 +4146,14 @@
     ],
     "createdAt": "2026-02-28T12:14:34.443Z",
     "updatedAt": "2026-02-28T12:14:34.443Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "contacts": [
+      {
+        "type": "phone",
+        "value": "+351931018263",
+        "label": "Telemóvel"
+      }
+    ]
   },
   "I113": {
     "id": "I113",

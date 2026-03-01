@@ -88,6 +88,14 @@
             </div>
             <button id="renderChartBtn" class="btn btn-sm"><i class="mdi mdi-refresh"></i> Renderizar</button>
           </div>
+
+          <!-- Path mode banner -->
+          <div id="pathBanner" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(68,147,248,0.10);border:1px solid rgba(68,147,248,0.28);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <i class="mdi mdi-transit-connection" style="color:#4493f8;font-size:1.1rem;flex-shrink:0;"></i>
+            <span style="font-size:0.88rem;color:var(--text-main);flex:1;">Caminho familiar: <strong id="pathBannerText"></strong></span>
+            <button id="clearPathBtn" class="btn btn-ghost btn-sm" style="font-size:0.82rem;white-space:nowrap;"><i class="mdi mdi-close-circle-outline"></i> Árvore completa</button>
+          </div>
+
           <div id="topolaWrap">
             <svg id="topolaSvg"></svg>
             <div class="chart-zoom-btns" id="topolaZoomBtns">
@@ -180,10 +188,107 @@
         return {date:{day,month,year}};
       }
 
+      /* ── Path / kinship filter ────────────────────────────────────── */
+      function computePathFilter(fromId, toId) {
+        if (!fromId || !toId || fromId === toId) return null;
+        // Use only non-deleted records so deleted entities never pollute the path
+        const allIndis = DB.getIndividuals();
+        const allFams  = DB.getFamilies();
+        const indiIdSet = new Set(allIndis.map(function(i){ return i.id; }));
+        const famIdSet  = new Set(allFams.map(function(f){ return f.id; }));
+        const adj = new Map();
+        function addEdge(a, b) {
+          if (!a || !b) return;
+          if (!adj.has(a)) adj.set(a, new Set());
+          if (!adj.has(b)) adj.set(b, new Set());
+          adj.get(a).add(b); adj.get(b).add(a);
+        }
+        // Build bipartite graph: person <-> family
+        // Use FAMILY records as the authoritative source for all connections
+        allFams.forEach(function(fam) {
+          if (fam.husb && indiIdSet.has(fam.husb)) addEdge(fam.id, fam.husb);
+          if (fam.wife && indiIdSet.has(fam.wife)) addEdge(fam.id, fam.wife);
+          (fam.children || []).forEach(function(cid) {
+            if (indiIdSet.has(cid)) addEdge(fam.id, cid);
+          });
+        });
+        // Also add edges from individual famc/fams refs pointing to valid families
+        allIndis.forEach(function(indi) {
+          const famcArr = Array.isArray(indi.famc) ? indi.famc : (indi.famc ? [indi.famc] : []);
+          famcArr.forEach(function(fid) { if (famIdSet.has(fid)) addEdge(indi.id, fid); });
+          (indi.fams || []).forEach(function(fid) { if (famIdSet.has(fid)) addEdge(indi.id, fid); });
+        });
+        const visited = new Map();
+        visited.set(fromId, null);
+        const queue = [fromId];
+        let found = false;
+        outer: while (queue.length > 0) {
+          const node = queue.shift();
+          const nbrs = adj.get(node) || new Set();
+          for (const nb of nbrs) {
+            if (!visited.has(nb)) {
+              visited.set(nb, node);
+              if (nb === toId) { found = true; break outer; }
+              queue.push(nb);
+            }
+          }
+        }
+        if (!found) return null;
+        const path = [];
+        let cur = toId;
+        while (cur !== null && cur !== undefined) { path.unshift(cur); cur = visited.get(cur); }
+        const indiSet = new Set(), famSet = new Set();
+        path.forEach(function(id) { if (indiIdSet.has(id)) indiSet.add(id); else famSet.add(id); });
+
+        // Build an index for quick lookups
+        const famById = {};
+        allFams.forEach(function(f){ famById[f.id] = f; });
+
+        // Expand "junction" families: any family in famSet whose parents (husb/wife)
+        // are NOT already in indiSet.  This happens when the BFS crossed through a
+        // sibling-link family (Father and Uncle share the same famc family) without
+        // visiting the parents.  We must add those parents so the chart has a proper
+        // root and can expand downward to BOTH endpoints.
+        const extraFams = new Set();   // families that carry the new parents
+        famSet.forEach(function(fid) {
+          const fam = famById[fid];
+          if (!fam) return;
+          const pathChildren = (fam.children || []).filter(function(c){ return indiSet.has(c); });
+          // If 2+ siblings of the path share this family, its parents are the common ancestor
+          if (pathChildren.length >= 2) {
+            if (fam.husb && !indiSet.has(fam.husb)) { indiSet.add(fam.husb); extraFams.add(fid); }
+            if (fam.wife && !indiSet.has(fam.wife)) { indiSet.add(fam.wife); extraFams.add(fid); }
+          }
+        });
+        // Also include the parent's own parents-family (famc) so the chart connects
+        // them to their own line when present
+        indiSet.forEach(function(pid) {
+          const indi = allIndis.find(function(i){ return i.id === pid; });
+          if (!indi) return;
+          const famcArr = Array.isArray(indi.famc) ? indi.famc : (indi.famc ? [indi.famc] : []);
+          // Only add it if it would be useful to anchor the root (keep tree small)
+          famcArr.forEach(function(fid) { /* intentionally not added — keep scope tight */ });
+        });
+
+        // Now find the startId: a person in indiSet who is not a child in any famSet family
+        const childrenInPath = new Set();
+        famSet.forEach(function(fid) {
+          const fam = famById[fid];
+          if (!fam) return;
+          (fam.children || []).forEach(function(cid){ if (indiSet.has(cid)) childrenInPath.add(cid); });
+        });
+        let startId = null;
+        for (const pid of indiSet) {
+          if (!childrenInPath.has(pid)) { startId = pid; break; }
+        }
+        if (!startId) startId = Array.from(indiSet)[0];
+        return { indiSet: indiSet, famSet: famSet, startId: startId };
+      }
+
       /* ── Build Topola-compatible JSON ─────────────────────────────────── */
       function buildTopolaJson(){
-        const indis=DB.getIndividuals();
-        const fams=DB.getFamilies();
+        const indis=_pathFilter?DB.getIndividuals().filter(function(i){return _pathFilter.indiSet.has(i.id);}):DB.getIndividuals();
+        const fams=_pathFilter?DB.getFamilies().filter(function(f){return _pathFilter.famSet.has(f.id);}):DB.getFamilies();
         // Build a set of valid (non-deleted) family IDs so we can filter refs
         const validFamIds=new Set(fams.map(f=>f.id));
         const validIndiIds=new Set(indis.map(i=>i.id));
@@ -191,9 +296,18 @@
           const birth=DB.getBirthEvent(indi);
           const death=DB.getDeathEvent(indi);
           const thumb=DB.getThumbnailForPerson(indi.id);
-          // Filter out refs to deleted/missing families
-          const famcVal=(indi.famc&&validFamIds.has(indi.famc))?indi.famc:undefined;
-          const famsVal=(indi.fams||[]).filter(fid=>validFamIds.has(fid));
+          // In path mode derive famc/fams from family records (source of truth)
+          let famcVal, famsVal;
+          if(_pathFilter){
+            // famc: any family in famMap that lists indi as a child
+            famcVal = fams.find(function(f){ return (f.children||[]).includes(indi.id); });
+            famcVal = famcVal ? famcVal.id : undefined;
+            // fams: any family in famMap that lists indi as husb or wife
+            famsVal = fams.filter(function(f){ return f.husb===indi.id||f.wife===indi.id; }).map(function(f){return f.id;});
+          } else {
+            famcVal=(indi.famc&&validFamIds.has(indi.famc))?indi.famc:undefined;
+            famsVal=(indi.fams||[]).filter(fid=>validFamIds.has(fid));
+          }
           return {
             id: indi.id,
             firstName: DB.getGivenName(indi)||undefined,
@@ -225,6 +339,7 @@
       let _vb={x:0,y:0,w:800,h:600};
       let _chartSize=[0,0];
       let _focusPt=[0,0];
+      let _pathFilter=null; // {indiSet:Set, famSet:Set} when in kinship-path mode
 
       function _applyViewBox(){
         document.getElementById('topolaSvg').setAttribute('viewBox',`${_vb.x} ${_vb.y} ${_vb.w} ${_vb.h}`);
@@ -318,25 +433,56 @@
 
       /* ── Build Donatso family-chart data ──────────────────────────────── */
       function buildFamilyChartData(){
-        const indis=DB.getIndividuals();
-        const fams=DB.getFamilies();
+        const indis=_pathFilter?DB.getIndividuals().filter(function(i){return _pathFilter.indiSet.has(i.id);}):DB.getIndividuals();
+        const fams=_pathFilter?DB.getFamilies().filter(function(f){return _pathFilter.famSet.has(f.id);}):DB.getFamilies();
         const famMap={};
         fams.forEach(f=>famMap[f.id]=f);
         const validIndiIds=new Set(indis.map(i=>i.id));
-        return indis.map(indi=>{
-          const parents=[];
-          if(indi.famc&&famMap[indi.famc]){
-            const fam=famMap[indi.famc];
-            if(fam.husb&&validIndiIds.has(fam.husb)) parents.push(fam.husb);
-            if(fam.wife&&validIndiIds.has(fam.wife)) parents.push(fam.wife);
-          }
-          const spouses=[],children=[];
-          (indi.fams||[]).forEach(famId=>{
-            const fam=famMap[famId]; if(!fam) return;
-            if(fam.husb&&fam.husb!==indi.id&&validIndiIds.has(fam.husb)&&!spouses.includes(fam.husb)) spouses.push(fam.husb);
-            if(fam.wife&&fam.wife!==indi.id&&validIndiIds.has(fam.wife)&&!spouses.includes(fam.wife)) spouses.push(fam.wife);
-            (fam.children||[]).forEach(cid=>{ if(validIndiIds.has(cid)&&!children.includes(cid)) children.push(cid); });
+
+        // In path mode derive connections from family records (source of truth),
+        // not from individual back-refs which can be asymmetric.
+        // Build per-person rels keyed by id.
+        const relsMap={};
+        indis.forEach(function(i){ relsMap[i.id]={parents:[],spouses:[],children:[]}; });
+
+        if(_pathFilter){
+          // Family-authoritative: iterate famMap and wire up everyone
+          Object.values(famMap).forEach(function(fam){
+            const husb=fam.husb&&validIndiIds.has(fam.husb)?fam.husb:null;
+            const wife=fam.wife&&validIndiIds.has(fam.wife)?fam.wife:null;
+            const chn=(fam.children||[]).filter(function(c){return validIndiIds.has(c);});
+            // spouses link each other
+            if(husb&&wife){
+              if(!relsMap[husb].spouses.includes(wife)) relsMap[husb].spouses.push(wife);
+              if(!relsMap[wife].spouses.includes(husb)) relsMap[wife].spouses.push(husb);
+            }
+            // parents link → children
+            chn.forEach(function(cid){
+              if(husb&&!relsMap[cid].parents.includes(husb)) relsMap[cid].parents.push(husb);
+              if(wife&&!relsMap[cid].parents.includes(wife)) relsMap[cid].parents.push(wife);
+              if(husb&&!relsMap[husb].children.includes(cid)) relsMap[husb].children.push(cid);
+              if(wife&&!relsMap[wife].children.includes(cid)) relsMap[wife].children.push(cid);
+            });
           });
+        } else {
+          // Normal mode: use individual back-refs (fast, consistent for full dataset)
+          indis.forEach(function(indi){
+            const r=relsMap[indi.id];
+            if(indi.famc&&famMap[indi.famc]){
+              const fam=famMap[indi.famc];
+              if(fam.husb&&validIndiIds.has(fam.husb)) r.parents.push(fam.husb);
+              if(fam.wife&&validIndiIds.has(fam.wife)) r.parents.push(fam.wife);
+            }
+            (indi.fams||[]).forEach(function(famId){
+              const fam=famMap[famId]; if(!fam) return;
+              if(fam.husb&&fam.husb!==indi.id&&validIndiIds.has(fam.husb)&&!r.spouses.includes(fam.husb)) r.spouses.push(fam.husb);
+              if(fam.wife&&fam.wife!==indi.id&&validIndiIds.has(fam.wife)&&!r.spouses.includes(fam.wife)) r.spouses.push(fam.wife);
+              (fam.children||[]).forEach(function(cid){ if(validIndiIds.has(cid)&&!r.children.includes(cid)) r.children.push(cid); });
+            });
+          });
+        }
+
+        return indis.map(function(indi){
           const birth=DB.getBirthEvent(indi),death=DB.getDeathEvent(indi);
           const thumb=DB.getThumbnailForPerson(indi.id);
           return {
@@ -349,7 +495,7 @@
               deathday: death&&death.date?death.date:'',
               avatar: thumb||undefined
             },
-            rels:{parents,spouses,children}
+            rels: relsMap[indi.id]
           };
         });
       }
@@ -611,9 +757,32 @@
       /* ── Init ──────────────────────────────────────────────────────────── */
       const focusId=getFocusPersonId();
       populateFocusSelect(focusId);
-      renderChart(focusId);
+
+      // Activate path mode if URL has pathFrom + pathTo (from Cadastro kinship badge)
+      (function(){
+        const p=new URLSearchParams(window.location.search);
+        const pathFrom=p.get('pathFrom'), pathTo=p.get('pathTo');
+        if (!pathFrom || !pathTo) { renderChart(focusId); return; }
+        const filter=computePathFilter(pathFrom, pathTo);
+        if (!filter || filter.indiSet.size < 2) { renderChart(focusId); return; }
+        _pathFilter=filter;
+        const nameFrom=DB.getDisplayName(DB.getIndividual(pathFrom))||pathFrom;
+        const nameTo=DB.getDisplayName(DB.getIndividual(pathTo))||pathTo;
+        const banner=document.getElementById('pathBanner');
+        document.getElementById('pathBannerText').textContent=nameFrom+' \u2192 '+nameTo;
+        banner.style.display='flex';
+        renderChart(filter.startId);
+      })();
+
+      document.getElementById('clearPathBtn').addEventListener('click',function(){
+        _pathFilter=null;
+        document.getElementById('pathBanner').style.display='none';
+        renderChart(_getSelectedOrFocusId());
+      });
 
       document.getElementById('renderChartBtn').addEventListener('click',function(){
+        _pathFilter=null;
+        document.getElementById('pathBanner').style.display='none';
         const id=_getSelectedOrFocusId();
         renderChart(id);
       });
@@ -624,6 +793,8 @@
       document.getElementById('centerChartBtn').addEventListener('click',()=>_centerViewBox(_focusPt[0],_focusPt[1]));
 
       document.getElementById('resetFocusBtn').addEventListener('click',function(){
+        _pathFilter=null;
+        document.getElementById('pathBanner').style.display='none';
         // Re-read the configured focus person from settings at click time
         // (the user may have changed it in configuracao.html since page load)
         const validIds=new Set(DB.getIndividuals().map(i=>i.id));

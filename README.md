@@ -70,12 +70,34 @@ server.js  (Express)
 
 ## Setup
 
-### Pré-requisitos
+### 🚀 Instalação automática (recomendado) — Docker em LXC Proxmox
+
+Para instalar o **myLineage** num LXC em Proxmox (Debian 12 ou Ubuntu 22.04+) com um único comando, use o instalador automático disponível na pasta [`setup/`](setup/):
+
+```bash
+# Descarregar e executar o instalador
+curl -fsSL https://raw.githubusercontent.com/mbangas/myLineage/main/setup/install.sh -o install.sh
+sudo bash install.sh
+```
+
+O instalador apresenta um **ecrã interactivo azul** que guia o utilizador em cada passo:
+- Actualiza o sistema, instala Docker CE e Portainer
+- Pergunta os caminhos para três volumes (fotografias, documentos, GEDCOM)
+- Descarrega o código, cria o `Dockerfile` e `docker-compose.yml`, faz o build e inicia tudo
+- Apresenta os URLs de acesso e comandos úteis no final
+
+📖 **Consulte [setup/INSTALL.md](setup/INSTALL.md)** para instruções detalhadas passo a passo, incluindo como preparar o LXC no Proxmox, o que fazer na primeira visita ao Portainer e como fazer backups.
+
+---
+
+### Instalação manual (desenvolvimento local)
+
+#### Pré-requisitos
 
 - [Node.js](https://nodejs.org) v18 ou superior
 - npm (incluído com o Node.js)
 
-### Instalação e arranque
+#### Arranque
 
 ```bash
 # 1. Clonar o repositório

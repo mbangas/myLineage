@@ -229,7 +229,7 @@
                 <span style="font-size:0.7rem;color:${agePillColor};opacity:0.7;">anos</span>
                </div>`
             :'<span style="color:var(--text-disabled);font-size:0.82rem;">—</span>';
-          const relHTML=relMap.has(indi.id)?_relBadgeHtml(relMap.get(indi.id)):'<span style="color:var(--text-disabled);font-size:0.8rem;">—</span>';
+          const relHTML=relMap.has(indi.id)?_relBadgeHtml(relMap.get(indi.id),_focusedId,indi.id):'<span style="color:var(--text-disabled);font-size:0.8rem;">—</span>';
           tr.innerHTML=`<td><div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:${avatarBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;color:#fff;font-weight:600;">${avatarChar}</div><a href="#" class="person-link" data-id="${indi.id}" style="font-weight:500;">${name}</a></div></td><td style="color:var(--text-secondary);font-size:0.82rem;font-variant-numeric:tabular-nums;">${birthYear||'—'}</td><td>${ageHTML}</td><td>${relHTML}</td><td style="text-align:right;" class="actions"><button data-id="${indi.id}" class="tree-focus icon-btn" title="Ver na Árvore"><i class="mdi mdi-sitemap"></i></button></td>`;
           tbody.appendChild(tr);
         });
@@ -387,7 +387,7 @@
         return 'Parente';
       }
 
-      function _relBadgeHtml(label) {
+      function _relBadgeHtml(label, focusId, targetId) {
         if (label === null) {
           return '<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.73rem;font-weight:700;background:rgba(255,215,0,0.18);border:1px solid rgba(200,170,0,0.45);color:#b89a00;white-space:nowrap;">&#9733; Em Foco</span>';
         }
@@ -398,7 +398,11 @@
         if (isDirect)     { bg='rgba(68,147,248,0.13)'; bd='rgba(68,147,248,0.35)'; col='#4493f8'; }
         else if (isInLaw) { bg='rgba(130,100,220,0.13)'; bd='rgba(130,100,220,0.35)'; col='#9b7fe8'; }
         else              { bg='rgba(255,155,60,0.13)'; bd='rgba(255,155,60,0.35)'; col='#c97c28'; }
-        return '<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.73rem;font-weight:500;background:'+bg+';border:1px solid '+bd+';color:'+col+';white-space:nowrap;">'+_esc(label)+'</span>';
+        const badge='<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.73rem;font-weight:500;background:'+bg+';border:1px solid '+bd+';color:'+col+';white-space:nowrap;'+(focusId&&targetId&&focusId!==targetId?'cursor:pointer;':'')+'">'+_esc(label)+'</span>';
+        if (focusId && targetId && focusId !== targetId) {
+          return '<a href="arvore.html?pathFrom='+encodeURIComponent(focusId)+'&pathTo='+encodeURIComponent(targetId)+'" title="Ver caminho na \u00e1rvore" style="text-decoration:none;">'+badge+'</a>';
+        }
+        return badge;
       }
 
       /* ── Search + nova pessoa ─────────────────────────────────────────── */

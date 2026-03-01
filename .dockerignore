@@ -1,0 +1,34 @@
+# Dependências Node.js (instaladas dentro do container)
+node_modules
+npm-debug.log*
+
+# Dados em runtime (montados como volumes)
+JSON-DATA/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+logs/
+
+# Ficheiros de desenvolvimento / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testes
+e2e-test.sh
+
+# Setup (não necessário na imagem)
+setup/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore

@@ -469,7 +469,7 @@
           '<div><label>Género</label><select id="df_gender"><option value=""'+(!sex?' selected':'')+'>​(n/a)</option><option value="M"'+(sex==='M'?' selected':'')+'>Masculino</option><option value="F"'+(sex==='F'?' selected':'')+'>Feminino</option><option value="X"'+(sex==='X'?' selected':'')+'>Outro</option></select></div>',
           '<div class="drawer-section-label" style="margin-top:8px;">Notas</div>',
           '<div><textarea id="df_notes" rows="3" placeholder="Notas...">'+_esc(notes)+'</textarea></div>',
-          indi?'<div style="margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'relacoes\')"><i class="mdi mdi-account-multiple-outline"></i> Relações</button><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'eventos\')"><i class="mdi mdi-calendar-check-outline"></i> Eventos</button><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'fotos\')"><i class="mdi mdi-image-multiple-outline"></i> Fotos</button></div><div style="margin-top:10px;display:flex;gap:8px;"><button class="btn btn-sm" style="font-size:0.82rem;gap:5px;" onclick="_drawerShowAddPerson(\''+indi.id+'\')"><i class="mdi mdi-account-plus-outline"></i> Adicionar</button><button class="btn btn-sm" style="font-size:0.82rem;gap:5px;" onclick="_drawerShowLinkPerson(\''+indi.id+'\')"><i class="mdi mdi-link-variant"></i> Ligar</button></div>':''
+          indi?'<div style="margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'relacoes\')"><i class="mdi mdi-account-multiple-outline"></i> Relações</button><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'eventos\')"><i class="mdi mdi-calendar-check-outline"></i> Eventos</button><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'fotos\')"><i class="mdi mdi-image-multiple-outline"></i> Fotos</button><button class="btn btn-ghost btn-sm" style="font-size:0.82rem;" onclick="openDrawerSection(\''+indi.id+'\',\'contactos\')"><i class="mdi mdi-card-account-phone-outline"></i> Contactos</button></div><div style="margin-top:10px;display:flex;gap:8px;"><button class="btn btn-sm" style="font-size:0.82rem;gap:5px;" onclick="_drawerShowAddPerson(\''+indi.id+'\')"><i class="mdi mdi-account-plus-outline"></i> Adicionar</button><button class="btn btn-sm" style="font-size:0.82rem;gap:5px;" onclick="_drawerShowLinkPerson(\''+indi.id+'\')"><i class="mdi mdi-link-variant"></i> Ligar</button></div>':''
         ].join('');
         document.getElementById('personDrawer').classList.add('open');
         document.getElementById('drawerOverlay').classList.add('open');
@@ -490,9 +490,9 @@
         const phdr=document.getElementById('drawerPersonHeader'); if(phdr) phdr.style.display='none';
         const backBtn=document.getElementById('drawerBackBtn'); if(backBtn){ backBtn.style.display=''; backBtn._personId=personId; }
         const _treeBtn2=document.getElementById('drawerTreeBtn'); if(_treeBtn2) _treeBtn2.style.display='none';
-        document.getElementById('drawerTitle').textContent=(section==='relacoes'?'Relações':section==='fotos'?'Fotos':'Eventos')+' — '+DB.getDisplayName(indi);
+        document.getElementById('drawerTitle').textContent=(section==='relacoes'?'Relações':section==='fotos'?'Fotos':section==='contactos'?'Contactos':'Eventos')+' — '+DB.getDisplayName(indi);
         const body=document.getElementById('drawerBody');
-        body.innerHTML=section==='relacoes'?_renderRelations(personId):section==='fotos'?_renderPhotos(personId):_renderEvents(personId);
+        body.innerHTML=section==='relacoes'?_renderRelations(personId):section==='fotos'?_renderPhotos(personId):section==='contactos'?_renderContacts(personId):_renderEvents(personId);
         if(section==='fotos') _buildPhotoGrid(personId);
       };
 
@@ -904,6 +904,95 @@
 
       /* ── Photo modal → delegated to PhotoLightbox ──────────────────────── */
       window._drawerViewPhoto = function(mediaId, personId){ window.PhotoLightbox.open(mediaId, personId); };
+
+      /* ── Contacts section ──────────────────────────────────────────────── */
+      function _renderContacts(personId){
+        const indi=DB.getIndividual(personId);
+        const contacts=(indi&&indi.contacts)||[];
+        const pid=_esc(personId);
+        let html='<div style="margin-bottom:12px;"><button class="btn btn-sm" onclick="_drawerShowAddContact(\''+pid+'\')" style="font-size:0.83rem;"><i class="mdi mdi-plus"></i> Adicionar Contacto</button></div>';
+        if(!contacts.length){ html+='<div style="color:#888;padding:4px 0 12px;">Nenhum contacto registado.</div>'; return html; }
+        html+='<div class="mini-list">';
+        contacts.forEach(function(c,i){
+          const icon=c.type==='phone'?'mdi-phone-outline':'mdi-email-outline';
+          const defLabel=c.type==='phone'?'Telemóvel':'Email';
+          html+='<div class="mini-card" style="padding:10px 12px;">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+            +'<div style="flex:1;"><i class="mdi '+icon+'" style="color:#4493f8;margin-right:6px;"></i>'
+            +'<span style="font-weight:600;font-size:0.9rem;">'+_esc(c.value)+'</span>'
+            +'<span style="color:#aaa;font-size:0.82rem;margin-left:8px;">'+_esc(c.label||defLabel)+'</span></div>'
+            +'<div style="display:flex;gap:2px;flex-shrink:0;">'
+            +'<button onclick="_drawerEditContact('+i+',\''+pid+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#4493f8;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-pencil-outline"></i></button>'
+            +'<button onclick="_drawerDeleteContact('+i+',\''+pid+'\')" title="Apagar" style="background:none;border:none;cursor:pointer;color:#e06060;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-trash-can-outline"></i></button>'
+            +'</div></div></div>';
+        });
+        html+='</div>';
+        return html;
+      }
+
+      window._drawerDeleteContact = function(idx,personId){
+        if(!confirm('Apagar este contacto?')) return;
+        const indi=DB.getIndividual(personId); if(!indi) return;
+        if(!indi.contacts) indi.contacts=[];
+        indi.contacts.splice(idx,1);
+        DB.saveIndividual(indi);
+        document.getElementById('drawerBody').innerHTML=_renderContacts(personId);
+      };
+
+      window._drawerEditContact = function(idx,personId){
+        const indi=DB.getIndividual(personId); if(!indi) return;
+        const c=(indi.contacts||[])[idx]; if(!c) return;
+        const pid=_esc(personId);
+        document.getElementById('drawerBody').innerHTML='<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Editar Contacto</h3>'
+          +'<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label>'
+          +'<select id="editCtType" style="width:100%;"><option value="phone"'+(c.type==='phone'?' selected':'')+'>Telemóvel</option><option value="email"'+(c.type==='email'?' selected':'')+'>Email</option></select></div>'
+          +'<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Valor</label>'
+          +'<input id="editCtValue" type="text" value="'+_esc(c.value||'')+'" style="width:100%;"/></div>'
+          +'<div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Etiqueta (opcional)</label>'
+          +'<input id="editCtLabel" type="text" value="'+_esc(c.label||'')+'" placeholder="ex: Casa, Trabalho..." style="width:100%;"/></div>'
+          +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
+          +'<button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\''+pid+'\',\'contactos\')">Cancelar</button>'
+          +'<button class="btn btn-sm" onclick="_drawerSaveEditContact('+idx+',\''+pid+'\')" ><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
+      };
+
+      window._drawerSaveEditContact = function(idx,personId){
+        const indi=DB.getIndividual(personId); if(!indi) return;
+        const type=(document.getElementById('editCtType')||{}).value||'phone';
+        const value=((document.getElementById('editCtValue')||{}).value||'').trim();
+        const label=((document.getElementById('editCtLabel')||{}).value||'').trim();
+        if(!value){ alert('Introduza um valor para o contacto.'); return; }
+        if(!indi.contacts) indi.contacts=[];
+        indi.contacts[idx]={type,value,label:label||undefined};
+        DB.saveIndividual(indi);
+        openDrawerSection(personId,'contactos');
+      };
+
+      window._drawerShowAddContact = function(personId){
+        const pid=_esc(personId);
+        document.getElementById('drawerBody').innerHTML='<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Novo Contacto</h3>'
+          +'<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label>'
+          +'<select id="addCtType" style="width:100%;"><option value="phone" selected>Telemóvel</option><option value="email">Email</option></select></div>'
+          +'<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Valor</label>'
+          +'<input id="addCtValue" type="text" placeholder="+351 910 000 000 / email@exemplo.com" style="width:100%;"/></div>'
+          +'<div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Etiqueta (opcional)</label>'
+          +'<input id="addCtLabel" type="text" placeholder="ex: Casa, Trabalho..." style="width:100%;"/></div>'
+          +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
+          +'<button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\''+pid+'\',\'contactos\')">Cancelar</button>'
+          +'<button class="btn btn-sm" onclick="_drawerSaveNewContact(\''+pid+'\')" ><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
+        setTimeout(function(){ var v=document.getElementById('addCtValue'); if(v) v.focus(); },50);
+      };
+
+      window._drawerSaveNewContact = function(personId){
+        const indi=DB.getIndividual(personId); if(!indi) return;
+        const type=(document.getElementById('addCtType')||{}).value||'phone';
+        const value=((document.getElementById('addCtValue')||{}).value||'').trim();
+        const label=((document.getElementById('addCtLabel')||{}).value||'').trim();
+        if(!value){ alert('Introduza um valor para o contacto.'); return; }
+        if(!indi.contacts) indi.contacts=[];
+        indi.contacts.push({type,value,label:label||undefined});
+        DB.saveIndividual(indi);
+        openDrawerSection(personId,'contactos');
+      };
 
       /* ── Drawer save / delete / close ──────────────────────────────────── */
       function drawerSave(){

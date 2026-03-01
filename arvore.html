@@ -260,6 +260,22 @@
             if (fam.wife && !indiSet.has(fam.wife)) { indiSet.add(fam.wife); extraFams.add(fid); }
           }
         });
+        // Include missing spouses from every family on the path so they appear
+        // with their real names instead of a virtual "—" placeholder node.
+        const validIndiIdSet = new Set(allIndis.map(function(i){ return i.id; }));
+        famSet.forEach(function(fid) {
+          const fam = famById[fid];
+          if (!fam) return;
+          if (fam.husb && validIndiIdSet.has(fam.husb) && indiSet.has(fam.husb) &&
+              fam.wife && validIndiIdSet.has(fam.wife) && !indiSet.has(fam.wife)) {
+            indiSet.add(fam.wife);
+          }
+          if (fam.wife && validIndiIdSet.has(fam.wife) && indiSet.has(fam.wife) &&
+              fam.husb && validIndiIdSet.has(fam.husb) && !indiSet.has(fam.husb)) {
+            indiSet.add(fam.husb);
+          }
+        });
+
         // Also include the parent's own parents-family (famc) so the chart connects
         // them to their own line when present
         indiSet.forEach(function(pid) {

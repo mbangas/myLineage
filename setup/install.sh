@@ -342,7 +342,7 @@ COPY --from=builder /app/JSON-DATA ./JSON-DATA
 RUN mkdir -p /app/uploads/fotos /app/uploads/documentos /app/uploads/gedcom
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget -qO- http://localhost:3000 > /dev/null 2>&1 || exit 1
+    CMD wget -qO- http://localhost:${PORT:-3000} > /dev/null 2>&1 || exit 1
 CMD ["node", "server.js"]
 DOCKERFILE_CONTENT
     info "Dockerfile de fallback criado."
@@ -367,8 +367,10 @@ services:
     container_name: mylineage
     restart: unless-stopped
 
-    ports:
-      - "${APP_PORT}:3000"
+    # network_mode: host evita criar um novo network namespace,
+    # o que elimina o erro de sysctl em Proxmox LXC:
+    #   "open sysctl net.ipv4.ip_unprivileged_port_start: permission denied"
+    network_mode: host
 
     # Volumes de dados
     # Por omissao os dados ficam dentro do contentor.
@@ -391,10 +393,10 @@ services:
 
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=${APP_PORT}
 
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:${APP_PORT}"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -52,6 +52,6 @@ EXPOSE 3000
 
 # Health check — verifica se o servidor responde
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget -qO- http://localhost:3000 > /dev/null 2>&1 || exit 1
+    CMD wget -qO- http://localhost:${PORT:-3000} > /dev/null 2>&1 || exit 1
 
 CMD ["node", "server.js"]

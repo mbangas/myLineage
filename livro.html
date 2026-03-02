@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>myLineage — Family History Book</title>
+  <link rel="stylesheet" href="css/livro.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+  <script src="remote-storage.js"></script>
+  <script src="auth.js"></script>
+  <script src="family-chart-bundle.js"></script>
+  <script src="livro-bundle.js"></script>
+</head>
+<body class="livro-body">
+
+<!-- Loading overlay -->
+<div id="livro-loading">
+  <div class="loading-spinner"></div>
+  <span>A compilar o livro…</span>
+</div>
+
+<!-- Toolbar -->
+<div id="livro-toolbar">
+  <span class="mdi mdi-book-open-variant" style="font-size:20px;color:#c8a96e;"></span>
+  <span class="lbr-title" id="lbrTitle">Family History Book</span>
+  <div class="lbr-sep"></div>
+  <label style="color:#a08060;font-size:12px;white-space:nowrap;">Pessoa foco:</label>
+  <select id="lbrPersonSelect" title="Mudar pessoa foco"></select>
+  <div class="lbr-sep"></div>
+  <span class="lbr-page-indicator" id="lbrPageIndicator">p. 1</span>
+  <div class="lbr-sep"></div>
+  <button id="lbrPrintBtn" title="Imprimir / Guardar PDF">
+    <span class="mdi mdi-printer"></span> Imprimir
+  </button>
+  <button id="lbrCloseBtn" title="Fechar livro">
+    <span class="mdi mdi-close"></span> Fechar
+  </button>
+</div>
+
+<!-- Book stage -->
+<div id="livro-stage">
+  <button id="livro-prev" title="Página anterior"><span class="mdi mdi-chevron-left"></span></button>
+  <div id="livro-book-wrap">
+    <!-- Pages are injected here by JS -->
+  </div>
+  <button id="livro-next" title="Próxima página"><span class="mdi mdi-chevron-right"></span></button>
+</div>
+
+<!-- Hidden print container populated on print -->
+<div id="livro-print-pages"></div>
+
+<script>
+// ================================================================
+//  FAMILY HISTORY BOOK
+//  Assembles a paginated book from the genealogy data and renders
+//  it with StPageFlip for realistic page-flip animation.
+// ================================================================
+
+(function () {
+  'use strict';
+
+  // ── Helpers ────────────────────────────────────────────────────
+
+  /** Parse GEDCOM date strings (e.g. "2 FEB 1962") → year number or null */
+  function parseYear(str) {
+    if (!str) return null;
+    const m = String(str).match(/\b(\d{4})\b/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  const PT_MONTHS = {
+    JAN:'Jan',FEB:'Fev',MAR:'Mar',APR:'Abr',MAY:'Mai',JUN:'Jun',
+    JUL:'Jul',AUG:'Ago',SEP:'Set',OCT:'Out',NOV:'Nov',DEC:'Dez'
+  };
+
+  /** Format GEDCOM date string for display */
+  function fmtDate(str) {
+    if (!str) return '–';
+    return str.replace(
+      /\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/i,
+      m => PT_MONTHS[m.toUpperCase()] || m
+    );
+  }
+
+  /** Get display name for individual */
+  function displayName(ind) {
+    if (!ind) return '?';
+    const n = ind.names && ind.names[0];
+    if (!n) return ind.id || '?';
+    const parts = [n.prefix, n.given, n.surname, n.suffix].filter(Boolean);
+    return parts.join(' ').trim() || ind.id || '?';
+  }
+
+  /** Get surname only */
+  function surname(ind) {
+    if (!ind) return '';
+    const n = ind.names && ind.names[0];
+    return (n && n.surname) || '';
+  }
+
+  /** Life years string */
+  function lifeYears(ind) {
+    if (!ind || !ind.events) return '';
+    const birt = ind.events.find(e => e.type === 'BIRT');
+    const deat = ind.events.find(e => e.type === 'DEAT');
+    const by = parseYear(birt && birt.date);
+    const dy = parseYear(deat && deat.date);
+    if (!by && !dy) return '';
+    return (by || '?') + (dy ? ' – ' + dy : ' – ');
+  }
+
+  /** Escape HTML */
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /** Resolve note text (may be ID ref or inline string) */
+  function resolveNote(DB, noteRef) {
+    if (!noteRef) return '';
+    if (typeof noteRef === 'string' && noteRef.startsWith('N')) {
+      const note = DB.getNote ? DB.getNote(noteRef) : null;
+      return note ? note.text || '' : noteRef;
+    }
+    return String(noteRef);
+  }
+
+  /** Gather notes text for individual */
+  function gatherNotes(DB, ind) {
+    if (!ind || !ind.notes || !ind.notes.length) return '';
+    return ind.notes.map(n => resolveNote(DB, n)).filter(Boolean).join('\n\n');
+  }
+
+  /** Get event of given type from individual events array */
+  function getEvent(ind, type) {
+    if (!ind || !ind.events) return null;
+    return ind.events.find(e => e.type === type) || null;
+  }
+
+  // ── BookCompiler ───────────────────────────────────────────────
+
+  class BookCompiler {
+    constructor(DB, rootId) {
+      this.DB = DB;
+      this.rootId = rootId;
+      this.individuals = {};   // id → individual
+      this.families = {};      // id → family
+      this.familyOrder = [];   // ordered family IDs for chapters
+      this.personPageMap = {}; // personId → page index (filled in layout pass)
+      this.pages = [];
+    }
+
+    /** Load all individuals and families into local maps */
+    _loadData() {
+      const DB = this.DB;
+      // collect all non-deleted individuals
+      DB.getIndividuals().forEach(ind => {
+        if (!ind.deletedAt) this.individuals[ind.id] = ind;
+      });
+      // collect all non-deleted families
+      DB.getFamilies().forEach(fam => {
+        if (!fam.deletedAt) this.families[fam.id] = fam;
+      });
+    }
+
+    /** BFS to collect all reachable families ordered by proximity to root */
+    traverseAllGenerations(rootId) {
+      const ind = this.individuals[rootId];
+      if (!ind) return;
+
+      const visitedFam = new Set();
+      const visitedInd = new Set([rootId]);
+      const queue = [rootId];
+
+      while (queue.length) {
+        const id = queue.shift();
+        const person = this.individuals[id];
+        if (!person) continue;
+
+        // Families as spouse
+        (person.fams || []).forEach(famId => {
+          if (!visitedFam.has(famId) && this.families[famId]) {
+            visitedFam.add(famId);
+            this.familyOrder.push(famId);
+            const fam = this.families[famId];
+            // add spouse
+            [fam.husb, fam.wife].forEach(sid => {
+              if (sid && !visitedInd.has(sid)) {
+                visitedInd.add(sid);
+                queue.push(sid);
+              }
+            });
+            // add children
+            (fam.children || []).forEach(cid => {
+              if (!visitedInd.has(cid)) {
+                visitedInd.add(cid);
+                queue.push(cid);
+              }
+            });
+          }
+        });
+
+        // Family as child → get parents
+        if (person.famc && this.families[person.famc] && !visitedFam.has(person.famc)) {
+          visitedFam.add(person.famc);
+          this.familyOrder.unshift(person.famc); // ancestors first
+          const fam = this.families[person.famc];
+          [fam.husb, fam.wife].forEach(pid => {
+            if (pid && !visitedInd.has(pid)) {
+              visitedInd.add(pid);
+              queue.push(pid);
+            }
+          });
+        }
+      }
+
+      // Remove duplicate IDs (unshift may have caused dups)
+      this.familyOrder = [...new Set(this.familyOrder)];
+    }
+
+    // ── Page renderers ─────────────────────────────────────────
+
+    _renderCover() {
+      const rootInd = this.individuals[this.rootId];
+      const sn = surname(rootInd) || 'Família';
+
+      // Collect all surnames in root person's immediate families
+      const surnames = new Set();
+      if (rootInd) {
+        (rootInd.fams || []).forEach(fid => {
+          const fam = this.families[fid];
+          if (!fam) return;
+          [fam.husb, fam.wife].forEach(sid => {
+            const s = surname(this.individuals[sid]);
+            if (s) surnames.add(s);
+          });
+        });
+        if (rootInd.famc) {
+          const fam = this.families[rootInd.famc];
+          if (fam) {
+            [fam.husb, fam.wife].forEach(sid => {
+              const s = surname(this.individuals[sid]);
+              if (s) surnames.add(s);
+            });
+          }
+        }
+      }
+      if (!surnames.size) surnames.add(sn);
+
+      const familiesList = [...surnames].join(' · ');
+      const year = new Date().getFullYear();
+
+      return {
+        type: 'cover',
+        title: 'Capa',
+        html: `
+<div class="livro-page-inner">
+  <div class="cover-ornament">&#9753;</div>
+  <div class="cover-ribbon"></div>
+  <div class="cover-title">Family History Book</div>
+  <div class="cover-subtitle">Livro de História Familiar</div>
+  <div class="cover-ribbon"></div>
+  <div class="cover-families">${esc(familiesList)}</div>
+  <div class="cover-date">${year}</div>
+  <div class="cover-app">produzido com myLineage</div>
+</div>`
+      };
+    }
+
+    _renderBlank() {
+      return { type: 'blank', title: '', html: '<div class="livro-page-inner"></div>' };
+    }
+
+    _renderToc(tocEntries) {
+      const rows = tocEntries.map(e => `
+<li>
+  <span class="toc-level-${e.level}">${esc(e.title)}</span>
+  <span class="toc-leader"></span>
+  <span class="toc-num" data-toc-ref="${esc(e.ref || '')}">${e.page || '…'}</span>
+</li>`).join('');
+
+      return {
+        type: 'toc',
+        title: 'Índice',
+        html: `<div class="livro-page-inner">
+  <div class="section-title">Índice Geral</div>
+  <ul class="toc-list">${rows}</ul>
+  <div class="livro-page-num left">i</div>
+</div>`
+      };
+    }
+
+    _renderIntro() {
+      const intro = (this.DB.getSetting && this.DB.getSetting('bookIntro')) ||
+        'Esta obra reúne a história da nossa família — os nascimentos, casamentos, migrações e legados que nos moldaram ao longo das gerações.\n\nAs biografias, fotografias e registos aqui compilados foram organizados a partir dos dados da árvore genealógica e constituem uma memória viva para as gerações futuras.\n\nQue este livro seja motivo de orgulho e identidade para todos os que o folhearem.';
+
+      return {
+        type: 'intro',
+        title: 'Introdução',
+        ref: 'intro',
+        html: `<div class="livro-page-inner">
+  <div class="section-title">Introdução</div>
+  <div class="intro-text">${esc(intro)}</div>
+</div>`
+      };
+    }
+
+    /** Build a static SVG family tree for a family unit */
+    _buildFamilySvg(famId) {
+      const fam = this.families[famId];
+      if (!fam) return '<svg></svg>';
+
+      const W = 460, H = 310;
+      const BOX_W = 130, BOX_H = 46, RX = 8;
+      const BLUE = '#4493f8', PINK = '#e26aa6', GREY = '#9aa0a6';
+
+      const husb = this.individuals[fam.husb];
+      const wife = this.individuals[fam.wife];
+      const children = (fam.children || [])
+        .map(id => this.individuals[id]).filter(Boolean).slice(0, 6);
+
+      const parts = [];
+
+      // ── Parents row ──────────────────────────────────────────
+      const parentY = 20;
+      const coupleY = parentY + 80;
+      const childY = coupleY + 100;
+
+      // husb/wife parent families (grandparents box)
+      const husbParFam = husb && husb.famc ? this.families[husb.famc] : null;
+      const wifeParFam = wife && wife.famc ? this.families[wife.famc] : null;
+
+      // Draw grandparent boxes if available
+      if (husbParFam) {
+        const h = this.individuals[husbParFam.husb];
+        const w = this.individuals[husbParFam.wife];
+        const lbl = [h && surname(h), w && surname(w)].filter(Boolean).join(' & ') || 'Pais';
+        parts.push(this._svgBox(W*0.16, parentY, BOX_W, BOX_H, RX, GREY, esc(lbl), '', false));
+        parts.push(`<line x1="${W*0.16+BOX_W/2}" y1="${parentY+BOX_H}" x2="${W*0.22+BOX_W/2}" y2="${coupleY}" stroke="#c8a96e80" stroke-width="1.5" stroke-dasharray="4"/>`);
+      }
+      if (wifeParFam) {
+        const h = this.individuals[wifeParFam.husb];
+        const w = this.individuals[wifeParFam.wife];
+        const lbl = [h && surname(h), w && surname(w)].filter(Boolean).join(' & ') || 'Pais';
+        parts.push(this._svgBox(W*0.59, parentY, BOX_W, BOX_H, RX, GREY, esc(lbl), '', false));
+        parts.push(`<line x1="${W*0.59+BOX_W/2}" y1="${parentY+BOX_H}" x2="${W*0.55+BOX_W/2}" y2="${coupleY}" stroke="#c8a96e80" stroke-width="1.5" stroke-dasharray="4"/>`);
+      }
+
+      // Couple row
+      const hX = W * 0.08, wX = W * 0.52;
+      const coupleConnY = coupleY + BOX_H / 2;
+
+      if (husb) {
+        const color = husb.sex === 'F' ? PINK : (husb.sex === 'M' ? BLUE : GREY);
+        parts.push(this._svgBox(hX, coupleY, BOX_W, BOX_H, RX, color, esc(displayName(husb)), esc(lifeYears(husb)), true));
+      }
+      if (wife) {
+        const color = wife.sex === 'F' ? PINK : (wife.sex === 'M' ? BLUE : GREY);
+        parts.push(this._svgBox(wX, coupleY, BOX_W, BOX_H, RX, color, esc(displayName(wife)), esc(lifeYears(wife)), true));
+      }
+
+      // Marriage line
+      if (husb && wife) {
+        const marr = (fam.events || []).find(e => e.type === 'MARR');
+        const marrLbl = marr ? fmtDate(marr.date) : '';
+        const cx = (hX + BOX_W + wX) / 2;
+        parts.push(`<line x1="${hX+BOX_W}" y1="${coupleConnY}" x2="${wX}" y2="${coupleConnY}" stroke="#c8a96e" stroke-width="2"/>`);
+        if (marrLbl) {
+          parts.push(`<rect x="${cx-34}" y="${coupleConnY-10}" width="68" height="18" rx="4" fill="#2c1810dd"/>`);
+          parts.push(`<text x="${cx}" y="${coupleConnY+4}" text-anchor="middle" font-size="10" fill="#c8a96e">${esc(marrLbl)}</text>`);
+        }
+        // Vertical drop to children
+        if (children.length) {
+          parts.push(`<line x1="${cx}" y1="${coupleConnY}" x2="${cx}" y2="${childY-10}" stroke="#c8a96e80" stroke-width="1.5"/>`);
+        }
+      }
+
+      // Children row
+      if (children.length) {
+        const totalW = children.length * (BOX_W + 10) - 10;
+        const startX = Math.max(10, (W - totalW) / 2);
+        const cx = husb && wife ? (hX + BOX_W + wX) / 2 : W / 2;
+
+        // Horizontal bar at child level
+        const barY = childY - 10;
+        const childMids = children.map((_, i) => startX + i * (BOX_W + 10) + BOX_W / 2);
+        if (children.length > 1) {
+          parts.push(`<line x1="${childMids[0]}" y1="${barY}" x2="${childMids[childMids.length-1]}" y2="${barY}" stroke="#c8a96e80" stroke-width="1.5"/>`);
+        }
+        const barCx = (childMids[0] + childMids[childMids.length-1]) / 2;
+        if (cx !== barCx) {
+          parts.push(`<line x1="${cx}" y1="${coupleConnY}" x2="${barCx}" y2="${barY}" stroke="#c8a96e80" stroke-width="1.5" stroke-dasharray="3"/>`);
+        }
+
+        children.forEach((child, i) => {
+          const cx2 = startX + i * (BOX_W + 10);
+          const color = child.sex === 'F' ? PINK : (child.sex === 'M' ? BLUE : GREY);
+          parts.push(`<line x1="${cx2+BOX_W/2}" y1="${barY}" x2="${cx2+BOX_W/2}" y2="${childY}" stroke="#c8a96e80" stroke-width="1.5"/>`);
+          parts.push(this._svgBox(cx2, childY, BOX_W, BOX_H, RX, color, esc(displayName(child)), esc(lifeYears(child)), true));
+        });
+      }
+
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,serif" style="overflow:visible;">${parts.join('')}</svg>`;
+    }
+
+    _svgBox(x, y, w, h, rx, color, name, years, showYears) {
+      const shortName = name.length > 18 ? name.slice(0, 17) + '…' : name;
+      const yearStr = showYears && years ? `<text x="${x+w/2}" y="${y+h-8}" text-anchor="middle" font-size="9.5" fill="#ffffffa0">${years}</text>` : '';
+      const nameY = showYears && years ? y + h/2 - 1 : y + h/2 + 6;
+      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${color}" opacity="0.9"/>`
+           + `<text x="${x+w/2}" y="${nameY}" text-anchor="middle" font-size="11" font-weight="bold" fill="white">${shortName}</text>`
+           + yearStr;
+    }
+
+    _renderChapterLeft(famId, chapterNum) {
+      const fam = this.families[famId];
+      if (!fam) return null;
+
+      const husb = this.individuals[fam.husb];
+      const wife = this.individuals[fam.wife];
+      const names = [husb && displayName(husb), wife && displayName(wife)].filter(Boolean);
+      const heading = names.join(' & ') || `Família ${chapterNum}`;
+
+      const childCount = (fam.children || []).length;
+      const marrEv = (fam.events || []).find(e => e.type === 'MARR');
+      const marrStr = marrEv ? `Casamento: ${fmtDate(marrEv.date)}${marrEv.place ? ', ' + marrEv.place : ''}` : '';
+
+      const svg = this._buildFamilySvg(famId);
+
+      return {
+        type: 'chapter-left',
+        title: heading,
+        ref: 'fam_' + famId,
+        famId,
+        html: `<div class="livro-page-inner page-chapter">
+  <div class="section-title">Capítulo ${chapterNum}</div>
+  <div class="chapter-heading">${esc(heading)}</div>
+  ${marrStr ? `<div class="chapter-years">${esc(marrStr)}</div>` : ''}
+  <div class="chapter-divider"></div>
+  <div class="tree-svg-wrap" style="flex:1;">${svg}</div>
+  ${childCount ? `<div style="font-size:12px;color:#7a3e1e;margin-top:8px;"><strong>${childCount}</strong> filho${childCount!==1?'s':''} registado${childCount!==1?'s':''}</div>` : ''}
+</div>`
+      };
+    }
+
+    _renderChapterRight(famId, chapterNum) {
+      const fam = this.families[famId];
+      if (!fam) return null;
+
+      // Focus bio on husband, fallback wife
+      const leadId = fam.husb || fam.wife;
+      const lead = this.individuals[leadId];
+      if (!lead) {
+        return { type: 'chapter-right', title: '', famId, html: '<div class="livro-page-inner"></div>' };
+      }
+
+      return this._renderBioPage(leadId, chapterNum, famId);
+    }
+
+    _renderBioPage(personId, chapterNum, famId) {
+      const DB = this.DB;
+      const ind = this.individuals[personId];
+      if (!ind) return null;
+
+      const name = displayName(ind);
+      const years = lifeYears(ind);
+
+      // Vital events
+      const birt = getEvent(ind, 'BIRT');
+      const bapm = getEvent(ind, 'BAPM');
+      const deat = getEvent(ind, 'DEAT');
+      const buri = getEvent(ind, 'BURI');
+      const occu = ind.events ? ind.events.filter(e => e.type === 'OCCU') : [];
+      const resi = ind.events ? ind.events.filter(e => e.type === 'RESI') : [];
+
+      // Notes
+      const notes = gatherNotes(DB, ind);
+
+      // Photos (up to 6)
+      const photos = [];
+      (ind.multimediaRefs || []).slice(0, 6).forEach(mid => {
+        const mm = DB.getMultimediaItem ? DB.getMultimediaItem(mid) : null;
+        if (!mm) return;
+        const src = mm.dataUrl || (mm.files && mm.files[0] && mm.files[0].file) || '';
+        if (src) photos.push(src);
+      });
+
+      // Family relations
+      let relations = '';
+      // Parents
+      if (ind.famc && this.families[ind.famc]) {
+        const pfam = this.families[ind.famc];
+        const pNames = [pfam.husb && displayName(this.individuals[pfam.husb]),
+                        pfam.wife && displayName(this.individuals[pfam.wife])].filter(Boolean);
+        if (pNames.length) relations += `<div class="bio-relations"><strong>Pais:</strong> ${esc(pNames.join(' &amp; '))}</div>`;
+      }
+      // Spouses & children
+      (ind.fams || []).forEach(fid => {
+        const sfam = this.families[fid];
+        if (!sfam) return;
+        const spouseId = sfam.husb === personId ? sfam.wife : sfam.husb;
+        const spouse = this.individuals[spouseId];
+        if (spouse) {
+          const marrEv = (sfam.events || []).find(e => e.type === 'MARR');
+          relations += `<div class="bio-relations"><strong>Cônjuge:</strong> ${esc(displayName(spouse))}${marrEv && marrEv.date ? ' (' + fmtDate(marrEv.date) + ')' : ''}</div>`;
+        }
+        const kids = (sfam.children || []).map(c => this.individuals[c]).filter(Boolean);
+        if (kids.length) {
+          relations += `<div class="bio-relations"><strong>Filhos:</strong> ${esc(kids.map(displayName).join(', '))}</div>`;
+        }
+      });
+
+      // Photo HTML
+      let photosHtml = '';
+      if (photos.length === 1) {
+        photosHtml = `<img class="bio-photo-wide" src="${esc(photos[0])}" alt="${esc(name)}"/>`;
+      } else if (photos.length > 1) {
+        photosHtml = `<div class="bio-photos">${photos.map(p =>
+          `<img class="bio-photo-thumb" src="${esc(p)}" alt="${esc(name)}"/>`).join('')}</div>`;
+      }
+
+      // Bio meta grid
+      const metaItems = [
+        birt  ? { l: 'Nascimento', v: `${fmtDate(birt.date)}${birt.place ? ', '+birt.place : ''}` } : null,
+        bapm  ? { l: 'Baptismo',   v: `${fmtDate(bapm.date)}${bapm.place ? ', '+bapm.place : ''}` } : null,
+        deat  ? { l: 'Falecimento',v: `${fmtDate(deat.date)}${deat.place ? ', '+deat.place : ''}` } : null,
+        buri  ? { l: 'Sepultamento',v:`${fmtDate(buri.date)}${buri.place ? ', '+buri.place : ''}` } : null,
+        ind.sex ? { l: 'Sexo', v: ind.sex === 'M' ? 'Masculino' : ind.sex === 'F' ? 'Feminino' : 'Outro' } : null,
+        ...(occu.map(o => ({ l: 'Profissão', v: `${o.place||''}${o.date?' ('+fmtDate(o.date)+')':''}`.trim() || '–' }))),
+        ...(resi.slice(0,2).map(r => ({ l: 'Residência', v: `${r.place||''}${r.date?' ('+fmtDate(r.date)+')':''}`.trim() || '–' }))),
+      ].filter(Boolean);
+
+      const metaHtml = metaItems.map(m =>
+        `<div class="bio-meta-item"><span class="bio-meta-label">${esc(m.l)}</span><span class="bio-meta-value">${esc(m.v)}</span></div>`
+      ).join('');
+
+      return {
+        type: 'chapter-right',
+        title: name,
+        ref: 'ind_' + personId,
+        personId,
+        famId,
+        html: `<div class="livro-page-inner page-bio">
+  <div class="chapter-heading">${esc(name)}</div>
+  ${years ? `<div class="chapter-years">${esc(years)}</div>` : ''}
+  <div class="chapter-divider"></div>
+  ${photosHtml}
+  <div class="bio-meta">${metaHtml}</div>
+  ${relations}
+  ${notes ? `<div class="bio-notes">${esc(notes).replace(/\n/g,'<br/>')}</div>` : ''}
+</div>`
+      };
+    }
+
+    _renderIndexGeneral(allPages) {
+      const entries = allPages
+        .filter(p => p.ref && p.ref.startsWith('ind_') && p.title)
+        .map(p => ({ name: p.title, page: p.pageNum || '?' }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+
+      const rows = entries.map(e =>
+        `<div class="index-entry"><span class="index-name">${esc(e.name)}</span><span class="index-pg">${e.page}</span></div>`
+      ).join('');
+
+      return {
+        type: 'index-general',
+        title: 'Índice de Pessoas',
+        ref: 'idx-general',
+        html: `<div class="livro-page-inner page-index">
+  <div class="section-title">Índice de Pessoas</div>
+  <div class="index-cols">${rows}</div>
+</div>`
+      };
+    }
+
+    _renderIndexSurnames(allPages) {
+      const map = {};
+      allPages
+        .filter(p => p.ref && p.ref.startsWith('ind_') && p.personId)
+        .forEach(p => {
+          const ind = this.individuals[p.personId];
+          const sn = surname(ind) || '#';
+          if (!map[sn]) map[sn] = [];
+          map[sn].push({ name: displayName(ind), page: p.pageNum || '?' });
+        });
+
+      const letters = Object.keys(map).sort((a, b) => a.localeCompare(b, 'pt'));
+      const rows = letters.map(letter => {
+        const names = map[letter].sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+        return `<div class="index-letter-group">${esc(letter)}</div>`
+             + names.map(n => `<div class="index-entry"><span class="index-name">${esc(n.name)}</span><span class="index-pg">${n.page}</span></div>`).join('');
+      }).join('');
+
+      return {
+        type: 'index-surnames',
+        title: 'Índice de Apelidos',
+        ref: 'idx-surnames',
+        html: `<div class="livro-page-inner page-index">
+  <div class="section-title">Índice de Apelidos</div>
+  <div class="index-cols">${rows}</div>
+</div>`
+      };
+    }
+
+    _renderChronology() {
+      // Gather all events from all traversed individuals
+      const events = [];
+      Object.values(this.individuals).forEach(ind => {
+        if (!ind || !ind.events) return;
+        ind.events.forEach(ev => {
+          const year = parseYear(ev.date);
+          if (!year) return;
+          events.push({
+            year,
+            type: ev.type,
+            date: fmtDate(ev.date),
+            place: ev.place || '',
+            name: displayName(ind),
+          });
+        });
+        // Also family events
+        (ind.fams || []).forEach(fid => {
+          const fam = this.families[fid];
+          if (!fam) return;
+          (fam.events || []).forEach(ev => {
+            const year = parseYear(ev.date);
+            if (!year) return;
+            const husb = this.individuals[fam.husb];
+            const wife = this.individuals[fam.wife];
+            const names = [husb && surname(husb), wife && surname(wife)].filter(Boolean);
+            events.push({
+              year,
+              type: ev.type,
+              date: fmtDate(ev.date),
+              place: ev.place || '',
+              name: names.join(' & ') || 'Família',
+            });
+          });
+        });
+      });
+
+      events.sort((a, b) => a.year - b.year || a.name.localeCompare(b.name, 'pt'));
+
+      // Split into pages of ~30 rows
+      const ROWS_PER_PAGE = 30;
+      const pages = [];
+      for (let start = 0; start < events.length || !pages.length; start += ROWS_PER_PAGE) {
+        const slice = events.slice(start, start + ROWS_PER_PAGE);
+        const rows = slice.map(e => {
+          const typeLabels = { BIRT:'Nascimento', DEAT:'Falecimento', MARR:'Casamento',
+            BAPM:'Baptismo', BURI:'Sepultamento', CREM:'Cremação', ADOP:'Adopção',
+            OCCU:'Profissão', RESI:'Residência', CHR:'Cristã', EVEN:'Evento', IMMI:'Emigração' };
+          const label = typeLabels[e.type] || e.type;
+          return `<tr><td class="chrono-year">${e.year}</td><td class="chrono-type">${esc(label)}</td><td>${esc(e.name)}</td><td>${esc(e.date)}</td><td>${esc(e.place)}</td></tr>`;
+        }).join('');
+        const title = pages.length === 0 ? 'Cronologia' : `Cronologia (cont.)`;
+        pages.push({
+          type: 'chrono',
+          title,
+          ref: pages.length === 0 ? 'chrono' : undefined,
+          html: `<div class="livro-page-inner page-chrono">
+  <div class="section-title">${title}</div>
+  <table class="chrono-table">
+    <thead><tr><th>Ano</th><th>Tipo</th><th>Pessoa</th><th>Data</th><th>Local</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>`
+        });
+      }
+      return pages;
+    }
+
+    /** Main entry: build all pages and return array */
+    buildPages() {
+      this._loadData();
+      this.traverseAllGenerations(this.rootId);
+
+      const pages = [];
+
+      // 1. Cover
+      pages.push({ ...this._renderCover(), cssClass: 'page-cover' });
+      // 2. Verso of cover (blank)
+      pages.push(this._renderBlank());
+      // 3. Introduction
+      pages.push({ ...this._renderIntro(), cssClass: 'page-intro' });
+      // 4. TOC placeholder (rebuilt after layout pass)
+      const tocIdx = pages.length;
+      pages.push(null); // placeholder
+
+      // 5. Chapters: each family → left (tree) + right (bio)
+      let chapterNum = 0;
+      this.familyOrder.forEach(famId => {
+        chapterNum++;
+        const left  = this._renderChapterLeft(famId, chapterNum);
+        const right = this._renderChapterRight(famId, chapterNum);
+        if (left)  pages.push({ ...left,  cssClass: 'page-chapter' });
+        if (right) pages.push({ ...right, cssClass: 'page-bio' });
+      });
+
+      // 6. Indexes (need layout pass first to get page numbers)
+      const idxGeneralIdx = pages.length; pages.push(null);
+      const idxSurnamesIdx = pages.length; pages.push(null);
+
+      // 7. Chronology
+      const chronoPages = this._renderChronology();
+      const chronoIdx = pages.length;
+      chronoPages.forEach(cp => pages.push({ ...cp, cssClass: 'page-chrono' }));
+
+      // ── Layout pass: assign page numbers ──────────────────────
+      pages.forEach((p, i) => {
+        if (p) p.pageNum = i + 1;
+      });
+
+      // ── Build indexes now that page numbers are known ──────────
+      pages[idxGeneralIdx]  = { ...this._renderIndexGeneral(pages.filter(Boolean)),  cssClass: 'page-index', pageNum: idxGeneralIdx + 1 };
+      pages[idxSurnamesIdx] = { ...this._renderIndexSurnames(pages.filter(Boolean)), cssClass: 'page-index', pageNum: idxSurnamesIdx + 1 };
+
+      // ── Build TOC ─────────────────────────────────────────────
+      const tocEntries = [];
+      tocEntries.push({ title: 'Introdução', level: 1, page: 3 });
+      let cn = 0;
+      this.familyOrder.forEach(famId => {
+        cn++;
+        const fam = this.families[famId];
+        const husb = this.individuals[fam && fam.husb];
+        const wife = this.individuals[fam && fam.wife];
+        const names = [husb && displayName(husb), wife && displayName(wife)].filter(Boolean);
+        const heading = names.join(' & ') || `Família ${cn}`;
+        // find the chapter-left page index
+        const pg = pages.findIndex(p => p && p.type === 'chapter-left' && p.famId === famId);
+        tocEntries.push({ title: `Cap. ${cn} — ${heading}`, level: 1, page: pg > -1 ? pg + 1 : '?' });
+      });
+      tocEntries.push({ title: 'Índice de Pessoas',  level: 1, page: idxGeneralIdx + 1 });
+      tocEntries.push({ title: 'Índice de Apelidos', level: 1, page: idxSurnamesIdx + 1 });
+      tocEntries.push({ title: 'Cronologia',          level: 1, page: chronoIdx + 1 });
+
+      pages[tocIdx] = { ...this._renderToc(tocEntries), cssClass: 'page-toc', pageNum: tocIdx + 1 };
+
+      this.pages = pages.filter(Boolean);
+      return this.pages;
+    }
+  }
+
+  // ── MAIN ────────────────────────────────────────────────────────
+
+  let pageFlip = null;
+  let allPages = [];
+
+  function getURLParam(k) {
+    return new URLSearchParams(window.location.search).get(k);
+  }
+
+  function updateIndicator() {
+    if (!pageFlip) return;
+    const cp = pageFlip.getCurrentPageIndex() + 1;
+    const total = allPages.length;
+    document.getElementById('lbrPageIndicator').textContent = `p. ${cp} / ${total}`;
+  }
+
+  function initBook(DB, rootId) {
+    const compiler = new BookCompiler(DB, rootId);
+    const pages = compiler.buildPages();
+    allPages = pages;
+
+    // Get root person name for title
+    const rootInd = compiler.individuals[rootId];
+    const rootName = rootInd ? displayName(rootInd) : '';
+    if (rootName) {
+      document.getElementById('lbrTitle').textContent = `Family History Book — ${rootName}`;
+      document.title = `myLineage — Family History Book — ${rootName}`;
+    }
+
+    const container = document.getElementById('livro-book-wrap');
+    container.innerHTML = '';
+
+    // Determine page dimensions based on container
+    const stageEl = document.getElementById('livro-stage');
+    const stageH = stageEl.clientHeight || window.innerHeight - 60;
+    const PAGE_H = Math.min(stageH - 30, 780);
+    const PAGE_W = Math.round(PAGE_H * 0.707); // A4 ratio
+
+    // Create page elements
+    const pageEls = pages.map((pg, i) => {
+      const div = document.createElement('div');
+      div.className = 'livro-page' + (pg.cssClass ? ' ' + pg.cssClass : '');
+      div.innerHTML = pg.html;
+      // Add page number footer to non-cover, non-blank pages
+      if (pg.type !== 'cover' && pg.type !== 'blank') {
+        const pn = document.createElement('div');
+        pn.className = 'livro-page-num ' + (i % 2 === 0 ? 'left' : 'right');
+        pn.textContent = pg.pageNum || (i + 1);
+        div.appendChild(pn);
+      }
+      container.appendChild(div);
+      return div;
+    });
+
+    // Initialise StPageFlip
+    const PF = window.PageFlip;
+    if (!PF) {
+      console.error('PageFlip library not loaded');
+      return;
+    }
+
+    pageFlip = new PF(container, {
+      width: PAGE_W,
+      height: PAGE_H,
+      size: 'fixed',
+      drawShadow: true,
+      flippingTime: 650,
+      usePortrait: false,
+      startZIndex: 10,
+      autoSize: false,
+      showCover: true,
+      mobileScrollSupport: true,
+      clickEventForward: true,
+    });
+
+    pageFlip.loadFromHTML(container.querySelectorAll('.livro-page'));
+
+    pageFlip.on('flip', () => updateIndicator());
+    pageFlip.on('changeState', () => updateIndicator());
+
+    updateIndicator();
+    document.getElementById('livro-loading').style.display = 'none';
+  }
+
+  function populatePersonSelect(DB, currentId) {
+    const sel = document.getElementById('lbrPersonSelect');
+    sel.innerHTML = '';
+    try {
+      const all = DB.getIndividuals ? DB.getIndividuals() : [];
+      all.filter(i => !i.deletedAt).forEach(ind => {
+        const opt = document.createElement('option');
+        opt.value = ind.id;
+        opt.textContent = displayName(ind) + (lifeYears(ind) ? ' ' + lifeYears(ind) : '');
+        if (ind.id === currentId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    } catch(e) {
+      // fallback: leave empty
+    }
+
+    sel.addEventListener('change', () => {
+      const newId = sel.value;
+      if (!newId) return;
+      document.getElementById('livro-loading').style.display = 'flex';
+      setTimeout(() => {
+        if (pageFlip) { try { pageFlip.destroy(); } catch(e){} }
+        const container = document.getElementById('livro-book-wrap');
+        container.innerHTML = '';
+        initBook(DB, newId);
+      }, 50);
+    });
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    MLAuth.requireAuth();
+
+    const waitDB = setInterval(() => {
+      const DB = window.GedcomDB;
+      if (!DB) return;
+      clearInterval(waitDB);
+
+      const paramId = getURLParam('person');
+      let rootId = paramId;
+      if (!rootId) {
+        try {
+          const fp = DB.getSetting('focusedPerson');
+          rootId = (fp && fp.id) ? fp.id : null;
+        } catch(e) {}
+      }
+      if (!rootId) {
+        // fallback: first individual
+        try {
+          const all = DB.getIndividuals();
+          rootId = all && all[0] && all[0].id;
+        } catch(e) {}
+      }
+
+      if (!rootId) {
+        document.getElementById('livro-loading').querySelector('span').textContent = 'Sem dados disponíveis.';
+        return;
+      }
+
+      populatePersonSelect(DB, rootId);
+      initBook(DB, rootId);
+    }, 100);
+
+    // ── Toolbar buttons ────────────────────────────────────────
+    document.getElementById('lbrCloseBtn').addEventListener('click', () => window.close());
+
+    document.getElementById('lbrPrintBtn').addEventListener('click', () => {
+      // Populate print pages
+      const printEl = document.getElementById('livro-print-pages');
+      printEl.innerHTML = allPages.map((pg, i) => {
+        return `<div class="print-page${pg.cssClass ? ' ' + pg.cssClass : ''}">${pg.html}</div>`;
+      }).join('');
+      window.print();
+    });
+
+    document.getElementById('livro-prev').addEventListener('click', () => {
+      if (pageFlip) pageFlip.flipPrev('top');
+    });
+
+    document.getElementById('livro-next').addEventListener('click', () => {
+      if (pageFlip) pageFlip.flipNext('top');
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (!pageFlip) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { pageFlip.flipNext('top'); e.preventDefault(); }
+      if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   { pageFlip.flipPrev('top'); e.preventDefault(); }
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

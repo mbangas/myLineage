@@ -65,6 +65,9 @@
             <h1>Árvore Genealógica</h1>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
+            <button id="openBookBtn" class="btn btn-sm" title="Abrir Family History Book" style="background:linear-gradient(135deg,#7a4010,#3a1808);border-color:#c8906040;">
+              <i class="mdi mdi-book-open-variant" aria-hidden="true"></i> Livro
+            </button>
             <button id="resetFocusBtn" class="btn btn-ghost btn-sm" title="Resetar foco para a pessoa configurada">
               <i class="mdi mdi-crosshairs-gps" aria-hidden="true"></i> Reset foco
             </button>
@@ -819,9 +822,11 @@
       });
 
       document.getElementById('zoomInBtn').addEventListener('click',()=>_zoomViewBox(1/1.3));
-      document.getElementById('zoomOutBtn').addEventListener('click',()=>_zoomViewBox(1.3));
-      document.getElementById('fitChartBtn').addEventListener('click',()=>_fitViewBox());
-      document.getElementById('centerChartBtn').addEventListener('click',()=>_centerViewBox(_focusPt[0],_focusPt[1]));
+      document.getElementById('openBookBtn').addEventListener('click', function() {
+        const personId = getFocusPersonId();
+        const url = 'livro.html' + (personId ? '?person=' + encodeURIComponent(personId) : '');
+        window.open(url, '_blank');
+      });
 
       document.getElementById('resetFocusBtn').addEventListener('click',function(){
         _pathFilter=null;

@@ -1,0 +1,602 @@
+/* ================================================================
+   FAMILY HISTORY BOOK — livro.css
+   Full-screen page-flip book viewer
+   ================================================================ */
+
+/* ---- Stage & Layout ------------------------------------------ */
+body.livro-body {
+  margin: 0;
+  padding: 0;
+  background: #1a1410;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #2c1810;
+  overflow: hidden;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+#livro-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(ellipse at center, #2a1f14 0%, #0d0a07 100%);
+}
+
+/* ---- Toolbar -------------------------------------------------- */
+#livro-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  background: #0d0a07cc;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #3a2a1a40;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+#livro-toolbar .lbr-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  color: #c8a96e;
+  letter-spacing: 0.04em;
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+#livro-toolbar select {
+  background: #1e150c;
+  color: #e0ccaa;
+  border: 1px solid #5a3a1a;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  max-width: 220px;
+}
+
+#livro-toolbar select:focus {
+  border-color: #c8a96e;
+}
+
+#livro-toolbar .lbr-page-indicator {
+  font-size: 13px;
+  color: #a08060;
+  min-width: 80px;
+  text-align: center;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.03em;
+}
+
+#livro-toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid #5a3a1a;
+  background: #1e150c;
+  color: #e0ccaa;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+
+#livro-toolbar button:hover {
+  background: #2e2010;
+  border-color: #c8a96e;
+}
+
+#livro-toolbar button .mdi {
+  font-size: 16px;
+  line-height: 1;
+}
+
+#livro-toolbar .lbr-sep {
+  width: 1px;
+  height: 24px;
+  background: #3a2a1a;
+  margin: 0 4px;
+}
+
+/* ---- Book Container ------------------------------------------ */
+#livro-book-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Page Base ----------------------------------------------- */
+.livro-page {
+  background: #fffef8;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #2c1810;
+  box-sizing: border-box;
+  /* subtle paper texture */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+.livro-page-inner {
+  padding: 40px 36px 36px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Page number */
+.livro-page-num {
+  position: absolute;
+  font-size: 11px;
+  color: #a08060;
+  letter-spacing: 0.04em;
+  bottom: 14px;
+}
+.livro-page-num.left  { left: 36px; }
+.livro-page-num.right { right: 36px; }
+
+/* ---- Cover Page ---------------------------------------------- */
+.livro-page.page-cover {
+  background: linear-gradient(160deg, #2c1f0e 0%, #1a110a 100%);
+  color: #f0e0c0;
+}
+
+.livro-page.page-cover .livro-page-inner {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.cover-ornament {
+  font-size: 56px;
+  opacity: 0.4;
+  line-height: 1;
+}
+
+.cover-ribbon {
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c8a96e, transparent);
+  margin: 0 auto;
+}
+
+.cover-title {
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f5e8c8;
+  line-height: 1.25;
+  text-shadow: 0 2px 8px #00000060;
+}
+
+.cover-subtitle {
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  color: #c8a96e;
+  text-transform: uppercase;
+}
+
+.cover-families {
+  font-size: 20px;
+  font-style: italic;
+  color: #e8d4a8;
+  line-height: 1.5;
+  max-width: 80%;
+}
+
+.cover-date {
+  font-size: 12px;
+  color: #a08060;
+  letter-spacing: 0.1em;
+}
+
+.cover-app {
+  font-size: 11px;
+  color: #705840;
+  letter-spacing: 0.06em;
+  position: absolute;
+  bottom: 28px;
+  left: 0; right: 0;
+  text-align: center;
+}
+
+/* ---- Blank Page ---------------------------------------------- */
+.livro-page.page-blank {
+  background: #fffef8;
+}
+
+/* ---- Introduction -------------------------------------------- */
+.page-intro .section-title,
+.page-toc .section-title,
+.page-chapter .section-title,
+.page-bio .section-title,
+.page-tree .section-title,
+.page-index .section-title,
+.page-chrono .section-title {
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  color: #5a2e0e;
+  text-transform: uppercase;
+  border-bottom: 2px solid #c8a96e;
+  padding-bottom: 6px;
+  margin-bottom: 18px;
+  margin-top: 0;
+}
+
+.intro-text {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #3c2010;
+  white-space: pre-wrap;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ---- Table of Contents --------------------------------------- */
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.toc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 5px 0;
+  border-bottom: 1px dotted #d4c4a0;
+  font-size: 13px;
+  color: #3c2010;
+  line-height: 1.3;
+}
+
+.toc-list li .toc-leader {
+  flex: 1;
+  border-bottom: 1px dotted #c8a06870;
+  margin: 0 6px;
+  min-width: 20px;
+  height: 0;
+  align-self: center;
+  margin-bottom: 3px;
+}
+
+.toc-list li .toc-num {
+  color: #a08060;
+  font-size: 12px;
+  min-width: 28px;
+  text-align: right;
+}
+
+.toc-list li .toc-level-1 { font-weight: bold; color: #5a2e0e; }
+.toc-list li .toc-level-2 { padding-left: 14px; color: #5a3820; }
+.toc-list li .toc-level-3 { padding-left: 28px; color: #6a4830; font-size: 12px; }
+
+/* ---- Chapter / Bio pages ------------------------------------- */
+.chapter-heading {
+  font-size: 20px;
+  font-weight: bold;
+  color: #5a2e0e;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.chapter-years {
+  font-size: 13px;
+  color: #a08060;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.chapter-divider {
+  height: 2px;
+  background: linear-gradient(90deg, #c8a96e, transparent);
+  margin-bottom: 16px;
+}
+
+/* Bio meta grid */
+.bio-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+
+.bio-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bio-meta-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a08060;
+}
+
+.bio-meta-value {
+  color: #3c2010;
+  line-height: 1.3;
+}
+
+/* Notes / bio text */
+.bio-notes {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #3c2010;
+  flex: 1;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+/* Family relations list */
+.bio-relations {
+  font-size: 12px;
+  color: #5a380a;
+  margin-bottom: 10px;
+}
+
+.bio-relations strong {
+  color: #3c1808;
+}
+
+/* Photo grid */
+.bio-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.bio-photo-thumb {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #d4c4a0;
+  box-shadow: 0 2px 6px #00000020;
+}
+
+.bio-photo-wide {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #d4c4a0;
+  box-shadow: 0 2px 8px #00000025;
+  margin-bottom: 8px;
+}
+
+/* ---- Tree Page ----------------------------------------------- */
+.page-tree .livro-page-inner {
+  padding: 24px 20px;
+}
+
+.tree-svg-wrap {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-svg-wrap svg {
+  max-width: 100%;
+  max-height: 100%;
+  overflow: visible;
+}
+
+/* ---- Index pages --------------------------------------------- */
+.index-cols {
+  columns: 2;
+  column-gap: 20px;
+  font-size: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.index-entry {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  border-bottom: 1px dotted #d4c4a080;
+  padding: 3px 0;
+  break-inside: avoid;
+  line-height: 1.3;
+}
+
+.index-name {
+  color: #3c2010;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.index-pg {
+  color: #a08060;
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.index-letter-group {
+  font-size: 16px;
+  font-weight: bold;
+  color: #5a2e0e;
+  border-bottom: 1px solid #c8a96e;
+  margin: 10px 0 4px;
+  padding-bottom: 2px;
+  break-after: avoid;
+}
+
+/* ---- Chronology --------------------------------------------- */
+.chrono-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  flex: 1;
+}
+
+.chrono-table thead th {
+  background: #5a2e0e;
+  color: #f5e0c0;
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.chrono-table tbody tr:nth-child(even) {
+  background: #faf5ea;
+}
+
+.chrono-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #e8dcc890;
+  vertical-align: top;
+  color: #3c2010;
+  line-height: 1.3;
+}
+
+.chrono-year {
+  font-weight: bold;
+  color: #7a3e1e;
+  min-width: 42px;
+}
+
+.chrono-type {
+  color: #a08060;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 60px;
+}
+
+/* ---- Navigation arrows --------------------------------------- */
+#livro-prev, #livro-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  background: #00000050;
+  border: none;
+  color: #c8a96e;
+  font-size: 28px;
+  width: 40px;
+  height: 70px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+#livro-prev { left: 8px; }
+#livro-next { right: 8px; }
+
+#livro-prev:hover, #livro-next:hover {
+  background: #00000090;
+}
+
+/* ---- Loading overlay ----------------------------------------- */
+#livro-loading {
+  position: fixed;
+  inset: 0;
+  background: #0d0a07ee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 9999;
+  color: #c8a96e;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+
+#livro-loading .loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid #3a2a1a;
+  border-top-color: #c8a96e;
+  border-radius: 50%;
+  animation: livro-spin 0.8s linear infinite;
+}
+
+@keyframes livro-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Print styles ------------------------------------------- */
+@media print {
+  body.livro-body {
+    background: white;
+    overflow: auto;
+    height: auto;
+  }
+
+  #livro-toolbar,
+  #livro-prev,
+  #livro-next,
+  #livro-loading,
+  .stf__wrapper,
+  .stf__parent {
+    display: none !important;
+  }
+
+  #livro-print-pages {
+    display: block !important;
+  }
+
+  .print-page {
+    width: 100%;
+    min-height: 100vh;
+    page-break-after: always;
+    overflow: visible;
+    padding: 40px 50px;
+    box-sizing: border-box;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #2c1810;
+  }
+
+  .print-page.page-cover {
+    background: #2c1f0e !important;
+    color: #f0e0c0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+#livro-print-pages {
+  display: none;
+}

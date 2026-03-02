@@ -284,8 +284,7 @@ step_install_portainer() {
     docker run -d \
         --name portainer \
         --restart=always \
-        -p "${PORTAINER_TUNNEL_PORT}:8000" \
-        -p "${PORTAINER_HTTPS_PORT}:9443" \
+        --network host \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v portainer_data:/data \
         portainer/portainer-ce:latest                       >> "$LOG" 2>&1
@@ -338,6 +337,7 @@ COPY --from=builder /app/topola-bundle.js ./
 COPY --from=builder /app/family-chart-bundle.js ./
 COPY --from=builder /app/qrcode-bundle.js ./
 COPY --from=builder /app/css ./css
+COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/JSON-DATA ./JSON-DATA
 RUN mkdir -p /app/uploads/fotos /app/uploads/documentos /app/uploads/gedcom
 EXPOSE 3000

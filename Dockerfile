@@ -38,6 +38,7 @@ COPY --from=builder /app/topola-bundle.js ./
 COPY --from=builder /app/family-chart-bundle.js ./
 COPY --from=builder /app/qrcode-bundle.js ./
 COPY --from=builder /app/css ./css
+COPY --from=builder /app/lib ./lib
 
 # Criar diretórios de dados e uploads
 RUN mkdir -p \

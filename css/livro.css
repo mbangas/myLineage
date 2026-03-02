@@ -412,15 +412,47 @@ body.livro-body {
 
 .bio-photo-mosaic-img {
   display: block;
-  flex-shrink: 0;
-}
-
-/* 1 photo: single full-width panel */
-.bio-photo-mosaic-1 .bio-photo-mosaic-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Footnote number badge overlaid on photo */
+.bio-photo-fn-badge {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 10px;
+  font-family: Georgia, serif;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Photo footnotes section at bottom of bio page */
+.bio-photo-footnotes {
+  margin-top: 6px;
+  border-top: 1px solid #d4c4a080;
+  padding-top: 5px;
+  flex-shrink: 0;
+}
+
+.bio-photo-footnote {
+  font-size: 10px;
+  color: #7a5030;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.bio-photo-footnote sup {
+  font-size: 8px;
+  color: #a06040;
+  margin-right: 3px;
 }
 
 /* 3-photo: column split handled inline */
@@ -438,6 +470,132 @@ body.livro-body {
   flex-direction: column;
 }
 
+/* ── Mini bio blocks (lean people merged on right page) ──── */
+.mini-bios-section {
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.mini-bios-divider {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a08060;
+  border-bottom: 1px solid #d4c4a060;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.mini-bio-block {
+  padding: 6px 0 6px 10px;
+  border-left: 2px solid #c8a96e50;
+  margin-bottom: 6px;
+}
+
+.mini-bio-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #5a2e0e;
+  margin-bottom: 2px;
+}
+
+.mini-bio-years {
+  font-weight: normal;
+  color: #a08060;
+  font-style: italic;
+  font-size: 11px;
+}
+
+.mini-bio-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b09070;
+  font-weight: bold;
+}
+
+.mini-bio-line {
+  font-size: 11px;
+  color: #4a3020;
+  line-height: 1.4;
+}
+
+.mini-bio-notes {
+  font-size: 11px;
+  color: #5a3820;
+  font-style: italic;
+  margin-top: 3px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow: hidden;
+  max-height: 42px;
+}
+
+/* ── Photo index grid ───────────────────────────────────── */
+.photo-idx-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+  align-content: start;
+}
+
+.photo-idx-entry {
+  display: flex;
+  gap: 8px;
+  padding: 5px;
+  border: 1px solid #d4c4a060;
+  border-radius: 5px;
+  min-height: 60px;
+  break-inside: avoid;
+}
+
+.photo-idx-thumb {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-color: #e8dcc8;
+}
+
+.photo-idx-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.photo-idx-person {
+  font-size: 11.5px;
+  font-weight: bold;
+  color: #3c2010;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-idx-title {
+  font-size: 10.5px;
+  color: #5a3820;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-idx-note {
+  font-size: 10px;
+  color: #7a5030;
+  font-style: italic;
+  overflow: hidden;
+  max-height: 28px;
+  line-height: 1.4;
+}
+
 /* ---- Tree Page ----------------------------------------------- */
 .page-tree .livro-page-inner {
   padding: 24px 20px;
@@ -445,6 +603,7 @@ body.livro-body {
 
 .tree-svg-wrap {
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -452,9 +611,10 @@ body.livro-body {
 }
 
 .tree-svg-wrap svg {
-  max-width: 100%;
-  max-height: 100%;
-  overflow: visible;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
 }
 
 /* ---- Index pages --------------------------------------------- */
@@ -651,6 +811,17 @@ body.livro-body {
 #lbrGotoInput:focus {
   border-color: #c8a96e !important;
   box-shadow: 0 0 0 2px #c8a96e30;
+}
+
+/* Search input */
+#lbrSearchInput:focus {
+  border-color: #c8a96e !important;
+  box-shadow: 0 0 0 2px #c8a96e30;
+  outline: none;
+}
+
+#lbrSearchInput::placeholder {
+  color: #6a5040;
 }
 
 /* Hide number input spin buttons */

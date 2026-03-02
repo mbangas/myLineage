@@ -412,8 +412,7 @@
         const marr = (fam.events || []).find(e => e.type === 'MARR');
         const ml = marr && marr.date ? esc(fmtDate(marr.date)) : '';
         if (ml) {
-          parts.push(`<rect x="${coupleConnCx - 30}" y="${coupleLineY - 9}" width="60" height="16" rx="3" fill="#fffef8" stroke="#c8a96e60" stroke-width="0.5"/>`);
-          parts.push(`<text x="${coupleConnCx}" y="${coupleLineY + 4}" text-anchor="middle" font-size="9" fill="#7a3e1e">${ml}</text>`);
+          parts.push(`<text x="${coupleConnCx}" y="${coupleLineY - 4}" text-anchor="middle" font-size="8" fill="#7a3e1e" opacity="0.9">${ml}</text>`);
         }
       }
 
@@ -453,7 +452,7 @@
       const yearStr = showYears && years
         ? `<text x="${x+w/2}" y="${y+h-7}" text-anchor="middle" font-size="9" fill="#a0806090">${years}</text>` : '';
       const nameY = showYears && years ? y + h/2 - 1 : y + h/2 + 5;
-      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="none" stroke="#c8a96e" stroke-width="1.5"/>`
+      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="none" stroke="#7a4e18" stroke-width="2"/>`
            + `<text x="${x+w/2}" y="${nameY}" text-anchor="middle" font-size="11" font-weight="500" fill="#3c2010">${shortName}</text>`
            + yearStr;
     }
@@ -479,7 +478,6 @@
         ref: 'fam_' + famId,
         famId,
         html: `<div class="livro-page-inner page-chapter">
-  <div class="section-title">Capítulo ${chapterNum}</div>
   <div class="chapter-heading">${esc(heading)}</div>
   ${marrStr ? `<div class="chapter-years">${esc(marrStr)}</div>` : ''}
   <div class="chapter-divider"></div>
@@ -506,49 +504,48 @@
       const img = (src, style, photoIdx) => {
         const badge = fnSet.has(photoIdx)
           ? `<span class="bio-photo-fn-badge">${photoIdx}</span>` : '';
-        return `<img src="${esc2(src)}" alt="${esc2(name)}" class="bio-photo-mosaic-img" style="${style}" loading="lazy"/>${badge}`;
+        return `<div style="position:relative;width:100%;height:100%;">${badge}<img src="${esc2(src)}" alt="${esc2(name)}" class="bio-photo-mosaic-img" style="${style}" loading="lazy"/></div>`;
       };
 
       if (n === 1) {
-        return `<div class="bio-photo-mosaic bio-photo-mosaic-1" style="position:relative;">${img(photos[0], 'width:100%;height:100%;object-fit:cover;border-radius:6px;', 1)}</div>`;
+        return `<div class="bio-photo-mosaic bio-photo-mosaic-1">${img(photos[0], 'width:100%;height:100%;object-fit:contain;', 1)}</div>`;
       }
       if (n === 2) {
         return `<div class="bio-photo-mosaic bio-photo-mosaic-2">
-          <div style="flex:1;overflow:hidden;border-radius:6px 0 0 6px;position:relative;">${img(photos[0], 'width:100%;height:100%;object-fit:cover;', 1)}</div>
-          <div style="flex:1;overflow:hidden;border-radius:0 6px 6px 0;position:relative;">${img(photos[1], 'width:100%;height:100%;object-fit:cover;', 2)}</div>
+          <div style="flex:1;display:flex;align-items:stretch;">${img(photos[0], 'width:100%;height:100%;object-fit:contain;', 1)}</div>
+          <div style="flex:1;display:flex;align-items:stretch;">${img(photos[1], 'width:100%;height:100%;object-fit:contain;', 2)}</div>
         </div>`;
       }
       if (n === 3) {
         return `<div class="bio-photo-mosaic bio-photo-mosaic-3">
-          <div style="flex:1.4;overflow:hidden;border-radius:6px 0 0 6px;position:relative;">${img(photos[0], 'width:100%;height:100%;object-fit:cover;', 1)}</div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
-            <div style="flex:1;overflow:hidden;border-radius:0 6px 0 0;position:relative;">${img(photos[1], 'width:100%;height:100%;object-fit:cover;', 2)}</div>
-            <div style="flex:1;overflow:hidden;border-radius:0 0 6px 0;position:relative;">${img(photos[2], 'width:100%;height:100%;object-fit:cover;', 3)}</div>
+          <div style="flex:1.4;display:flex;align-items:stretch;">${img(photos[0], 'width:100%;height:100%;object-fit:contain;', 1)}</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <div style="flex:1;display:flex;align-items:stretch;">${img(photos[1], 'width:100%;height:100%;object-fit:contain;', 2)}</div>
+            <div style="flex:1;display:flex;align-items:stretch;">${img(photos[2], 'width:100%;height:100%;object-fit:contain;', 3)}</div>
           </div>
         </div>`;
       }
       if (n === 4) {
         return `<div class="bio-photo-mosaic bio-photo-mosaic-4">
-          <div style="display:flex;gap:4px;flex:1;">
-            <div style="flex:1;overflow:hidden;border-radius:6px 0 0 0;position:relative;">${img(photos[0], 'width:100%;height:100%;object-fit:cover;', 1)}</div>
-            <div style="flex:1;overflow:hidden;border-radius:0 6px 0 0;position:relative;">${img(photos[1], 'width:100%;height:100%;object-fit:cover;', 2)}</div>
+          <div style="display:flex;gap:12px;flex:1;min-height:0;">
+            <div style="flex:1;display:flex;align-items:stretch;">${img(photos[0], 'width:100%;height:100%;object-fit:contain;', 1)}</div>
+            <div style="flex:1;display:flex;align-items:stretch;">${img(photos[1], 'width:100%;height:100%;object-fit:contain;', 2)}</div>
           </div>
-          <div style="display:flex;gap:4px;flex:1;">
-            <div style="flex:1;overflow:hidden;border-radius:0 0 0 6px;position:relative;">${img(photos[2], 'width:100%;height:100%;object-fit:cover;', 3)}</div>
-            <div style="flex:1;overflow:hidden;border-radius:0 0 6px 0;position:relative;">${img(photos[3], 'width:100%;height:100%;object-fit:cover;', 4)}</div>
+          <div style="display:flex;gap:12px;flex:1;min-height:0;">
+            <div style="flex:1;display:flex;align-items:stretch;">${img(photos[2], 'width:100%;height:100%;object-fit:contain;', 3)}</div>
+            <div style="flex:1;display:flex;align-items:stretch;">${img(photos[3], 'width:100%;height:100%;object-fit:contain;', 4)}</div>
           </div>
         </div>`;
       }
       // 5 or 6
       const first3 = photos.slice(0, 3);
       const rest   = photos.slice(3, 6);
-      const row2   = rest.map((p, ri) => `<div style="flex:1;overflow:hidden;border-radius:4px;position:relative;">${img(p,'width:100%;height:100%;object-fit:cover;', 4 + ri)}</div>`).join('');
+      const row2   = rest.map((p, ri) => `<div style="flex:1;display:flex;align-items:stretch;">${img(p,'width:100%;height:100%;object-fit:contain;', 4 + ri)}</div>`).join('');
       return `<div class="bio-photo-mosaic bio-photo-mosaic-5" style="flex-direction:column;">
-        <div style="display:flex;gap:4px;flex:1.4;min-height:0;">${first3.map((p,i) => {
-          const r = i===0?'6px 0 0 0':i===2?'0 6px 0 0':'0';
-          return `<div style="flex:1;overflow:hidden;border-radius:${r};position:relative;">${img(p,'width:100%;height:100%;object-fit:cover;', i+1)}</div>`;
-        }).join('')}</div>
-        <div style="display:flex;gap:4px;flex:1;min-height:0;">${row2}</div>
+        <div style="display:flex;gap:12px;flex:1.4;min-height:0;">${first3.map((p,i) =>
+          `<div style="flex:1;display:flex;align-items:stretch;">${img(p,'width:100%;height:100%;object-fit:contain;', i+1)}</div>`
+        ).join('')}</div>
+        <div style="display:flex;gap:12px;flex:1;min-height:0;">${row2}</div>
       </div>`;
     }
 
@@ -662,7 +659,6 @@
   <div class="chapter-heading">${esc(name)}</div>
   ${years ? `<div class="chapter-years">${esc(years)}</div>` : ''}
   <div class="chapter-divider"></div>
-  <div class="bio-meta">${metaHtml}</div>
   <div class="bio-relations-wrap">${relations}</div>
   ${notes ? `<div class="bio-notes">${esc(notes).replace(/\n/g,'<br/>')}</div>` : ''}
   ${photosHtml ? `<div class="bio-photo-area ${photoHeightClass}">${photosHtml}</div>` : ''}
@@ -685,9 +681,9 @@
         personId,
         html: `<div class="livro-page-inner page-bio">
   <div class="chapter-heading">${esc(name)}</div>
-  <div class="chapter-years" style="font-style:normal;">${esc(pageLabel)}</div>
+  <div class="chapter-years" style="font-style:normal;font-size:11px;">${esc(pageLabel)}</div>
   <div class="chapter-divider"></div>
-  <div class="bio-photo-area photo-h-lg">${photosHtml}</div>
+  <div class="bio-photo-area" style="flex:1;min-height:0;height:auto;">${photosHtml}</div>
   ${footnotesHtml}
 </div>`
       };
@@ -889,14 +885,17 @@
     _renderIndexPhotos() {
       const DB = this.DB;
       const entries = [];
+      const seenMids = new Set(); // deduplicate photos by multimedia ID
       // Collect all multimedia items that have a photo src
       Object.values(this.individuals).forEach(ind => {
         if (!ind || !ind.multimediaRefs) return;
         ind.multimediaRefs.forEach((mid, idx) => {
+          if (seenMids.has(mid)) return; // skip duplicate photo
           const mm = DB.getMultimediaItem ? DB.getMultimediaItem(mid) : null;
           if (!mm) return;
           const src = mm.dataUrl || (mm.files && mm.files[0] && mm.files[0].file) || '';
           if (!src) return;
+          seenMids.add(mid);
           const title = (mm.title || mm.files && mm.files[0] && mm.files[0].title) || '';
           const noteText = mm.notes && mm.notes.length
             ? mm.notes.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
@@ -929,10 +928,68 @@
       };
     }
 
-    /** After layout pass: replace data-pgref placeholders with actual page numbers */
+    _renderIndicators() {
+      const inds = Object.values(this.individuals);
+      const fams = Object.values(this.families);
+      const total = inds.length;
+      const males   = inds.filter(p => p.sex === 'M').length;
+      const females = inds.filter(p => p.sex === 'F').length;
+      const withPhotos = inds.filter(p => p.multimediaRefs && p.multimediaRefs.length).length;
+      const withNotes  = inds.filter(p => p.notes && p.notes.length).length;
+
+      // Birth years
+      const birthYears = inds
+        .map(p => { const e = (p.events||[]).find(e=>e.type==='BIRT'); return parseYear(e&&e.date); })
+        .filter(Boolean).sort((a,b)=>a-b);
+      const oldest = birthYears[0];
+      const newest = birthYears[birthYears.length-1];
+      const generations = (oldest && newest) ? Math.round((newest-oldest)/25) : null;
+
+      // Marriage count
+      const marriages = fams.filter(f => (f.events||[]).some(e=>e.type==='MARR')).length;
+      // Children average
+      const totalChildren = fams.reduce((s,f)=>s+(f.children||[]).length,0);
+      const avgChildren = fams.length ? (totalChildren/fams.length).toFixed(1) : '–';
+
+      // Surnames
+      const surnames = new Set();
+      inds.forEach(p => { const s = surname(p); if (s) surnames.add(s); });
+
+      const row = (label, value) =>
+        `<div class="ind-row"><span class="ind-label">${esc(label)}</span><span class="ind-value">${esc(String(value))}</span></div>`;
+
+      return {
+        type: 'indicators',
+        title: 'Indicadores',
+        ref: 'idx-indicators',
+        html: `<div class="livro-page-inner page-index">
+  <div class="section-title">Indicadores</div>
+  <div class="ind-grid">
+    <div class="ind-section-head">Pessoas</div>
+    ${row('Total de pessoas', total)}
+    ${row('Homens', males + (total ? ` (${Math.round(males/total*100)}%)` : ''))}
+    ${row('Mulheres', females + (total ? ` (${Math.round(females/total*100)}%)` : ''))}
+    ${row('Pessoas com fotografia', withPhotos)}
+    ${row('Pessoas com notas biogr\u00e1ficas', withNotes)}
+    ${oldest ? row('Nascimento mais antigo', oldest) : ''}
+    ${newest ? row('Nascimento mais recente', newest) : ''}
+    ${generations ? row('N\u00famero estimado de gera\u00e7\u00f5es', generations) : ''}
+    <div class="ind-section-head">Fam\u00edlias</div>
+    ${row('Total de fam\u00edlias', fams.length)}
+    ${row('Casamentos registados', marriages)}
+    ${row('Total de filhos', totalChildren)}
+    ${row('M\u00e9dia de filhos por fam\u00edlia', avgChildren)}
+    <div class="ind-section-head">Apelidos</div>
+    ${row('Apelidos distintos', surnames.size)}
+    ${surnames.size ? row('Listagem', [...surnames].sort((a,b)=>a.localeCompare(b,'pt')).slice(0,15).join(', ')) : ''}
+  </div>
+</div>`
+      };
+    }
     resolvePgRefs(pages) {
-      // Build map: personId → pageNum
+      // Build map: personId → pageNum (also stored on this.personPageMap for post-build use)
       const map = {};
+      this.personPageMap = map;
       pages.forEach(p => {
         if (!p) return;
         if (p.ref && p.ref.startsWith('ind_') && p.personId && p.pageNum) {
@@ -946,9 +1003,14 @@
       // Replace placeholders in all page HTML strings
       pages.forEach(p => {
         if (!p || !p.html) return;
+        // Collect own person IDs for this page (skip self-references)
+        const ownIds = new Set();
+        if (p.personId) ownIds.add(p.personId);
+        if (p.leanIds) p.leanIds.forEach(lid => ownIds.add(lid));
         p.html = p.html.replace(
           /<span class="bio-pg-ref" data-pgref="([^"]+)"><\/span>/g,
           (_, pid) => {
+            if (ownIds.has(pid)) return ''; // skip self-references
             const pg = map[pid];
             return pg
               ? `<span class="bio-pg-ref-resolved" title="p. ${pg}"> p.${pg}</span>`
@@ -962,15 +1024,24 @@
       this._loadData();
       this.traverseAllGenerations(this.rootId);
 
+      // ── Ensure the focused person's own families appear first ──────
+      const _rootFamIds = (this.individuals[this.rootId]?.fams || [])
+        .filter(fid => this.families[fid]);
+      if (_rootFamIds.length) {
+        this.familyOrder = [
+          ..._rootFamIds,
+          ...this.familyOrder.filter(fid => !_rootFamIds.includes(fid))
+        ];
+      }
+
       const pages = [];
 
       // 0. Cover  (shown alone by StPageFlip showCover)
       pages.push({ ...this._renderCover(), cssClass: 'page-cover' });
-      // 1. Introduction  (LEFT of first spread)
+      // 1. Blank verso (back of cover)
+      pages.push({ ...this._renderBlank(), cssClass: 'page-blank' });
+      // 2. Introduction
       pages.push({ ...this._renderIntro(), cssClass: 'page-intro' });
-      // 2. TOC placeholder  (RIGHT of first spread) — rebuilt after layout pass
-      const tocIdx = pages.length;
-      pages.push(null);
 
       // Determine which people will be shown as lean mini-bios inside their family's right page,
       // so we can skip their standalone bio pages later.
@@ -1013,15 +1084,37 @@
         if (leanIds.length) familyLeanMap[famId] = leanIds;
       });
 
-      // ── Chapter pages ─────────────────────────────────────────
-      // Track which personIds already have standalone bio pages (to skip merged ones)
+      // ── Chapter pages + grouped family bios ─────────────────
       const bioPersonIds = new Set();
+
+      /** Push a bio page + any photo continuations */
+      const pushBioPages = (pid, famId) => {
+        const bioPage = this._renderBioPage(pid, 0, famId);
+        if (!bioPage) return;
+        pages.push({ ...bioPage, cssClass: 'page-bio' });
+        bioPersonIds.add(pid);
+        if (bioPage.photosExtra && bioPage.photosExtra.length) {
+          const pChunks = [];
+          for (let ci = 0; ci < bioPage.photosExtra.length; ci += 6)
+            pChunks.push(bioPage.photosExtra.slice(ci, ci + 6));
+          pChunks.forEach((chunk, ci) => {
+            pages.push({ ...this._renderPhotoContinuation(
+              pid, chunk, bioPage.title,
+              `Fotografias (${ci + 2}/${pChunks.length + 1})`
+            ), cssClass: 'page-bio' });
+          });
+        }
+      };
 
       let chapterNum = 0;
       this.familyOrder.forEach(famId => {
         chapterNum++;
-        const left  = this._renderChapterLeft(famId, chapterNum);
+        const fam = this.families[famId];
+        if (!fam) return;
+        const leadId = fam.husb || fam.wife;
         const leanIds = familyLeanMap[famId] || [];
+
+        const left  = this._renderChapterLeft(famId, chapterNum);
         const right = leanIds.length
           ? this._renderChapterRightWithMini(famId, chapterNum, leanIds)
           : this._renderChapterRight(famId, chapterNum);
@@ -1030,73 +1123,37 @@
         if (right) {
           pages.push({ ...right, cssClass: 'page-bio' });
           if (right.personId) bioPersonIds.add(right.personId);
-          // Photo continuation pages for any overflow photos
+          // Photo continuation pages for lead
           if (right.photosExtra && right.photosExtra.length) {
             const chunks = [];
-            for (let ci = 0; ci < right.photosExtra.length; ci += 6) {
+            for (let ci = 0; ci < right.photosExtra.length; ci += 6)
               chunks.push(right.photosExtra.slice(ci, ci + 6));
-            }
             chunks.forEach((chunk, ci) => {
-              const cont = this._renderPhotoContinuation(
+              pages.push({ ...this._renderPhotoContinuation(
                 right.personId, chunk, right.title,
                 `Fotografias (${ci + 2}/${chunks.length + 1})`
-              );
-              pages.push({ ...cont, cssClass: 'page-bio' });
+              ), cssClass: 'page-bio' });
             });
           }
         }
-      });
 
-      // ── Standalone bio pages for non-lead, non-lean people ────
-      // We also render standalone pages for the SPOUSE of each chapter lead if not lean
-      this.familyOrder.forEach(famId => {
-        const fam = this.families[famId];
-        if (!fam) return;
-        const leadId = fam.husb || fam.wife;
+        // ── Spouse bio immediately after lead ──────────────────
         const spouseId = fam.husb === leadId ? fam.wife : fam.husb;
-        if (spouseId && !mergedPersonIds.has(spouseId) && !bioPersonIds.has(spouseId)) {
-          const sp = this.individuals[spouseId];
-          if (!sp) return;
-          const bioPage = this._renderBioPage(spouseId, 0, famId);
-          if (bioPage) {
-            pages.push({ ...bioPage, cssClass: 'page-bio' });
-            bioPersonIds.add(spouseId);
-            if (bioPage.photosExtra && bioPage.photosExtra.length) {
-              for (let ci = 0; ci < bioPage.photosExtra.length; ci += 6) {
-                const chunk = bioPage.photosExtra.slice(ci, ci + 6);
-                const cont = this._renderPhotoContinuation(spouseId, chunk, bioPage.title, 'Fotografias (cont.)');
-                pages.push({ ...cont, cssClass: 'page-bio' });
-              }
-            }
-          }
-        }
-        // Children with their own fams (not lean, not yet rendered)
+        if (spouseId && !mergedPersonIds.has(spouseId) && !bioPersonIds.has(spouseId))
+          pushBioPages(spouseId, famId);
+
+        // ── Children bios (non-lead, non-lean) ─────────────────
         (fam.children || []).forEach(cid => {
-          if (!mergedPersonIds.has(cid) && !bioPersonIds.has(cid) && !chapterLeadIds.has(cid)) {
-            const child = this.individuals[cid];
-            if (!child) return;
-            const bioPage = this._renderBioPage(cid, 0, famId);
-            if (bioPage) {
-              pages.push({ ...bioPage, cssClass: 'page-bio' });
-              bioPersonIds.add(cid);
-            }
-          }
+          if (!mergedPersonIds.has(cid) && !bioPersonIds.has(cid) && !chapterLeadIds.has(cid))
+            pushBioPages(cid, famId);
         });
       });
 
       // ── Photo Index ───────────────────────────────────────────
-      const idxPhotosPage = this._renderIndexPhotos();
-      const idxPhotosIdx = pages.length;
-      pages.push(idxPhotosPage ? { ...idxPhotosPage, cssClass: 'page-index' } : null);
+      const idxPhotosIdx = pages.length; pages.push(null); // filled after layout pass
 
-      // ── Indexes (need layout pass first) ─────────────────────
-      const idxGeneralIdx  = pages.length; pages.push(null);
-      const idxSurnamesIdx = pages.length; pages.push(null);
-
-      // ── Chronology ────────────────────────────────────────────
-      const chronoPages = this._renderChronology();
-      const chronoIdx = pages.length;
-      chronoPages.forEach(cp => pages.push({ ...cp, cssClass: 'page-chrono' }));
+      // ── Indicators ────────────────────────────────────────────
+      const idxIndicatorsIdx = pages.length; pages.push(null); // filled after layout pass
 
       // ── Layout pass: assign page numbers ──────────────────────
       pages.forEach((p, i) => {
@@ -1125,29 +1182,26 @@
       });
       const allPagesWithVirtual = [...pages.filter(Boolean), ...virtualEntries];
 
-      pages[idxGeneralIdx]  = { ...this._renderIndexGeneral(allPagesWithVirtual),  cssClass: 'page-index', pageNum: idxGeneralIdx + 1 };
-      pages[idxSurnamesIdx] = { ...this._renderIndexSurnames(allPagesWithVirtual), cssClass: 'page-index', pageNum: idxSurnamesIdx + 1 };
-
-      // ── Build TOC ─────────────────────────────────────────────
-      const tocEntries = [];
-      tocEntries.push({ title: 'Introdução', level: 1, page: 2 });
-      let cn = 0;
-      this.familyOrder.forEach(famId => {
-        cn++;
-        const fam = this.families[famId];
-        const husb = this.individuals[fam && fam.husb];
-        const wife = this.individuals[fam && fam.wife];
-        const names = [husb && displayName(husb), wife && displayName(wife)].filter(Boolean);
-        const heading = names.join(' & ') || `Família ${cn}`;
-        const pg = pages.findIndex(p => p && p.type === 'chapter-left' && p.famId === famId);
-        tocEntries.push({ title: `Cap. ${cn} — ${heading}`, level: 1, page: pg > -1 ? pg + 1 : '?' });
+      // ── Build photo index (resolved page numbers now known) ────────
+      const photoEntries = [];
+      const seenPhotoPersons = new Set();
+      Object.values(this.individuals).forEach(ind => {
+        if (!ind || !ind.multimediaRefs || !ind.multimediaRefs.length) return;
+        const hasSrc = ind.multimediaRefs.some(mid => {
+          const mm = this.DB.getMultimediaItem ? this.DB.getMultimediaItem(mid) : null;
+          return mm && !!(mm.dataUrl || (mm.files && mm.files[0] && mm.files[0].file));
+        });
+        if (!hasSrc || seenPhotoPersons.has(ind.id)) return;
+        seenPhotoPersons.add(ind.id);
+      photoEntries.push({ name: displayName(ind), page: this.personPageMap[ind.id] || '?' });
       });
-      if (idxPhotosPage) tocEntries.push({ title: 'Índice de Fotografias', level: 1, page: idxPhotosIdx + 1 });
-      tocEntries.push({ title: 'Índice de Pessoas',  level: 1, page: idxGeneralIdx + 1 });
-      tocEntries.push({ title: 'Índice de Apelidos', level: 1, page: idxSurnamesIdx + 1 });
-      tocEntries.push({ title: 'Cronologia',          level: 1, page: chronoIdx + 1 });
+      photoEntries.sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+      const idxPhotosPage = this._renderIndexPhotos(photoEntries);
+      if (idxPhotosPage) pages[idxPhotosIdx] = { ...idxPhotosPage, cssClass: 'page-index', pageNum: idxPhotosIdx + 1 };
 
-      pages[tocIdx] = { ...this._renderToc(tocEntries), cssClass: 'page-toc', pageNum: tocIdx + 1 };
+      // ── Build indicators page ──────────────────────────────────────
+      const idxIndicatorsPage = this._renderIndicators();
+      if (idxIndicatorsPage) pages[idxIndicatorsIdx] = { ...idxIndicatorsPage, cssClass: 'page-index', pageNum: idxIndicatorsIdx + 1 };
 
       this.pages = pages.filter(Boolean);
       return this.pages;

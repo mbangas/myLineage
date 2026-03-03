@@ -287,6 +287,219 @@
       #plbBody { flex-direction: column; }
       #plbSidebar { width: 100%; border-left: none; border-top: 1px solid var(--border, rgba(255,255,255,0.08)); max-height: 38vh; }
     }
+    /* ── Person tagging ─────────────────────────────────────────────── */
+    .plb-people-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .plb-person-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .plb-person-chip-label {
+      flex: 1;
+      font-size: 0.78rem;
+      padding: 3px 9px;
+      border-radius: 12px;
+      background: var(--accent-soft, rgba(99,102,241,0.15));
+      color: var(--accent, #818cf8);
+      border: 1px solid var(--border-accent, rgba(99,102,241,0.25));
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .plb-person-chip-label.plb-bbox-tag {
+      background: rgba(59,130,246,0.12);
+      color: #60a5fa;
+      border-color: rgba(59,130,246,0.3);
+    }
+    .plb-person-unlink-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary, #777);
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 1rem;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .plb-person-unlink-btn:hover { color: #e53935; }
+    .plb-add-person-area { position: relative; }
+    .plb-add-person-btn {
+      width: 100%;
+      padding: 5px 10px;
+      border-radius: 7px;
+      border: 1px dashed var(--border, rgba(255,255,255,0.18));
+      background: transparent;
+      color: var(--text-secondary, #888);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .plb-add-person-btn:hover {
+      background: rgba(99,102,241,0.12);
+      color: var(--accent, #818cf8);
+      border-color: var(--accent, #818cf8);
+    }
+    #plbPersonSearchWrap { display: none; }
+    .plb-person-search-input {
+      width: 100%;
+      padding: 6px 9px;
+      border-radius: 7px 7px 0 0;
+      border: 1px solid var(--border, rgba(255,255,255,0.15));
+      border-bottom: none;
+      background: rgba(20,25,45,0.95);
+      color: var(--text-main, #e8eaf6);
+      box-sizing: border-box;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .plb-person-search-input:focus { border-color: var(--accent, #818cf8); }
+    .plb-person-dropdown {
+      background: rgba(20,25,45,0.98);
+      border: 1px solid var(--border, rgba(255,255,255,0.15));
+      border-radius: 0 0 7px 7px;
+      max-height: 140px;
+      overflow-y: auto;
+      display: none;
+    }
+    .plb-person-dropdown.open { display: block; }
+    .plb-person-option {
+      padding: 7px 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: var(--text-main, #e8eaf6);
+      transition: background 0.12s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .plb-person-option:hover { background: rgba(99,102,241,0.22); }
+    .plb-person-option.already-linked {
+      color: var(--text-secondary, #888);
+      cursor: default;
+      font-style: italic;
+    }
+    /* Draw mode */
+    .plb-draw-btn {
+      width: 100%;
+      margin-top: 4px;
+      padding: 5px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--border, rgba(255,255,255,0.1));
+      background: transparent;
+      color: var(--text-secondary, #888);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .plb-draw-btn:hover { background: rgba(59,130,246,0.12); color: #60a5fa; }
+    .plb-draw-btn.active {
+      background: rgba(59,130,246,0.2);
+      color: #3b82f6;
+      border-color: rgba(59,130,246,0.4);
+    }
+    #plbDrawOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      cursor: crosshair;
+      display: none;
+    }
+    #plbDrawOverlay.active { display: block; }
+    #plbDrawRectEl {
+      position: absolute;
+      border: 2px dashed rgba(59,130,246,0.9);
+      background: rgba(59,130,246,0.15);
+      box-sizing: border-box;
+      pointer-events: none;
+      display: none;
+    }
+    .plb-tag-remove-btn {
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #e53935;
+      border: none;
+      color: #fff;
+      font-size: 0.6rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      line-height: 1;
+      padding: 0;
+    }
+    .plb-tag-zone:hover .plb-tag-remove-btn { display: flex; }
+    /* Bbox person popup */
+    #plbBboxPersonPopup {
+      position: absolute;
+      background: var(--bg-surface, #1e2030);
+      border: 1px solid var(--border, rgba(255,255,255,0.15));
+      border-radius: 8px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      padding: 10px;
+      z-index: 30;
+      width: 200px;
+      display: none;
+    }
+    #plbBboxPersonPopup.open { display: block; }
+    #plbBboxSearchInput {
+      width: 100%;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border, rgba(255,255,255,0.15));
+      background: rgba(20,25,45,0.9);
+      color: var(--text-main, #e8eaf6);
+      box-sizing: border-box;
+      font-size: 0.82rem;
+      font-family: inherit;
+      margin-bottom: 4px;
+      outline: none;
+    }
+    #plbBboxPersonList { max-height: 120px; overflow-y: auto; }
+    .plb-bbox-person-opt {
+      padding: 5px 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-main, #e8eaf6);
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .plb-bbox-person-opt:hover { background: rgba(59,130,246,0.2); }
+    .plb-bbox-popup-cancel {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-secondary, #888);
+      cursor: pointer;
+      text-align: center;
+      padding: 3px 0;
+      border-radius: 4px;
+    }
+    .plb-bbox-popup-cancel:hover { color: var(--text-main, #e8eaf6); }
   `;
 
   /* ── HTML ─────────────────────────────────────────────────────────────── */
@@ -316,6 +529,13 @@
           <div id="plbPhotoWrap">
             <img id="plbImg" src="" alt="" />
             <div id="plbTagOverlay"></div>
+            <div id="plbDrawOverlay"></div>
+            <div id="plbDrawRectEl"></div>
+            <div id="plbBboxPersonPopup">
+              <input type="text" id="plbBboxSearchInput" placeholder="Pesquisar pessoa..." autocomplete="off" />
+              <div id="plbBboxPersonList"></div>
+              <div class="plb-bbox-popup-cancel" id="plbBboxCancel">Cancelar</div>
+            </div>
           </div>
         </div>
         <aside id="plbSidebar">
@@ -325,7 +545,19 @@
           </div>
           <div id="plbPeopleSection">
             <div class="plb-info-lbl">Pessoas</div>
-            <div class="plb-chips" id="plbPeopleChips"></div>
+            <div class="plb-people-list" id="plbPeopleList"></div>
+            <div class="plb-add-person-area" id="plbAddPersonArea">
+              <button class="plb-add-person-btn" id="plbAddPersonBtn">
+                <i class="mdi mdi-account-plus-outline"></i> Associar pessoa
+              </button>
+              <div id="plbPersonSearchWrap">
+                <input type="text" class="plb-person-search-input" id="plbPersonSearchInput" placeholder="Pesquisar pessoa..." autocomplete="off" />
+                <div class="plb-person-dropdown" id="plbPersonDropdown"></div>
+              </div>
+            </div>
+            <button class="plb-draw-btn" id="plbMarkRegionBtn">
+              <i class="mdi mdi-vector-rectangle"></i> Marcar região na foto
+            </button>
           </div>
           <div>
             <div class="plb-info-lbl">Notas</div>
@@ -343,6 +575,9 @@
   let _photoList = [];   // array of multimedia ids
   let _currentId = null;
   let _personId  = null;
+  // draw-mode state
+  let _drawMode    = false;
+  let _pendingBbox = null;  // { x, y, w, h } normalized (0–1)
 
   /* ── Init ─────────────────────────────────────────────────────────────── */
   function _init() {
@@ -371,6 +606,8 @@
     document.getElementById('plbDownload').addEventListener('click', _download);
     document.getElementById('plbSaveNotes').addEventListener('click', _saveNotes);
     _overlay.addEventListener('click', e => { if (e.target === _overlay) close(); });
+    _initPersonPickerEvents();
+    _initDrawMode();
 
     document.addEventListener('keydown', e => {
       if (!_overlay.classList.contains('plb-open')) return;
@@ -411,19 +648,6 @@
     return String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   }
 
-  /* ── Person map (id→name) for the whole base ──────────────────────────── */
-  function _buildPersonMap() {
-    const DB = window.GedcomDB;
-    const map = {};
-    if (!DB) return map;
-    const indis = DB.getIndividuals ? DB.getIndividuals() : [];
-    for (const i of indis) {
-      const name = DB.getDisplayName ? DB.getDisplayName(i) : ((i.names && i.names[0]) ? (i.names[0].given + ' ' + i.names[0].surname).trim() : i.id);
-      map[i.id] = name;
-    }
-    return map;
-  }
-
   /* ── Load one photo into the viewer ──────────────────────────────────── */
   function _load(mediaId) {
     const DB = window.GedcomDB;
@@ -459,35 +683,26 @@
     document.getElementById('plbNotesArea').value = _getNotes(m);
 
     // People (from tags + from individuals refs)
-    const personMap = _buildPersonMap();
-    const people = [];
-    const seen = new Set();
-    // from tags
-    (m.tags || []).forEach(t => {
-      const name = t.personName || personMap[t.personId] || '';
-      if (name && !seen.has(name)) { seen.add(name); people.push(name); }
-    });
-    // from individual refs (reverse lookup)
-    if (DB.getIndividuals) {
-      for (const i of DB.getIndividuals()) {
-        if ((i.multimediaRefs || []).includes(mediaId)) {
-          const n = DB.getDisplayName ? DB.getDisplayName(i) : i.id;
-          if (n && !seen.has(n)) { seen.add(n); people.push(n); }
-        }
-      }
-    }
-    const chipsEl = document.getElementById('plbPeopleChips');
-    chipsEl.innerHTML = '';
-    if (people.length) {
-      people.forEach(name => {
-        const c = document.createElement('span');
-        c.className = 'plb-chip';
-        c.textContent = name;
-        chipsEl.appendChild(c);
-      });
-    } else {
-      chipsEl.innerHTML = '<span style="font-size:0.82rem;color:var(--text-secondary,#888);font-style:italic;">Nenhuma pessoa associada</span>';
-    }
+    _renderPeopleSection(m);
+
+    // Reset person picker UI and draw mode on photo change
+    const addBtn = document.getElementById('plbAddPersonBtn');
+    const searchWrap = document.getElementById('plbPersonSearchWrap');
+    const dropdown = document.getElementById('plbPersonDropdown');
+    if (addBtn)     addBtn.style.display = '';
+    if (searchWrap) searchWrap.style.display = 'none';
+    if (dropdown)   dropdown.classList.remove('open');
+    // Reset draw mode
+    _drawMode    = false;
+    _pendingBbox = null;
+    const drawBtn    = document.getElementById('plbMarkRegionBtn');
+    const drawOv     = document.getElementById('plbDrawOverlay');
+    const drawRect   = document.getElementById('plbDrawRectEl');
+    const bboxPopup  = document.getElementById('plbBboxPersonPopup');
+    if (drawBtn)   drawBtn.classList.remove('active');
+    if (drawOv)    drawOv.classList.remove('active');
+    if (drawRect)  drawRect.style.display = 'none';
+    if (bboxPopup) bboxPopup.classList.remove('open');
 
     // Image
     const img = document.getElementById('plbImg');
@@ -506,7 +721,7 @@
     const overlay = document.getElementById('plbTagOverlay');
     overlay.innerHTML = '';
     const tags = (m.tags || []).filter(t => t.bbox && t.bbox.w > 0 && t.bbox.h > 0);
-    tags.forEach(t => {
+    tags.forEach((t, idx) => {
       const zone = document.createElement('div');
       zone.className = 'plb-tag-zone';
       zone.style.left   = (t.bbox.x * 100) + '%';
@@ -517,6 +732,13 @@
       lbl.className = 'plb-tag-lbl';
       lbl.textContent = t.personName || 'Pessoa';
       zone.appendChild(lbl);
+      // Remove button (visible on hover via CSS)
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'plb-tag-remove-btn';
+      rmBtn.title = 'Remover região';
+      rmBtn.innerHTML = '<i class="mdi mdi-close" style="pointer-events:none;font-size:0.65rem;"></i>';
+      rmBtn.addEventListener('click', e => { e.stopPropagation(); _removeBboxTag(idx); });
+      zone.appendChild(rmBtn);
       overlay.appendChild(zone);
     });
   }
@@ -548,6 +770,405 @@
     // scroll active into view
     const activeThumb = strip.querySelector('.plb-active');
     if (activeThumb) activeThumb.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  /* ── Person tagging helpers ───────────────────────────────────────────── */
+
+  /**
+   * Get a sorted list of all persons in the database.
+   * @returns {{ id: string, name: string }[]}
+   */
+  function _getPersonList() {
+    const DB = window.GedcomDB;
+    if (!DB || !DB.getIndividuals) return [];
+    return DB.getIndividuals()
+      .map(indi => ({
+        id:   indi.id,
+        name: DB.getDisplayName ? DB.getDisplayName(indi) : (indi.id || '')
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+  }
+
+  /**
+   * Render the interactive people section in the sidebar.
+   * @param {object} m – multimedia record
+   */
+  function _renderPeopleSection(m) {
+    const DB = window.GedcomDB;
+    if (!DB) return;
+    const listEl = document.getElementById('plbPeopleList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    // Collect linked persons: first from individual.multimediaRefs, then bbox tags
+    const linked = [];
+    const seenIds = new Set();
+
+    if (DB.getIndividuals) {
+      for (const indi of DB.getIndividuals()) {
+        if ((indi.multimediaRefs || []).includes(m.id)) {
+          const name = DB.getDisplayName ? DB.getDisplayName(indi) : indi.id;
+          linked.push({ id: indi.id, name, source: 'ref' });
+          seenIds.add(indi.id);
+        }
+      }
+    }
+
+    // bbox-only tags (person not yet in multimediaRefs)
+    (m.tags || []).forEach((t, tagIdx) => {
+      if (t.personId && seenIds.has(t.personId)) return;
+      if (!t.personId && !t.personName) return;
+      const name = t.personName || t.personId;
+      linked.push({ id: t.personId || null, name, source: 'tag', tagIdx });
+      if (t.personId) seenIds.add(t.personId);
+    });
+
+    if (!linked.length) {
+      const empty = document.createElement('span');
+      empty.style.cssText = 'font-size:0.82rem;color:var(--text-secondary,#888);font-style:italic;padding:2px 0;';
+      empty.textContent = 'Nenhuma pessoa associada';
+      listEl.appendChild(empty);
+    } else {
+      linked.forEach(p => {
+        const row   = document.createElement('div');
+        row.className = 'plb-person-row';
+
+        const chip = document.createElement('span');
+        chip.className = 'plb-person-chip-label' + (p.source === 'tag' ? ' plb-bbox-tag' : '');
+        chip.title = p.source === 'tag' ? 'Marcação por região' : 'Associação direta';
+        chip.textContent = p.name;
+
+        const unlinkBtn = document.createElement('button');
+        unlinkBtn.className = 'plb-person-unlink-btn';
+        unlinkBtn.title = 'Remover associação';
+        unlinkBtn.innerHTML = '<i class="mdi mdi-close" style="pointer-events:none;"></i>';
+        unlinkBtn.addEventListener('click', () => _unlinkPerson(p));
+
+        row.appendChild(chip);
+        row.appendChild(unlinkBtn);
+        listEl.appendChild(row);
+      });
+    }
+  }
+
+  /**
+   * Link an individual to the current photo (adds to multimediaRefs).
+   * @param {string} indiId
+   */
+  function _linkPerson(indiId) {
+    const DB = window.GedcomDB;
+    if (!DB || !_currentId) return;
+    const indi = DB.getIndividual ? DB.getIndividual(indiId) : null;
+    if (!indi) return;
+    if (!indi.multimediaRefs) indi.multimediaRefs = [];
+    if (!indi.multimediaRefs.includes(_currentId)) {
+      indi.multimediaRefs.push(_currentId);
+      if (DB.saveIndividual) DB.saveIndividual(indi);
+    }
+    const m = DB.getMultimediaItem ? DB.getMultimediaItem(_currentId) : null;
+    if (m) _renderPeopleSection(m);
+  }
+
+  /**
+   * Unlink a person entry from the current photo.
+   * @param {{ id: string|null, source: string, tagIdx?: number, name: string }} p
+   */
+  function _unlinkPerson(p) {
+    const DB = window.GedcomDB;
+    if (!DB || !_currentId) return;
+    if (p.id) {
+      const indi = DB.getIndividual ? DB.getIndividual(p.id) : null;
+      if (indi && indi.multimediaRefs) {
+        indi.multimediaRefs = indi.multimediaRefs.filter(mid => mid !== _currentId);
+        if (DB.saveIndividual) DB.saveIndividual(indi);
+      }
+    }
+    // Also remove bbox tag if this association came from one
+    if (p.source === 'tag' && p.tagIdx !== undefined) {
+      const m = DB.getMultimediaItem ? DB.getMultimediaItem(_currentId) : null;
+      if (m && m.tags) {
+        m.tags.splice(p.tagIdx, 1);
+        if (DB.saveMultimedia) DB.saveMultimedia(m);
+        _renderTagZones(m);
+      }
+    }
+    const m2 = DB.getMultimediaItem ? DB.getMultimediaItem(_currentId) : null;
+    if (m2) _renderPeopleSection(m2);
+  }
+
+  /**
+   * Remove a bbox tag by index and refresh.
+   * @param {number} tagIdx
+   */
+  function _removeBboxTag(tagIdx) {
+    const DB = window.GedcomDB;
+    if (!_currentId || !DB) return;
+    const m = DB.getMultimediaItem ? DB.getMultimediaItem(_currentId) : null;
+    if (!m || !m.tags) return;
+    m.tags.splice(tagIdx, 1);
+    if (DB.saveMultimedia) DB.saveMultimedia(m);
+    _renderTagZones(m);
+    _renderPeopleSection(m);
+  }
+
+  /* ── Person picker (sidebar) ──────────────────────────────────────────── */
+
+  /** Wire events for the "Associar pessoa" picker in the sidebar. */
+  function _initPersonPickerEvents() {
+    const addBtn     = document.getElementById('plbAddPersonBtn');
+    const searchWrap = document.getElementById('plbPersonSearchWrap');
+    const searchInput = document.getElementById('plbPersonSearchInput');
+    const dropdown   = document.getElementById('plbPersonDropdown');
+    if (!addBtn) return;
+
+    addBtn.addEventListener('click', () => {
+      addBtn.style.display = 'none';
+      searchWrap.style.display = 'block';
+      searchInput.value = '';
+      _populatePersonDropdown('');
+      dropdown.classList.add('open');
+      searchInput.focus();
+    });
+
+    searchInput.addEventListener('input', () => {
+      _populatePersonDropdown(searchInput.value.trim().toLowerCase());
+      dropdown.classList.add('open');
+    });
+
+    searchInput.addEventListener('blur', () => {
+      setTimeout(() => {
+        searchWrap.style.display = 'none';
+        const ab = document.getElementById('plbAddPersonBtn');
+        if (ab) ab.style.display = '';
+        dropdown.classList.remove('open');
+      }, 200);
+    });
+
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        searchWrap.style.display = 'none';
+        addBtn.style.display = '';
+        dropdown.classList.remove('open');
+      }
+    });
+  }
+
+  /**
+   * Populate the sidebar person dropdown with filtered results.
+   * @param {string} search – lowercase search term
+   */
+  function _populatePersonDropdown(search) {
+    const dropdown = document.getElementById('plbPersonDropdown');
+    if (!dropdown) return;
+    dropdown.innerHTML = '';
+    const DB = window.GedcomDB;
+    if (!DB) return;
+
+    const linkedSet = new Set();
+    if (DB.getIndividuals) {
+      for (const indi of DB.getIndividuals()) {
+        if ((indi.multimediaRefs || []).includes(_currentId)) linkedSet.add(indi.id);
+      }
+    }
+
+    const persons = _getPersonList();
+    const filtered = search
+      ? persons.filter(p => p.name.toLowerCase().includes(search))
+      : persons;
+
+    if (!filtered.length) {
+      dropdown.innerHTML = '<div class="plb-person-option" style="color:#888;cursor:default;">Nenhuma pessoa encontrada</div>';
+      return;
+    }
+
+    filtered.slice(0, 30).forEach(p => {
+      const opt = document.createElement('div');
+      const isLinked = linkedSet.has(p.id);
+      opt.className = 'plb-person-option' + (isLinked ? ' already-linked' : '');
+      opt.textContent = p.name + (isLinked ? ' ✓' : '');
+      if (!isLinked) {
+        opt.addEventListener('mousedown', e => {
+          e.preventDefault();
+          _linkPerson(p.id);
+          const sw = document.getElementById('plbPersonSearchWrap');
+          const ab = document.getElementById('plbAddPersonBtn');
+          const dd = document.getElementById('plbPersonDropdown');
+          if (sw) sw.style.display = 'none';
+          if (ab) ab.style.display = '';
+          if (dd) dd.classList.remove('open');
+        });
+      }
+      dropdown.appendChild(opt);
+    });
+  }
+
+  /* ── Draw-mode (bbox region tagging) ─────────────────────────────────── */
+
+  /** Wire events for the "Marcar região" draw mode. */
+  function _initDrawMode() {
+    const drawBtn  = document.getElementById('plbMarkRegionBtn');
+    const overlay  = document.getElementById('plbDrawOverlay');
+    const rectEl   = document.getElementById('plbDrawRectEl');
+    const popup    = document.getElementById('plbBboxPersonPopup');
+    const cancelEl = document.getElementById('plbBboxCancel');
+    const bboxInput = document.getElementById('plbBboxSearchInput');
+    if (!drawBtn) return;
+
+    drawBtn.addEventListener('click', () => {
+      _drawMode = !_drawMode;
+      drawBtn.classList.toggle('active', _drawMode);
+      overlay.classList.toggle('active', _drawMode);
+      if (!_drawMode) {
+        rectEl.style.display = 'none';
+        popup.classList.remove('open');
+        _pendingBbox = null;
+      }
+    });
+
+    cancelEl.addEventListener('click', () => {
+      popup.classList.remove('open');
+      rectEl.style.display = 'none';
+      _pendingBbox = null;
+    });
+
+    let isDrawing = false;
+    let startX = 0, startY = 0;
+
+    overlay.addEventListener('mousedown', e => {
+      if (!_drawMode) return;
+      const img = document.getElementById('plbImg');
+      if (!img) return;
+      const imgRect = img.getBoundingClientRect();
+      isDrawing = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      rectEl.style.left   = (e.clientX - imgRect.left) + 'px';
+      rectEl.style.top    = (e.clientY - imgRect.top)  + 'px';
+      rectEl.style.width  = '0';
+      rectEl.style.height = '0';
+      rectEl.style.display = 'block';
+      popup.classList.remove('open');
+      e.preventDefault();
+    });
+
+    overlay.addEventListener('mousemove', e => {
+      if (!isDrawing) return;
+      const img = document.getElementById('plbImg');
+      if (!img) return;
+      const imgRect = img.getBoundingClientRect();
+      const x1 = Math.min(startX, e.clientX) - imgRect.left;
+      const y1 = Math.min(startY, e.clientY) - imgRect.top;
+      const x2 = Math.max(startX, e.clientX) - imgRect.left;
+      const y2 = Math.max(startY, e.clientY) - imgRect.top;
+      rectEl.style.left   = Math.max(0, x1) + 'px';
+      rectEl.style.top    = Math.max(0, y1) + 'px';
+      rectEl.style.width  = (x2 - x1) + 'px';
+      rectEl.style.height = (y2 - y1) + 'px';
+    });
+
+    overlay.addEventListener('mouseup', e => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      const img = document.getElementById('plbImg');
+      if (!img) return;
+      const imgRect = img.getBoundingClientRect();
+      const x1 = Math.min(startX, e.clientX) - imgRect.left;
+      const y1 = Math.min(startY, e.clientY) - imgRect.top;
+      const x2 = Math.max(startX, e.clientX) - imgRect.left;
+      const y2 = Math.max(startY, e.clientY) - imgRect.top;
+      const w  = x2 - x1;
+      const h  = y2 - y1;
+      if (w < 10 || h < 10) { rectEl.style.display = 'none'; return; }
+
+      // Normalize to image dimensions (0–1)
+      _pendingBbox = {
+        x: Math.max(0, x1) / imgRect.width,
+        y: Math.max(0, y1) / imgRect.height,
+        w: Math.min(w / imgRect.width,  1 - Math.max(0, x1) / imgRect.width),
+        h: Math.min(h / imgRect.height, 1 - Math.max(0, y1) / imgRect.height)
+      };
+
+      // Position and open person popup
+      const wrap     = document.getElementById('plbPhotoWrap');
+      const wrapRect = wrap.getBoundingClientRect();
+      const popX = Math.min(e.clientX - wrapRect.left + 8, wrapRect.width  - 216);
+      const popY = Math.min(e.clientY - wrapRect.top  + 8, wrapRect.height - 185);
+      popup.style.left = Math.max(0, popX) + 'px';
+      popup.style.top  = Math.max(0, popY) + 'px';
+      bboxInput.value = '';
+      _populateBboxPersonList('');
+      popup.classList.add('open');
+      bboxInput.focus();
+    });
+
+    bboxInput.addEventListener('input', () => {
+      _populateBboxPersonList(bboxInput.value.trim().toLowerCase());
+    });
+  }
+
+  /**
+   * Populate the bbox popup person list.
+   * @param {string} search – lowercase search term
+   */
+  function _populateBboxPersonList(search) {
+    const listEl = document.getElementById('plbBboxPersonList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    const persons = _getPersonList();
+    const filtered = search ? persons.filter(p => p.name.toLowerCase().includes(search)) : persons;
+    if (!filtered.length) {
+      listEl.innerHTML = '<div class="plb-bbox-person-opt" style="color:#888;cursor:default;">Nenhuma pessoa encontrada</div>';
+      return;
+    }
+    filtered.slice(0, 20).forEach(p => {
+      const opt = document.createElement('div');
+      opt.className = 'plb-bbox-person-opt';
+      opt.textContent = p.name;
+      opt.addEventListener('click', () => _saveBboxTag(p.id, p.name));
+      listEl.appendChild(opt);
+    });
+  }
+
+  /**
+   * Save a drawn bbox tag and close the popup.
+   * @param {string} personId
+   * @param {string} personName
+   */
+  function _saveBboxTag(personId, personName) {
+    const DB = window.GedcomDB;
+    if (!DB || !_currentId || !_pendingBbox) return;
+    const m = DB.getMultimediaItem ? DB.getMultimediaItem(_currentId) : null;
+    if (!m) return;
+    if (!m.tags) m.tags = [];
+    m.tags.push({ personId, personName, bbox: { ..._pendingBbox } });
+    if (DB.saveMultimedia) DB.saveMultimedia(m);
+
+    // Also link the person via multimediaRefs so the photo shows in their profile
+    if (personId) {
+      const indi = DB.getIndividual ? DB.getIndividual(personId) : null;
+      if (indi) {
+        if (!indi.multimediaRefs) indi.multimediaRefs = [];
+        if (!indi.multimediaRefs.includes(_currentId)) {
+          indi.multimediaRefs.push(_currentId);
+          if (DB.saveIndividual) DB.saveIndividual(indi);
+        }
+      }
+    }
+
+    // Close popup and exit draw mode
+    const popup   = document.getElementById('plbBboxPersonPopup');
+    const rectEl  = document.getElementById('plbDrawRectEl');
+    const drawBtn = document.getElementById('plbMarkRegionBtn');
+    const overlay = document.getElementById('plbDrawOverlay');
+    if (popup)   popup.classList.remove('open');
+    if (rectEl)  rectEl.style.display = 'none';
+    if (drawBtn) drawBtn.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+    _drawMode    = false;
+    _pendingBbox = null;
+
+    _renderTagZones(m);
+    _renderPeopleSection(m);
   }
 
   /* ── Navigation ───────────────────────────────────────────────────────── */
@@ -645,6 +1266,17 @@
     if (img) { img.onload = null; img.src = ''; }
     const overlay = document.getElementById('plbTagOverlay');
     if (overlay) overlay.innerHTML = '';
+    // Reset draw mode
+    _drawMode    = false;
+    _pendingBbox = null;
+    const drawBtn = document.getElementById('plbMarkRegionBtn');
+    const drawOverlay = document.getElementById('plbDrawOverlay');
+    const rectEl  = document.getElementById('plbDrawRectEl');
+    const popup   = document.getElementById('plbBboxPersonPopup');
+    if (drawBtn)    { drawBtn.classList.remove('active'); }
+    if (drawOverlay){ drawOverlay.classList.remove('active'); }
+    if (rectEl)     { rectEl.style.display = 'none'; }
+    if (popup)      { popup.classList.remove('open'); }
     _currentId = null;
   }
 

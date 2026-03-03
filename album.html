@@ -472,10 +472,131 @@
       .album-nav-btn:disabled { opacity: 0.18; cursor: default; pointer-events: none; }
       .album-nav-prev { left: 10px; }
       .album-nav-next { right: 10px; }
+
+      /* ── Person tagging ────────────────────────────────────────────── */
+      .album-people-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+      .album-person-row  { display: flex; align-items: center; gap: 6px; }
+      .album-person-chip {
+        flex: 1;
+        font-size: 0.75rem;
+        padding: 3px 9px;
+        border-radius: 12px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid var(--border-accent);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .album-person-chip.album-bbox-chip {
+        background: rgba(59,130,246,0.12);
+        color: #60a5fa;
+        border-color: rgba(59,130,246,0.3);
+      }
+      .album-person-unlink-btn {
+        background: none; border: none; cursor: pointer;
+        color: var(--text-secondary); line-height: 1;
+        padding: 2px 4px; border-radius: 4px; font-size: 1rem;
+        flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        transition: color var(--transition);
+      }
+      .album-person-unlink-btn:hover { color: #e53935; }
+      .album-add-person-area { position: relative; }
+      .album-add-person-btn {
+        width: 100%; padding: 5px 10px; border-radius: 7px;
+        border: 1px dashed var(--border);
+        background: transparent; color: var(--text-secondary);
+        font-size: 0.82rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+        transition: background var(--transition), color var(--transition), border-color var(--transition);
+      }
+      .album-add-person-btn:hover {
+        background: var(--accent-soft); color: var(--accent); border-color: var(--accent);
+      }
+      #albumPersonSearchWrap { display: none; }
+      .album-person-search-input {
+        width: 100%; padding: 6px 9px;
+        border-radius: 7px 7px 0 0;
+        border: 1px solid var(--border); border-bottom: none;
+        background: var(--bg-surface-2); color: var(--text-main);
+        box-sizing: border-box; font-size: 0.85rem; font-family: var(--font-main); outline: none;
+      }
+      .album-person-search-input:focus { border-color: var(--accent); }
+      .album-person-dropdown {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 0 0 7px 7px;
+        max-height: 140px; overflow-y: auto; display: none;
+      }
+      .album-person-dropdown.open { display: block; }
+      .album-person-option {
+        padding: 7px 10px; font-size: 0.82rem; cursor: pointer;
+        color: var(--text-main); transition: background var(--transition);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .album-person-option:hover { background: var(--accent-soft); }
+      .album-person-option.already-linked { color: var(--text-secondary); cursor: default; font-style: italic; }
+      /* Draw mode */
+      .album-draw-btn {
+        width: 100%; margin-top: 4px; padding: 5px 10px;
+        border-radius: 7px; border: 1px solid var(--border);
+        background: transparent; color: var(--text-secondary);
+        font-size: 0.82rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+        transition: background var(--transition), color var(--transition);
+        font-family: var(--font-main);
+      }
+      .album-draw-btn:hover { background: rgba(59,130,246,0.1); color: #60a5fa; }
+      .album-draw-btn.active { background: rgba(59,130,246,0.18); color: #3b82f6; border-color: rgba(59,130,246,0.4); }
+      #albumDrawOverlay {
+        position: absolute; inset: 0; z-index: 20; cursor: crosshair; display: none;
+      }
+      #albumDrawOverlay.active { display: block; }
+      #albumDrawRectEl {
+        position: absolute; border: 2px dashed rgba(59,130,246,0.9);
+        background: rgba(59,130,246,0.15); box-sizing: border-box;
+        pointer-events: none; display: none;
+      }
+      .album-tag-zone-remove-btn {
+        position: absolute; top: -7px; right: -7px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #e53935; border: none; color: #fff;
+        font-size: 0.6rem; cursor: pointer;
+        display: none; align-items: center; justify-content: center;
+        z-index: 5; line-height: 1; padding: 0;
+      }
+      .album-tag-zone:hover .album-tag-zone-remove-btn { display: flex; }
+      #albumBboxPersonPopup {
+        position: absolute;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-lg);
+        padding: 10px; z-index: 30; width: 200px; display: none;
+      }
+      #albumBboxPersonPopup.open { display: block; }
+      #albumBboxSearchInput {
+        width: 100%; padding: 5px 8px; border-radius: 6px;
+        border: 1px solid var(--border); background: var(--bg-surface-2);
+        color: var(--text-main); box-sizing: border-box;
+        font-size: 0.82rem; font-family: var(--font-main);
+        margin-bottom: 4px; outline: none;
+      }
+      #albumBboxPersonList { max-height: 120px; overflow-y: auto; }
+      .album-bbox-person-opt {
+        padding: 5px 8px; font-size: 0.8rem; cursor: pointer;
+        color: var(--text-main); border-radius: 4px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .album-bbox-person-opt:hover { background: rgba(59,130,246,0.15); }
+      .album-bbox-popup-cancel {
+        margin-top: 6px; font-size: 0.75rem; color: var(--text-secondary);
+        cursor: pointer; text-align: center; padding: 3px 0; border-radius: 4px;
+      }
+      .album-bbox-popup-cancel:hover { color: var(--text-main); }
     </style>
     <script src="remote-storage.js"></script>
     <script src="auth.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -505,11 +626,7 @@
           <div style="flex:1;display:flex;justify-content:center;align-items:center;">
             <input type="search" class="album-search" id="albumSearch" placeholder="Pesquisar por nome ou pessoa..." />
           </div>
-          <div style="flex:1;display:flex;justify-content:flex-end;align-items:center;">
-            <button class="btn btn-ghost btn-sm" id="btnExportPdf" title="Exportar todas as fotos para PDF">
-              <i class="mdi mdi-file-pdf-box" aria-hidden="true"></i> Exportar PDF
-            </button>
-          </div>
+          <div style="flex:1;"></div>
         </div>
 
         <!-- Content area -->
@@ -519,18 +636,6 @@
           </div>
         </div>
       </main>
-    </div>
-
-    <!-- PDF progress overlay -->
-    <div id="pdfProgressOverlay" aria-live="polite">
-      <div class="pdf-progress-box">
-        <i class="mdi mdi-file-pdf-box" aria-hidden="true"></i>
-        <div class="pdf-progress-title">A gerar PDF&hellip;</div>
-        <div class="pdf-progress-msg" id="pdfProgressMsg">A iniciar&hellip;</div>
-        <div class="pdf-progress-bar-wrap">
-          <div class="pdf-progress-bar" id="pdfProgressBar"></div>
-        </div>
-      </div>
     </div>
 
     <!-- Delete confirmation dialog -->
@@ -576,6 +681,13 @@
             <div class="album-photo-wrap" id="modalPhotoWrap">
               <img id="modalImg" src="" alt="" />
               <div class="album-tag-overlay" id="modalTagOverlay"></div>
+              <div id="albumDrawOverlay"></div>
+              <div id="albumDrawRectEl"></div>
+              <div id="albumBboxPersonPopup">
+                <input type="text" id="albumBboxSearchInput" placeholder="Pesquisar pessoa..." autocomplete="off" />
+                <div id="albumBboxPersonList"></div>
+                <div class="album-bbox-popup-cancel" id="albumBboxCancel">Cancelar</div>
+              </div>
             </div>
           </div>
           <aside class="album-modal-sidebar" id="modalSidebar">
@@ -678,6 +790,9 @@
       let _dirGranted = false;
       let _currentModalItem = null;
       let _currentModalIndex = -1;
+      // Draw-mode state
+      let _albumDrawMode    = false;
+      let _albumPendingBbox = null;  // { x, y, w, h } normalized (0–1)
 
       // ── Render thumbnails ────────────────────────────────────────────
       function renderGrid(items){
@@ -772,7 +887,7 @@
         const tags = (item.tags || []).filter(t => t.bbox && t.bbox.w > 0 && t.bbox.h > 0);
         if(!tags.length) return;
         const showAlways = tags.length <= 6;
-        tags.forEach(t => {
+        tags.forEach((t, idx) => {
           const zone = document.createElement('div');
           zone.className = 'album-tag-zone';
           zone.style.left   = (t.bbox.x * 100) + '%';
@@ -785,6 +900,15 @@
           lbl.className = 'album-tag-zone-label' + (showAlways ? ' album-tag-zone-label-always' : '');
           lbl.textContent = t.personName || t.name || 'Pessoa';
           zone.appendChild(lbl);
+          // Remove button (visible on hover, only for DB records)
+          if(!item.fromFs){
+            const rmBtn = document.createElement('button');
+            rmBtn.className = 'album-tag-zone-remove-btn';
+            rmBtn.title = 'Remover região';
+            rmBtn.innerHTML = '<i class="mdi mdi-close" style="pointer-events:none;font-size:0.65rem;"></i>';
+            rmBtn.addEventListener('click', e => { e.stopPropagation(); _albumRemoveBboxTag(idx, item); });
+            zone.appendChild(rmBtn);
+          }
           overlay.appendChild(zone);
         });
       }
@@ -838,28 +962,33 @@
           sidebar.appendChild(section('Adicionado em', escapeHtml(fmtDate(item.createdAt))));
         }
 
-        // Persons tagged or linked
-        const allPersons = [];
-        if(item.persons && item.persons.length){ allPersons.push(...item.persons); }
-        if(item.tags && item.tags.length){
-          item.tags.forEach(t => { if(t.personName && !allPersons.includes(t.personName)) allPersons.push(t.personName); });
-        }
-        if(allPersons.length){
-          const s = document.createElement('div');
-          s.className = 'album-info-section';
-          s.innerHTML = '<div class="album-info-label">Pessoas</div>';
-          const chips = document.createElement('div');
-          chips.className = 'album-info-chips';
-          allPersons.forEach(name => {
-            const c = document.createElement('span');
-            c.className = 'album-info-chip';
-            c.textContent = name;
-            chips.appendChild(c);
-          });
-          s.appendChild(chips);
-          sidebar.appendChild(s);
-        } else {
-          sidebar.appendChild(section('Pessoas', 'Nenhuma pessoa associada', true));
+        // Persons – interactive (editable for DB records, read-only for filesystem items)
+        const peopleSection = document.createElement('div');
+        peopleSection.className = 'album-info-section';
+        peopleSection.id = '_albumPeopleSection';
+        peopleSection.innerHTML = '<div class="album-info-label">Pessoas</div>';
+        sidebar.appendChild(peopleSection);
+        _albumRenderPeopleSection(item);
+
+        if(!item.fromFs){
+          // "Associar pessoa" picker
+          const addArea = document.createElement('div');
+          addArea.className = 'album-add-person-area album-info-section';
+          addArea.innerHTML = `
+            <button class="album-add-person-btn" id="albumAddPersonBtn">
+              <i class="mdi mdi-account-plus-outline"></i> Associar pessoa
+            </button>
+            <div id="albumPersonSearchWrap">
+              <input type="text" class="album-person-search-input" id="albumPersonSearchInput" placeholder="Pesquisar pessoa..." autocomplete="off" />
+              <div class="album-person-dropdown" id="albumPersonDropdown"></div>
+            </div>`;
+          sidebar.appendChild(addArea);
+
+          // "Marcar região" draw mode button
+          const drawBtnWrap = document.createElement('div');
+          drawBtnWrap.className = 'album-info-section';
+          drawBtnWrap.innerHTML = '<button class="album-draw-btn" id="albumMarkRegionBtn"><i class="mdi mdi-vector-rectangle"></i> Marcar região na foto</button>';
+          sidebar.appendChild(drawBtnWrap);
         }
 
         // Notes
@@ -887,6 +1016,12 @@
 
         document.getElementById('albumModal').classList.add('open');
         document.getElementById('albumModal').focus();
+
+        // Wire interactive tagging (after DOM insertion)
+        if(!item.fromFs){
+          _albumInitPersonPicker(item);
+          _albumInitDrawMode(item);
+        }
       }
 
       function closeModal(){
@@ -897,7 +1032,397 @@
         if(img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
         img.src = '';
         document.getElementById('modalTagOverlay').innerHTML = '';
+        _albumResetDrawMode();
         _currentModalItem = null;
+        // Refresh grid to reflect any person-tagging changes on thumbnails
+        renderGrid(_filteredItems);
+      }
+
+      // ── Person tagging helpers ────────────────────────────────────────
+
+      /**
+       * Returns sorted list of all persons.
+       * @returns {{ id:string, name:string }[]}
+       */
+      function _albumGetPersonList(){
+        return DB.getIndividuals()
+          .map(i => ({ id: i.id, name: DB.getDisplayName(i) }))
+          .sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+      }
+
+      /**
+       * Render the interactive people list in the modal sidebar.
+       * @param {object} item – album item
+       */
+      function _albumRenderPeopleSection(item){
+        const section = document.getElementById('_albumPeopleSection');
+        if(!section) return;
+        // Remove previous list (keep the label)
+        section.querySelectorAll('.album-people-list').forEach(el => el.remove());
+
+        const list = document.createElement('div');
+        list.className = 'album-people-list';
+
+        const linked = [];
+        const seenIds = new Set();
+
+        // From individual.multimediaRefs
+        for(const indi of DB.getIndividuals()){
+          if((indi.multimediaRefs || []).includes(item.id)){
+            const name = DB.getDisplayName(indi);
+            linked.push({ id: indi.id, name, source: 'ref' });
+            seenIds.add(indi.id);
+          }
+        }
+        // From bbox tags not yet in multimediaRefs
+        (item.tags || []).forEach((t, tagIdx) => {
+          if(t.personId && seenIds.has(t.personId)) return;
+          if(!t.personId && !t.personName) return;
+          const name = t.personName || t.personId;
+          linked.push({ id: t.personId || null, name, source: 'tag', tagIdx });
+          if(t.personId) seenIds.add(t.personId);
+        });
+
+        if(!linked.length){
+          const empty = document.createElement('span');
+          empty.style.cssText = 'font-size:0.82rem;color:var(--text-secondary);font-style:italic;padding:2px 0;';
+          empty.textContent = 'Nenhuma pessoa associada';
+          list.appendChild(empty);
+        } else {
+          linked.forEach(p => {
+            const row = document.createElement('div');
+            row.className = 'album-person-row';
+
+            const chip = document.createElement('span');
+            chip.className = 'album-person-chip' + (p.source === 'tag' ? ' album-bbox-chip' : '');
+            chip.title = p.source === 'tag' ? 'Marcação por região' : 'Associação direta';
+            chip.textContent = p.name;
+
+            const unlinkBtn = document.createElement('button');
+            unlinkBtn.className = 'album-person-unlink-btn';
+            unlinkBtn.title = 'Remover associação';
+            unlinkBtn.innerHTML = '<i class="mdi mdi-close" style="pointer-events:none;"></i>';
+            unlinkBtn.addEventListener('click', () => _albumUnlinkPerson(p, item));
+
+            row.appendChild(chip);
+            row.appendChild(unlinkBtn);
+            list.appendChild(row);
+          });
+        }
+
+        section.appendChild(list);
+      }
+
+      /**
+       * Link an individual to an album item.
+       * @param {string} indiId
+       * @param {object} item – album item
+       */
+      function _albumLinkPerson(indiId, item){
+        if(item.fromFs) return;
+        const indi = DB.getIndividual(indiId);
+        if(!indi) return;
+        if(!indi.multimediaRefs) indi.multimediaRefs = [];
+        if(!indi.multimediaRefs.includes(item.id)){
+          indi.multimediaRefs.push(item.id);
+          DB.saveIndividual(indi);
+        }
+        // Also refresh the in-memory item's persons list
+        const personName = DB.getDisplayName(indi);
+        if(!item.persons) item.persons = [];
+        if(!item.persons.includes(personName)) item.persons.push(personName);
+        _albumRenderPeopleSection(item);
+      }
+
+      /**
+       * Unlink a person entry from an album item.
+       * @param {{ id:string|null, source:string, tagIdx?:number }} p
+       * @param {object} item
+       */
+      function _albumUnlinkPerson(p, item){
+        if(p.id){
+          const indi = DB.getIndividual(p.id);
+          if(indi && indi.multimediaRefs){
+            indi.multimediaRefs = indi.multimediaRefs.filter(mid => mid !== item.id);
+            DB.saveIndividual(indi);
+          }
+        }
+        // Update in-memory persons list
+        if(item.persons) item.persons = item.persons.filter(n => n !== p.name);
+        if(p.source === 'tag' && p.tagIdx !== undefined){
+          if(!item.tags) item.tags = [];
+          item.tags.splice(p.tagIdx, 1);
+          const m = DB.getMultimediaItem(item.id);
+          if(m){ m.tags = item.tags; DB.saveMultimedia(m); }
+          renderTagZones(item);
+        }
+        _albumRenderPeopleSection(item);
+      }
+
+      /**
+       * Remove a bbox tag by index.
+       * @param {number} tagIdx
+       * @param {object} item
+       */
+      function _albumRemoveBboxTag(tagIdx, item){
+        if(item.fromFs || !item.tags) return;
+        item.tags.splice(tagIdx, 1);
+        const m = DB.getMultimediaItem(item.id);
+        if(m){ m.tags = item.tags; DB.saveMultimedia(m); }
+        renderTagZones(item);
+        _albumRenderPeopleSection(item);
+      }
+
+      /**
+       * Wire the "Associar pessoa" picker for the current modal item.
+       * @param {object} item
+       */
+      function _albumInitPersonPicker(item){
+        const addBtn     = document.getElementById('albumAddPersonBtn');
+        const searchWrap = document.getElementById('albumPersonSearchWrap');
+        const searchInput = document.getElementById('albumPersonSearchInput');
+        const dropdown   = document.getElementById('albumPersonDropdown');
+        if(!addBtn) return;
+
+        addBtn.onclick = () => {
+          addBtn.style.display = 'none';
+          searchWrap.style.display = 'block';
+          searchInput.value = '';
+          _albumPopulatePersonDropdown('', item);
+          dropdown.classList.add('open');
+          searchInput.focus();
+        };
+
+        searchInput.oninput = () => {
+          _albumPopulatePersonDropdown(searchInput.value.trim().toLowerCase(), item);
+          dropdown.classList.add('open');
+        };
+
+        searchInput.onblur = () => {
+          setTimeout(() => {
+            searchWrap.style.display = 'none';
+            const ab = document.getElementById('albumAddPersonBtn');
+            if(ab) ab.style.display = '';
+            const dd = document.getElementById('albumPersonDropdown');
+            if(dd) dd.classList.remove('open');
+          }, 200);
+        };
+
+        searchInput.onkeydown = e => {
+          if(e.key === 'Escape'){
+            searchWrap.style.display = 'none';
+            addBtn.style.display = '';
+            dropdown.classList.remove('open');
+          }
+        };
+      }
+
+      /**
+       * Populate the sidebar person dropdown.
+       * @param {string} search
+       * @param {object} item
+       */
+      function _albumPopulatePersonDropdown(search, item){
+        const dropdown = document.getElementById('albumPersonDropdown');
+        if(!dropdown) return;
+        dropdown.innerHTML = '';
+        const linkedSet = new Set();
+        for(const indi of DB.getIndividuals()){
+          if((indi.multimediaRefs || []).includes(item.id)) linkedSet.add(indi.id);
+        }
+        const persons  = _albumGetPersonList();
+        const filtered = search ? persons.filter(p => p.name.toLowerCase().includes(search)) : persons;
+        if(!filtered.length){
+          dropdown.innerHTML = '<div class="album-person-option" style="color:#888;cursor:default;">Nenhuma pessoa encontrada</div>';
+          return;
+        }
+        filtered.slice(0, 30).forEach(p => {
+          const opt = document.createElement('div');
+          const isLinked = linkedSet.has(p.id);
+          opt.className = 'album-person-option' + (isLinked ? ' already-linked' : '');
+          opt.textContent = p.name + (isLinked ? ' ✓' : '');
+          if(!isLinked){
+            opt.addEventListener('mousedown', e => {
+              e.preventDefault();
+              _albumLinkPerson(p.id, item);
+              const sw = document.getElementById('albumPersonSearchWrap');
+              const ab = document.getElementById('albumAddPersonBtn');
+              const dd = document.getElementById('albumPersonDropdown');
+              if(sw) sw.style.display = 'none';
+              if(ab) ab.style.display = '';
+              if(dd) dd.classList.remove('open');
+            });
+          }
+          dropdown.appendChild(opt);
+        });
+      }
+
+      /**
+       * Wire draw mode events for the current modal item.
+       * @param {object} item
+       */
+      function _albumInitDrawMode(item){
+        const drawBtn   = document.getElementById('albumMarkRegionBtn');
+        const overlay   = document.getElementById('albumDrawOverlay');
+        const rectEl    = document.getElementById('albumDrawRectEl');
+        const popup     = document.getElementById('albumBboxPersonPopup');
+        const cancelEl  = document.getElementById('albumBboxCancel');
+        const bboxInput = document.getElementById('albumBboxSearchInput');
+        if(!drawBtn) return;
+
+        // Reset previous state
+        _albumDrawMode    = false;
+        _albumPendingBbox = null;
+        drawBtn.classList.remove('active');
+        overlay.classList.remove('active');
+        rectEl.style.display   = 'none';
+        popup.classList.remove('open');
+
+        drawBtn.onclick = () => {
+          _albumDrawMode = !_albumDrawMode;
+          drawBtn.classList.toggle('active', _albumDrawMode);
+          overlay.classList.toggle('active', _albumDrawMode);
+          if(!_albumDrawMode){
+            rectEl.style.display = 'none';
+            popup.classList.remove('open');
+            _albumPendingBbox = null;
+          }
+        };
+
+        cancelEl.onclick = () => {
+          popup.classList.remove('open');
+          rectEl.style.display = 'none';
+          _albumPendingBbox = null;
+        };
+
+        let isDrawing = false;
+        let startX = 0, startY = 0;
+
+        overlay.onmousedown = e => {
+          if(!_albumDrawMode) return;
+          const img = document.getElementById('modalImg');
+          if(!img) return;
+          const imgRect = img.getBoundingClientRect();
+          isDrawing = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          rectEl.style.left   = (e.clientX - imgRect.left) + 'px';
+          rectEl.style.top    = (e.clientY - imgRect.top)  + 'px';
+          rectEl.style.width  = '0';
+          rectEl.style.height = '0';
+          rectEl.style.display = 'block';
+          popup.classList.remove('open');
+          e.preventDefault();
+        };
+
+        overlay.onmousemove = e => {
+          if(!isDrawing) return;
+          const img = document.getElementById('modalImg');
+          if(!img) return;
+          const imgRect = img.getBoundingClientRect();
+          const x1 = Math.min(startX, e.clientX) - imgRect.left;
+          const y1 = Math.min(startY, e.clientY) - imgRect.top;
+          const x2 = Math.max(startX, e.clientX) - imgRect.left;
+          const y2 = Math.max(startY, e.clientY) - imgRect.top;
+          rectEl.style.left   = Math.max(0, x1) + 'px';
+          rectEl.style.top    = Math.max(0, y1) + 'px';
+          rectEl.style.width  = (x2 - x1) + 'px';
+          rectEl.style.height = (y2 - y1) + 'px';
+        };
+
+        overlay.onmouseup = e => {
+          if(!isDrawing) return;
+          isDrawing = false;
+          const img = document.getElementById('modalImg');
+          if(!img) return;
+          const imgRect = img.getBoundingClientRect();
+          const x1 = Math.min(startX, e.clientX) - imgRect.left;
+          const y1 = Math.min(startY, e.clientY) - imgRect.top;
+          const x2 = Math.max(startX, e.clientX) - imgRect.left;
+          const y2 = Math.max(startY, e.clientY) - imgRect.top;
+          const w  = x2 - x1;
+          const h  = y2 - y1;
+          if(w < 10 || h < 10){ rectEl.style.display = 'none'; return; }
+
+          _albumPendingBbox = {
+            x: Math.max(0, x1) / imgRect.width,
+            y: Math.max(0, y1) / imgRect.height,
+            w: Math.min(w / imgRect.width,  1 - Math.max(0, x1) / imgRect.width),
+            h: Math.min(h / imgRect.height, 1 - Math.max(0, y1) / imgRect.height)
+          };
+
+          const wrap     = document.getElementById('modalPhotoWrap');
+          const wrapRect = wrap.getBoundingClientRect();
+          const popX = Math.min(e.clientX - wrapRect.left + 8, wrapRect.width  - 216);
+          const popY = Math.min(e.clientY - wrapRect.top  + 8, wrapRect.height - 185);
+          popup.style.left = Math.max(0, popX) + 'px';
+          popup.style.top  = Math.max(0, popY) + 'px';
+          bboxInput.value = '';
+          _albumPopulateBboxPersonList('', item);
+          popup.classList.add('open');
+          bboxInput.focus();
+        };
+
+        bboxInput.oninput = () => _albumPopulateBboxPersonList(bboxInput.value.trim().toLowerCase(), item);
+      }
+
+      /**
+       * Populate the bbox popup person list.
+       * @param {string} search
+       * @param {object} item
+       */
+      function _albumPopulateBboxPersonList(search, item){
+        const listEl = document.getElementById('albumBboxPersonList');
+        if(!listEl) return;
+        listEl.innerHTML = '';
+        const persons  = _albumGetPersonList();
+        const filtered = search ? persons.filter(p => p.name.toLowerCase().includes(search)) : persons;
+        if(!filtered.length){
+          listEl.innerHTML = '<div class="album-bbox-person-opt" style="color:#888;cursor:default;">Nenhuma pessoa encontrada</div>';
+          return;
+        }
+        filtered.slice(0, 20).forEach(p => {
+          const opt = document.createElement('div');
+          opt.className = 'album-bbox-person-opt';
+          opt.textContent = p.name;
+          opt.addEventListener('click', () => _albumSaveBboxTag(p.id, p.name, item));
+          listEl.appendChild(opt);
+        });
+      }
+
+      /**
+       * Save a bbox tag on an album item and close the popup.
+       * @param {string} personId
+       * @param {string} personName
+       * @param {object} item
+       */
+      function _albumSaveBboxTag(personId, personName, item){
+        if(!_albumPendingBbox) return;
+        if(!item.tags) item.tags = [];
+        item.tags.push({ personId, personName, bbox: { ..._albumPendingBbox } });
+        const m = DB.getMultimediaItem(item.id);
+        if(m){ m.tags = item.tags; DB.saveMultimedia(m); }
+        // Link person via multimediaRefs
+        if(personId){ _albumLinkPerson(personId, item); }
+
+        // Close popup and exit draw mode
+        _albumResetDrawMode();
+        renderTagZones(item);
+        _albumRenderPeopleSection(item);
+      }
+
+      /** Reset draw mode state and UI elements. */
+      function _albumResetDrawMode(){
+        _albumDrawMode    = false;
+        _albumPendingBbox = null;
+        const drawBtn  = document.getElementById('albumMarkRegionBtn');
+        const overlay  = document.getElementById('albumDrawOverlay');
+        const rectEl   = document.getElementById('albumDrawRectEl');
+        const popup    = document.getElementById('albumBboxPersonPopup');
+        if(drawBtn)  drawBtn.classList.remove('active');
+        if(overlay)  overlay.classList.remove('active');
+        if(rectEl)   rectEl.style.display = 'none';
+        if(popup)    popup.classList.remove('open');
       }
 
       // ── Delete photo ─────────────────────────────────────────────────
@@ -1126,8 +1651,8 @@
           content.innerHTML = `<div class="album-empty"><i class="mdi mdi-alert-outline" aria-hidden="true"></i><p>Erro ao carregar o álbum: ${escapeHtml(String(e))}</p></div>`;
         }
       }
-      // ── Export to PDF ──────────────────────────────────────────────────
-      async function blobSrcToDataUrl(src){
+      // ── (PDF export removed) ─────────────────────────────────────────
+      /* async function blobSrcToDataUrl(src){
         if(!src) return { dataUrl: null, natW: 0, natH: 0 };
         return new Promise(resolve => {
           const img = new Image();
@@ -1307,8 +1832,7 @@
           bar.style.width = '0%';
           btn.disabled = false;
         }
-      }
-      document.getElementById('btnExportPdf').addEventListener('click', exportAlbumToPDF);
+      } */
       // ── Init ─────────────────────────────────────────────────────────
       document.addEventListener('DOMContentLoaded', loadAlbum);
     </script>

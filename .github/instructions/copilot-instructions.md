@@ -1,9 +1,5 @@
 
 
-// Reference: General code review standards and best practices for maintaining high-quality codebases.
-// https://github.com/github/awesome-copilot/tree/main/instructions
-
-
 # General Code Review Standards
 
 ## Code Quality Essentials

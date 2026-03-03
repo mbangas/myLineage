@@ -184,6 +184,22 @@
         font-variant-numeric: tabular-nums;
       }
 
+      /* actor */
+      .hist-actor {
+        font-size: 0.75rem;
+        color: var(--text-disabled);
+        margin-top: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .hist-actor a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .hist-actor a:hover { text-decoration: underline; }
+
       /* ── Empty state ──────────────────────────────────────────────────── */
       .hist-empty {
         display: flex;
@@ -329,7 +345,7 @@
         const q        = searchQuery.trim().toLowerCase();
         const filtered = all.filter(e => {
           if (activeCategory !== 'all' && e.category !== activeCategory) return false;
-          if (q && !e.action.toLowerCase().includes(q) && !(e.detail||'').toLowerCase().includes(q)) return false;
+          if (q && !e.action.toLowerCase().includes(q) && !(e.detail||'').toLowerCase().includes(q) && !(e.actor||'').toLowerCase().includes(q) && !(e.subjectName||'').toLowerCase().includes(q)) return false;
           return true;
         });
 
@@ -366,12 +382,16 @@
           for (const e of entries) {
             const cat  = e.category || 'geral';
             const meta = CAT_META[cat] || CAT_META['geral'];
+            const subjectHtml = buildSubjectHtml(e);
+            const actorHtml   = buildActorHtml(e);
             html += `
               <div class="hist-entry">
                 <div class="hist-icon cat-${escHtml(cat)}"><i class="mdi ${escHtml(meta.icon)}" aria-hidden="true"></i></div>
                 <div class="hist-body">
                   <div class="hist-action">${escHtml(e.action)}</div>
+                  ${subjectHtml}
                   ${e.detail ? `<div class="hist-detail" title="${escHtml(e.detail)}">${escHtml(e.detail)}</div>` : ''}
+                  ${actorHtml}
                 </div>
                 <div class="hist-time">${timeStr(e.ts)}</div>
               </div>`;
@@ -383,6 +403,37 @@
 
       function escHtml(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      /**
+       * Build the subject HTML: the person/entity that was changed.
+       * For Individual entries shows a clickable link to open "Editar Pessoa".
+       * Falls back to legacy entries where the name was embedded in action text.
+       */
+      function buildSubjectHtml(entry) {
+        // New entries store subjectName; legacy entries embed name in action
+        let name = entry.subjectName || '';
+        if (!name && entry.entity === 'Individual') {
+          // Legacy: extract name from "Verb Entidade: Nome"
+          const m = entry.action.match(/:\s*(.+)$/);
+          if (m) name = m[1].trim();
+        }
+        if (!name && entry.entity !== 'Individual') return '';
+        if (!name) return '';
+        const icon = '<i class="mdi mdi-account" aria-hidden="true"></i>';
+        const nameDisplay = (entry.entity === 'Individual' && entry.id && entry.id !== '?')
+          ? `<a href="app.html?edit=${encodeURIComponent(entry.id)}" title="Abrir Editar Pessoa">${escHtml(name)}</a>`
+          : escHtml(name);
+        return `<div class="hist-actor">${icon} ${nameDisplay}</div>`;
+      }
+
+      /**
+       * Build the actor HTML: who made the change — shown as plain text only.
+       */
+      function buildActorHtml(entry) {
+        if (!entry.actor) return '';
+        const icon = '<i class="mdi mdi-account-edit-outline" aria-hidden="true"></i>';
+        return `<div class="hist-actor" style="color:var(--text-disabled);">${icon} ${escHtml(entry.actor)}</div>`;
       }
 
       /* ── category chips ──────────────────────────────────────────────── */

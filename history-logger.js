@@ -74,18 +74,30 @@
           personName = nameOf(result) || nameOf(data);
         }
 
-        const actionText = personName
-          ? `${verb} ${label}: ${personName}`
-          : `${verb} ${label}`;
+        const actionText = `${verb} ${label}`;
         const detail = personName ? '' : (label + ' ' + id);
 
+        // Capture the currently logged-in user
+        let actorName = '';
+        let actorId   = null;
+        try {
+          const sess = window.MLAuth && window.MLAuth.getSession ? window.MLAuth.getSession() : null;
+          if (sess) {
+            actorName = sess.name  || '';
+            actorId   = sess.personId || null;
+          }
+        } catch(eActor) { /* silent */ }
+
         DB.addHistory({
-          ts:       new Date().toISOString(),
-          entity:   entityType,
-          action:   actionText,
-          id:       String(id),
-          detail:   detail,
-          category: category
+          ts:          new Date().toISOString(),
+          entity:      entityType,
+          action:      actionText,
+          id:          String(id),
+          detail:      detail,
+          category:    category,
+          subjectName: (entityType === 'Individual' && personName) ? personName : undefined,
+          actor:       actorName || undefined,
+          actorId:     actorId   || undefined
         });
       } catch(e) { /* silent */ }
       return result;

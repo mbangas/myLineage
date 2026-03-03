@@ -1,5 +1,65 @@
 [
   {
+    "ts": "2026-03-03T21:53:39.876Z",
+    "entity": "Multimedia",
+    "action": "Actualizar Multimédia",
+    "id": "M_I1_2",
+    "detail": "Multimédia M_I1_2",
+    "category": "album",
+    "actor": "Miguel Filipe do Amaral Bangueses",
+    "actorId": "I112"
+  },
+  {
+    "ts": "2026-03-03T21:53:39.875Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo: Miguel Filipe do Amaral Bangueses",
+    "id": "I112",
+    "detail": "",
+    "category": "pessoas",
+    "actor": "Miguel Filipe do Amaral Bangueses",
+    "actorId": "I112"
+  },
+  {
+    "ts": "2026-03-03T21:53:37.997Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo: Miguel Filipe do Amaral Bangueses",
+    "id": "I112",
+    "detail": "",
+    "category": "pessoas",
+    "actor": "Miguel Filipe do Amaral Bangueses",
+    "actorId": "I112"
+  },
+  {
+    "ts": "2026-03-03T21:53:26.059Z",
+    "entity": "Multimedia",
+    "action": "Actualizar Multimédia",
+    "id": "M_I1_2",
+    "detail": "Multimédia M_I1_2",
+    "category": "album",
+    "actor": "Miguel Filipe do Amaral Bangueses",
+    "actorId": "I112"
+  },
+  {
+    "ts": "2026-03-03T21:53:26.059Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo: Susana Maria Alves Silvério Ferreira Bangueses",
+    "id": "I113",
+    "detail": "",
+    "category": "pessoas",
+    "actor": "Miguel Filipe do Amaral Bangueses",
+    "actorId": "I112"
+  },
+  {
+    "ts": "2026-03-03T21:53:23.554Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo: Susana Maria Alves Silvério Ferreira Bangueses",
+    "id": "I113",
+    "detail": "",
+    "category": "pessoas",
+    "actor": "Miguel Filipe do Amaral Bangueses",
+    "actorId": "I112"
+  },
+  {
     "ts": "2026-03-03T21:45:52.987Z",
     "entity": "Multimedia",
     "action": "Actualizar Multimédia",

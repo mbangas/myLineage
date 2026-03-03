@@ -348,6 +348,94 @@
         for (let i = 0; i < spousesToAdd.length; i++) {
           if (!rels.has(spousesToAdd[i].id)) rels.set(spousesToAdd[i].id, spousesToAdd[i].label);
         }
+        // Third pass: bio relatives of the focus person's partner(s) → in-law labels
+        // (sogro/sogra, cunhado/cunhada via cônjuge, enteado/a, primo/a do cônjuge, etc.)
+        const primarySpouseIds = [];
+        const focusIndi = indiMap[focusId];
+        if (focusIndi) {
+          const focusFams = focusIndi.fams || [];
+          for (let fi = 0; fi < focusFams.length; fi++) {
+            const fam = famMap[focusFams[fi]];
+            if (!fam) continue;
+            const couple = [fam.husb, fam.wife];
+            for (let ci = 0; ci < couple.length; ci++) {
+              const spId = couple[ci];
+              if (spId && spId !== focusId) primarySpouseIds.push(spId);
+            }
+          }
+        }
+        const inLawsToAdd = [];
+        for (let si = 0; si < primarySpouseIds.length; si++) {
+          const spouseId = primarySpouseIds[si];
+          // BFS through the spouse's bio parent-child tree
+          const spVisited = new Map();
+          spVisited.set(spouseId, {ups:0, downs:0});
+          const spQueue = [{id:spouseId, ups:0, downs:0}];
+          while (spQueue.length > 0) {
+            const item = spQueue.shift();
+            const id = item.id, ups = item.ups, downs = item.downs;
+            const indi = indiMap[id];
+            if (!indi) continue;
+            // Go UP to parents (only when we haven't started going down yet)
+            if (downs === 0 && indi.famc) {
+              const famcIds = Array.isArray(indi.famc) ? indi.famc : [indi.famc];
+              for (let fi = 0; fi < famcIds.length; fi++) {
+                const fam = famMap[famcIds[fi]];
+                if (!fam) continue;
+                const pp = [fam.husb, fam.wife];
+                for (let pi = 0; pi < pp.length; pi++) {
+                  const pId = pp[pi];
+                  if (pId && !spVisited.has(pId)) {
+                    spVisited.set(pId, {ups:ups+1, downs:0});
+                    spQueue.push({id:pId, ups:ups+1, downs:0});
+                  }
+                }
+              }
+            }
+            // Go DOWN to children through fams
+            const spFams = indi.fams || [];
+            for (let fi = 0; fi < spFams.length; fi++) {
+              const fam = famMap[spFams[fi]];
+              if (!fam) continue;
+              const ch = fam.children || [];
+              for (let ci = 0; ci < ch.length; ci++) {
+                const cId = ch[ci];
+                if (!spVisited.has(cId)) {
+                  spVisited.set(cId, {ups:ups, downs:downs+1});
+                  spQueue.push({id:cId, ups:ups, downs:downs+1});
+                }
+              }
+            }
+          }
+          // Assign in-law labels based on relationship to the spouse
+          spVisited.forEach(function(v, id) {
+            if (rels.has(id)) return; // already has a label (bio or previous in-law)
+            const indi = indiMap[id];
+            const sex = (indi && indi.sex) || '';
+            const f = sex === 'F', m = sex === 'M';
+            const ups = v.ups, downs = v.downs;
+            let label = null;
+            if (ups===0 && downs===0) return; // the spouse themselves, already labelled
+            else if (ups===1 && downs===0) label = f ? 'Sogra' : m ? 'Sogro' : 'Sogro/Sogra';
+            else if (ups===2 && downs===0) label = f ? 'Avó do cônjuge' : m ? 'Avô do cônjuge' : 'Avô/ó do cônjuge';
+            else if (ups===3 && downs===0) label = f ? 'Bisavó do cônjuge' : m ? 'Bisavô do cônjuge' : 'Bisavô/ó do cônjuge';
+            else if (ups===1 && downs===1) label = f ? 'Cunhada' : m ? 'Cunhado' : 'Cunhado/a';
+            else if (ups===0 && downs===1) label = f ? 'Enteada' : m ? 'Enteado' : 'Enteado/a';
+            else if (ups===0 && downs===2) label = f ? 'Neta do cônjuge' : m ? 'Neto do cônjuge' : 'Neto/a do cônjuge';
+            else if (ups===1 && downs===2) label = f ? 'Sobrinha do cônjuge' : m ? 'Sobrinho do cônjuge' : 'Sobrinho/a do cônjuge';
+            else if (ups===2 && downs===1) label = f ? 'Tia do cônjuge' : m ? 'Tio do cônjuge' : 'Tio/a do cônjuge';
+            else if (ups===3 && downs===1) label = f ? 'Tia-avó do cônjuge' : m ? 'Tio-avô do cônjuge' : 'Tio/a-avô/ó do cônjuge';
+            else if (ups===2 && downs===2) label = f ? 'Prima do cônjuge' : m ? 'Primo do cônjuge' : 'Primo/a do cônjuge';
+            else if (ups===2 && downs===3) label = (f?'Prima':'Primo') + ' do cônjuge 1x afastado/a';
+            else if (ups===3 && downs===2) label = (f?'Prima':'Primo') + ' do cônjuge 1x afastado/a';
+            else if (ups===3 && downs===3) label = f ? '2ª Prima do cônjuge' : m ? '2º Primo do cônjuge' : '2º Primo/a do cônjuge';
+            else label = 'Parente do cônjuge';
+            if (label) inLawsToAdd.push({id:id, label:label});
+          });
+        }
+        for (let i = 0; i < inLawsToAdd.length; i++) {
+          if (!rels.has(inLawsToAdd[i].id)) rels.set(inLawsToAdd[i].id, inLawsToAdd[i].label);
+        }
         _relCache = {focusId: focusId, map: rels};
         return rels;
       }
@@ -396,7 +484,7 @@
         }
         if (!label) return '<span style="color:var(--text-disabled);font-size:0.8rem;">—</span>';
         const isDirect = /^(Pai|M\u00e3e|Filho|Filha|Av\u00f4|Av\u00f3|Bisav\u00f4|Bisav\u00f3|Trisav\u00f4|Trisav\u00f3|Trineto|Trineta|Bisneto|Bisneta|Neto|Neta|Tetrav|Descend)/.test(label);
-        const isInLaw = /^(Esposo|Esposa|C\u00f4njuge|Genro|Nora|Padrasto|Madrasta|Cunhado|Cunhada)/.test(label);
+        const isInLaw = /^(Esposo|Esposa|C\u00f4njuge|Genro|Nora|Padrasto|Madrasta|Cunhado|Cunhada|Sogro|Sogra|Enteado|Enteada|Parente)/.test(label) || /c\u00f4njuge/.test(label);
         let bg, bd, col;
         if (isDirect)     { bg='rgba(68,147,248,0.13)'; bd='rgba(68,147,248,0.35)'; col='#4493f8'; }
         else if (isInLaw) { bg='rgba(130,100,220,0.13)'; bd='rgba(130,100,220,0.35)'; col='#9b7fe8'; }

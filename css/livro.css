@@ -1072,3 +1072,26 @@ body.livro-body {
   margin: 0;
 }
 #lbrGotoInput { -moz-appearance: textfield; }
+
+/* ---- White Background Mode ----------------------------------- */
+/*
+  Applied by toggling .livro-white-mode on <body>.
+  Replaces the aged-parchment texture with a clean white background
+  while preserving covers and dark UI chrome.
+*/
+body.livro-white-mode .livro-page {
+  background-color: #ffffff;
+  background-image: none;
+}
+
+/* Cover pages keep their dark styling */
+body.livro-white-mode .livro-page.page-cover {
+  background: linear-gradient(160deg, #2c1f0e 0%, #1a110a 100%);
+}
+
+/* Highlight the toggle button when white mode is active */
+body.livro-white-mode #lbrWhiteBgBtn {
+  background: #2e2010;
+  border-color: #c8a96e;
+  color: #f5e0a0;
+}

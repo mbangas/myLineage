@@ -42,12 +42,33 @@
         "form": "jpg"
       }
     ],
-    "notes": [],
+    "notes": "teste",
     "sourceRefs": [],
     "dataUrl": null,
-    "tags": [],
+    "tags": [
+      {
+        "personId": "I112",
+        "personName": "Miguel Filipe do Amaral Bangueses",
+        "bbox": {
+          "x": 0.3351251158480074,
+          "y": 0.5306087800053859,
+          "w": 0.17349397590361446,
+          "h": 0.20715471013962447
+        }
+      },
+      {
+        "personId": "I113",
+        "personName": "Susana Maria Alves Silvério Ferreira Bangueses",
+        "bbox": {
+          "x": 0.8114334062036097,
+          "y": 0.20791303496229557,
+          "w": 0.11350883922121388,
+          "h": 0.18803251395553813
+        }
+      }
+    ],
     "createdAt": "2026-02-28T12:14:34.443Z",
-    "updatedAt": "2026-02-28T12:14:34.443Z",
+    "updatedAt": "2026-03-03T21:45:53.416Z",
     "deletedAt": null
   },
   "M_I3_0": {

@@ -1,5 +1,53 @@
 [
   {
+    "ts": "2026-03-03T21:45:52.987Z",
+    "entity": "Multimedia",
+    "action": "Actualizar Multimédia",
+    "id": "M_I1_2",
+    "detail": "Multimédia M_I1_2",
+    "category": "album"
+  },
+  {
+    "ts": "2026-03-03T21:45:40.714Z",
+    "entity": "Multimedia",
+    "action": "Actualizar Multimédia",
+    "id": "M_I1_2",
+    "detail": "Multimédia M_I1_2",
+    "category": "album"
+  },
+  {
+    "ts": "2026-03-03T21:45:40.715Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo: Susana Maria Alves Silvério Ferreira Bangueses",
+    "id": "I113",
+    "detail": "",
+    "category": "pessoas"
+  },
+  {
+    "ts": "2026-03-03T21:45:15.065Z",
+    "entity": "Multimedia",
+    "action": "Actualizar Multimédia",
+    "id": "M_I1_2",
+    "detail": "Multimédia M_I1_2",
+    "category": "album"
+  },
+  {
+    "ts": "2026-03-03T21:45:15.066Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo: Miguel Filipe do Amaral Bangueses",
+    "id": "I112",
+    "detail": "",
+    "category": "pessoas"
+  },
+  {
+    "ts": "2026-03-03T21:23:49.540Z",
+    "entity": "Login",
+    "action": "Login: Miguel Filipe do Amaral Bangueses",
+    "id": "+351931018263",
+    "detail": "+351931018263 · Administrador",
+    "category": "login"
+  },
+  {
     "ts": "2026-03-03T01:44:55.114Z",
     "entity": "Individual",
     "action": "Actualizar Indivíduo: Maria do Rosario Alves Ferreira",

@@ -28,12 +28,13 @@
       box-shadow: 0 24px 64px rgba(0,0,0,0.7);
       max-width: 960px;
       width: 100%;
+      height: 80vh;
       max-height: 92vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       animation: plbIn 0.18s ease;
-      transition: max-width 0.2s ease, max-height 0.2s ease, border-radius 0.2s ease;
+      transition: max-width 0.2s ease, height 0.2s ease, max-height 0.2s ease, border-radius 0.2s ease;
     }
     #plbOverlay.plb-maximized #plbInner {
       max-width: 100vw;
@@ -44,6 +45,7 @@
       box-shadow: none;
       border: none;
     }
+    #plbOverlay.plb-maximized #plbImg { max-height: calc(100vh - 57px); }
     @keyframes plbIn {
       from { opacity: 0; transform: scale(0.96) translateY(8px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
@@ -119,11 +121,10 @@
     #plbImg {
       display: block;
       max-width: 100%;
-      max-height: calc(92vh - 57px);
+      max-height: calc(80vh - 57px);
       object-fit: contain;
       border-radius: 6px;
     }
-    #plbOverlay.plb-maximized #plbImg { max-height: calc(100vh - 57px); }
     #plbTagOverlay {
       position: absolute;
       inset: 0;
@@ -221,11 +222,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-      opacity: 0;
-      transform: translateY(4px);
+      opacity: 1;
+      transform: translateY(0);
       transition: opacity 0.15s, transform 0.15s;
     }
-    .plb-tag-zone:hover .plb-tag-lbl { opacity: 1; transform: translateY(0); }
     /* Notes textarea */
     #plbNotesArea {
       width: 100%;
@@ -454,14 +454,14 @@
     .plb-tag-zone:hover .plb-tag-remove-btn { display: flex; }
     /* Bbox person popup */
     #plbBboxPersonPopup {
-      position: absolute;
+      position: fixed;
       background: var(--bg-surface, #1e2030);
       border: 1px solid var(--border, rgba(255,255,255,0.15));
       border-radius: 8px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.6);
       padding: 10px;
-      z-index: 30;
-      width: 200px;
+      z-index: 2147483647;
+      width: 220px;
       display: none;
     }
     #plbBboxPersonPopup.open { display: block; }
@@ -1088,17 +1088,21 @@
         h: Math.min(h / imgRect.height, 1 - Math.max(0, y1) / imgRect.height)
       };
 
-      // Position and open person popup
-      const wrap     = document.getElementById('plbPhotoWrap');
-      const wrapRect = wrap.getBoundingClientRect();
-      const popX = Math.min(e.clientX - wrapRect.left + 8, wrapRect.width  - 216);
-      const popY = Math.min(e.clientY - wrapRect.top  + 8, wrapRect.height - 185);
-      popup.style.left = Math.max(0, popX) + 'px';
-      popup.style.top  = Math.max(0, popY) + 'px';
+      // Position and open person popup (fixed positioning to avoid clip by overflow:hidden)
+      const vpW = window.innerWidth;
+      const vpH = window.innerHeight;
+      const popW = 220;
+      const popH = 200;  // approximate max height
+      let popLeft = e.clientX + 12;
+      let popTop  = e.clientY + 12;
+      if (popLeft + popW > vpW - 8) popLeft = e.clientX - popW - 8;
+      if (popTop  + popH > vpH - 8) popTop  = e.clientY - popH - 8;
+      popup.style.left = Math.max(4, popLeft) + 'px';
+      popup.style.top  = Math.max(4, popTop)  + 'px';
       bboxInput.value = '';
       _populateBboxPersonList('');
       popup.classList.add('open');
-      bboxInput.focus();
+      requestAnimationFrame(() => bboxInput.focus());
     });
 
     bboxInput.addEventListener('input', () => {
@@ -1124,7 +1128,11 @@
       const opt = document.createElement('div');
       opt.className = 'plb-bbox-person-opt';
       opt.textContent = p.name;
-      opt.addEventListener('click', () => _saveBboxTag(p.id, p.name));
+      // Use mousedown+preventDefault so the click fires before any blur handler closes things
+      opt.addEventListener('mousedown', e => {
+        e.preventDefault();
+        _saveBboxTag(p.id, p.name);
+      });
       listEl.appendChild(opt);
     });
   }

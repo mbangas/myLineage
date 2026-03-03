@@ -232,9 +232,34 @@ body.livro-body {
   text-align: center;
 }
 
+/* App logo block on cover / back-cover */
+.cover-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.cover-logo-icon {
+  font-size: 80px;
+  line-height: 1;
+  color: #4a9060;
+  opacity: 0.85;
+  text-shadow: 0 4px 18px rgba(40, 100, 60, 0.45);
+}
+
+.cover-logo-name {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.22em;
+  color: #7ab890;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
 /* ---- Blank Page ---------------------------------------------- */
 .livro-page.page-blank {
-  background: #fffef8;
+  /* inherits the same aged-paper background as .livro-page */
 }
 
 /* ---- Introduction -------------------------------------------- */

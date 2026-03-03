@@ -467,7 +467,7 @@
         title: 'Capa',
         html: `
 <div class="livro-page-inner">
-  <div class="cover-ornament">&#9753;</div>
+  <div class="cover-logo"><i class="mdi mdi-tree cover-logo-icon"></i><span class="cover-logo-name">myLineage</span></div>
   <div class="cover-ribbon"></div>
   <div class="cover-title">Family History Book</div>
   <div class="cover-subtitle">Livro de História Familiar</div>
@@ -1178,6 +1178,50 @@
 </div>`
       };
     }
+    _renderContraCapa() {
+      // Mirror the front cover — same families / year so the closed book is symmetric
+      const rootInd = this.individuals[this.rootId];
+      const sn = surname(rootInd) || 'Família';
+      const surnames = new Set();
+      if (rootInd) {
+        (rootInd.fams || []).forEach(fid => {
+          const fam = this.families[fid];
+          if (!fam) return;
+          [fam.husb, fam.wife].forEach(sid => {
+            const s = surname(this.individuals[sid]);
+            if (s) surnames.add(s);
+          });
+        });
+        if (rootInd.famc) {
+          const fam = this.families[rootInd.famc];
+          if (fam) {
+            [fam.husb, fam.wife].forEach(sid => {
+              const s = surname(this.individuals[sid]);
+              if (s) surnames.add(s);
+            });
+          }
+        }
+      }
+      if (!surnames.size) surnames.add(sn);
+      const familiesList = [...surnames].join(' · ');
+      const year = new Date().getFullYear();
+      return {
+        type: 'back-cover',
+        title: '',
+        html: `
+<div class="livro-page-inner">
+  <div class="cover-logo"><i class="mdi mdi-tree cover-logo-icon"></i><span class="cover-logo-name">myLineage</span></div>
+  <div class="cover-ribbon"></div>
+  <div class="cover-title">Family History Book</div>
+  <div class="cover-subtitle">Livro de História Familiar</div>
+  <div class="cover-ribbon"></div>
+  <div class="cover-families">${esc(familiesList)}</div>
+  <div class="cover-date">${year}</div>
+  <div class="cover-app">produzido com myLineage</div>
+</div>`
+      };
+    }
+
     resolvePgRefs(pages) {
       // Build map: personId → pageNum (also stored on this.personPageMap for post-build use)
       const map = {};
@@ -1341,12 +1385,6 @@
         });
       });
 
-      // ── Photo Index ───────────────────────────────────────────
-      const idxPhotosIdx = pages.length; pages.push(null); // filled after layout pass
-
-      // ── Indicators ────────────────────────────────────────────
-      const idxIndicatorsIdx = pages.length; pages.push(null); // filled after layout pass
-
       // ── Layout pass: assign page numbers ──────────────────────
       pages.forEach((p, i) => {
         if (p) p.pageNum = i + 1;
@@ -1372,28 +1410,13 @@
           });
         });
       });
-      const allPagesWithVirtual = [...pages.filter(Boolean), ...virtualEntries];
-
-      // ── Build photo index (resolved page numbers now known) ────────
-      const photoEntries = [];
-      const seenPhotoPersons = new Set();
-      Object.values(this.individuals).forEach(ind => {
-        if (!ind || !ind.multimediaRefs || !ind.multimediaRefs.length) return;
-        const hasSrc = ind.multimediaRefs.some(mid => {
-          const mm = this.DB.getMultimediaItem ? this.DB.getMultimediaItem(mid) : null;
-          return mm && !!(mm.dataUrl || (mm.files && mm.files[0] && mm.files[0].file));
-        });
-        if (!hasSrc || seenPhotoPersons.has(ind.id)) return;
-        seenPhotoPersons.add(ind.id);
-      photoEntries.push({ name: displayName(ind), page: this.personPageMap[ind.id] || '?' });
-      });
-      photoEntries.sort((a, b) => a.name.localeCompare(b.name, 'pt'));
-      const idxPhotosPage = this._renderIndexPhotos(photoEntries);
-      if (idxPhotosPage) pages[idxPhotosIdx] = { ...idxPhotosPage, cssClass: 'page-index', pageNum: idxPhotosIdx + 1 };
-
-      // ── Build indicators page ──────────────────────────────────────
-      const idxIndicatorsPage = this._renderIndicators();
-      if (idxIndicatorsPage) pages[idxIndicatorsIdx] = { ...idxIndicatorsPage, cssClass: 'page-index', pageNum: idxIndicatorsIdx + 1 };
+      // ── Back cover ─────────────────────────────────────────────────
+      // StPageFlip (showCover:true) needs an even total page count so the
+      // last page is shown alone (book closed). Add a blank page if needed.
+      if (pages.filter(Boolean).length % 2 === 0) {
+        pages.push({ ...this._renderBlank(), cssClass: 'page-blank' });
+      }
+      pages.push({ ...this._renderContraCapa(), cssClass: 'page-cover' });
 
       this.pages = pages.filter(Boolean);
       return this.pages;
@@ -1450,9 +1473,11 @@
       div.className = 'livro-page' + (pg.cssClass ? ' ' + pg.cssClass : '');
       div.innerHTML = pg.html;
       // Add page number footer to non-cover, non-blank pages
-      if (pg.type !== 'cover' && pg.type !== 'blank') {
+      if (pg.type !== 'cover' && pg.type !== 'back-cover' && pg.type !== 'blank') {
         const pn = document.createElement('div');
-        pn.className = 'livro-page-num ' + (i % 2 === 0 ? 'left' : 'right');
+        // Odd index → left page → page number on left (outside spine)
+        // Even index → right page → page number on right (outside spine)
+        pn.className = 'livro-page-num ' + (i % 2 === 1 ? 'left' : 'right');
         pn.textContent = pg.pageNum || (i + 1);
         div.appendChild(pn);
       }
@@ -1570,13 +1595,21 @@
     sel.addEventListener('change', () => {
       const newId = sel.value;
       if (!newId) return;
-      document.getElementById('livro-loading').style.display = 'flex';
-      setTimeout(() => {
-        if (pageFlip) { try { pageFlip.destroy(); } catch(e){} }
+      const loadingEl = document.getElementById('livro-loading');
+      loadingEl.style.display = 'flex';
+      // Double rAF ensures the browser paints the loading overlay
+      // before the synchronous (and potentially slow) book build starts
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (pageFlip) { try { pageFlip.destroy(); } catch(e){} pageFlip = null; }
         const container = document.getElementById('livro-book-wrap');
         container.innerHTML = '';
-        initBook(DB, newId);
-      }, 50);
+        try {
+          initBook(DB, newId);
+        } catch(e) {
+          console.error('Book build error:', e);
+          loadingEl.style.display = 'none';
+        }
+      }));
     });
   }
 

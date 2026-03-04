@@ -71,6 +71,105 @@
       .confirm-bar.visible { display:flex; }
       .confirm-bar .btn { font-size:.8rem; padding:5px 14px; }
       .confirm-bar .btn-cancel { background:transparent; color:var(--text-secondary); border:1px solid var(--border); }
+
+      /* ── GEDCOM info section ─────────────────────────────────── */
+      .gedcom-info { max-width:760px; margin-top:28px; }
+
+      .gedcom-info-header {
+        display:flex; align-items:center; gap:12px;
+        margin-bottom:20px;
+      }
+      .gedcom-info-header .header-icon {
+        width:42px; height:42px; border-radius:var(--radius-sm);
+        background:var(--accent-soft); border:1px solid var(--border-accent);
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.25rem; color:var(--accent); flex-shrink:0;
+      }
+      .gedcom-info-header h2 { margin:0; font-size:1.05rem; color:var(--text-main); }
+      .gedcom-info-header p { margin:2px 0 0; font-size:0.82rem; color:var(--text-secondary); }
+
+      .gedcom-cards {
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap:14px;
+        margin-bottom:18px;
+      }
+      .gedcom-card {
+        background:var(--bg-surface);
+        border:1px solid var(--border-subtle);
+        border-radius:var(--radius-sm);
+        padding:16px;
+        transition:border-color .18s, background .18s;
+      }
+      .gedcom-card:hover {
+        border-color:var(--border);
+        background:var(--bg-surface-2);
+      }
+      .gedcom-card .gc-icon {
+        width:34px; height:34px; border-radius:8px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1rem; margin-bottom:10px; flex-shrink:0;
+      }
+      .gedcom-card .gc-icon.blue  { background:var(--accent-soft);  color:var(--accent); }
+      .gedcom-card .gc-icon.green { background:var(--green-soft);   color:var(--green); }
+      .gedcom-card .gc-icon.purple{ background:var(--purple-soft);  color:var(--purple); }
+      .gedcom-card .gc-icon.amber { background:var(--amber-soft);   color:var(--amber); }
+      .gedcom-card h3 { font-size:0.875rem; font-weight:600; margin:0 0 6px; color:var(--text-main); }
+      .gedcom-card p  { font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55; }
+
+      .gedcom-how {
+        background:var(--bg-surface);
+        border:1px solid var(--border-subtle);
+        border-radius:var(--radius-sm);
+        padding:18px;
+        margin-bottom:16px;
+      }
+      .gedcom-how h3 { font-size:0.9rem; font-weight:600; margin:0 0 14px; color:var(--text-main); display:flex; align-items:center; gap:8px; }
+      .gedcom-steps {
+        display:flex; gap:0; flex-direction:column;
+      }
+      .gedcom-step {
+        display:flex; gap:14px; align-items:flex-start;
+        padding:8px 0;
+        border-bottom:1px solid var(--border-subtle);
+      }
+      .gedcom-step:last-child { border-bottom:none; padding-bottom:0; }
+      .step-num {
+        width:24px; height:24px; border-radius:50%;
+        background:var(--accent-soft); color:var(--accent);
+        font-size:0.75rem; font-weight:700;
+        display:flex; align-items:center; justify-content:center;
+        flex-shrink:0; margin-top:1px;
+      }
+      .gedcom-step p { margin:0; font-size:0.82rem; color:var(--text-secondary); line-height:1.55; }
+      .gedcom-step strong { color:var(--text-main); font-weight:600; }
+
+      .gedcom-link-banner {
+        display:flex; align-items:center; gap:14px;
+        background:var(--bg-surface);
+        border:1px solid var(--border-accent);
+        border-radius:var(--radius-sm);
+        padding:14px 18px;
+      }
+      .gedcom-link-banner .banner-icon {
+        width:38px; height:38px; border-radius:var(--radius-sm);
+        background:var(--accent-soft); border:1px solid var(--border-accent);
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.1rem; color:var(--accent); flex-shrink:0;
+      }
+      .gedcom-link-banner .banner-text { flex:1; }
+      .gedcom-link-banner .banner-text p { margin:2px 0 0; font-size:0.8rem; color:var(--text-secondary); }
+      .gedcom-link-banner .banner-text strong { font-size:0.875rem; color:var(--text-main); }
+      .gedcom-link-banner a.ext-link {
+        display:inline-flex; align-items:center; gap:6px;
+        padding:7px 14px; border-radius:var(--radius-sm);
+        background:var(--accent); color:#fff;
+        font-size:0.8rem; font-weight:600;
+        text-decoration:none;
+        transition:opacity .15s;
+        white-space:nowrap;
+      }
+      .gedcom-link-banner a.ext-link:hover { opacity:.85; }
     </style>
   </head>
   <body>
@@ -156,6 +255,79 @@
           </div>
 
         </div>
+
+        <!-- ── GEDCOM informational section ─────────────────────────── -->
+        <section class="gedcom-info">
+
+          <div class="gedcom-info-header">
+            <div class="header-icon"><i class="mdi mdi-information-outline"></i></div>
+            <div>
+              <h2>O que é o GEDCOM?</h2>
+              <p>Tudo o que precisa de saber sobre este padrão de genealogia</p>
+            </div>
+          </div>
+
+          <!-- 4 info cards -->
+          <div class="gedcom-cards">
+            <div class="gedcom-card">
+              <div class="gc-icon blue"><i class="mdi mdi-file-document-outline"></i></div>
+              <h3>O que é?</h3>
+              <p>GEDCOM (<em>Genealogical Data Communication</em>) é um formato de ficheiro de texto criado para guardar e partilhar dados genealógicos — como pessoas, datas, locais e relacionamentos familiares.</p>
+            </div>
+            <div class="gedcom-card">
+              <div class="gc-icon green"><i class="mdi mdi-swap-horizontal"></i></div>
+              <h3>Para que serve?</h3>
+              <p>Serve como <strong>"língua comum"</strong> entre diferentes programas de genealogia. Ao exportar o seu arquivo em GEDCOM, pode abri-lo em qualquer outra aplicação compatível sem perder informação.</p>
+            </div>
+            <div class="gedcom-card">
+              <div class="gc-icon purple"><i class="mdi mdi-account-group-outline"></i></div>
+              <h3>Quem usa?</h3>
+              <p>Genealogistas de todo o mundo, desde utilizadores domésticos a arquivos históricos e centros de investigação. Plataformas como Ancestry, FamilySearch, Gramps e MyHeritage suportam GEDCOM.</p>
+            </div>
+            <div class="gedcom-card">
+              <div class="gc-icon amber"><i class="mdi mdi-calendar-clock"></i></div>
+              <h3>Quando surgiu?</h3>
+              <p>Foi criado em 1984 pela Igreja de Jesus Cristo dos Santos dos Últimos Dias (FamilySearch) para digitalizar e preservar registos genealógicos. Ao longo dos anos evoluiu com novas versões, sendo a mais recente a GEDCOM 5.5.5 e GEDCOM 7.</p>
+            </div>
+          </div>
+
+          <!-- How it works -->
+          <div class="gedcom-how">
+            <h3><i class="mdi mdi-cog-outline"></i> Como funciona, em termos simples?</h3>
+            <div class="gedcom-steps">
+              <div class="gedcom-step">
+                <div class="step-num">1</div>
+                <p>Um ficheiro <strong>.ged</strong> é um ficheiro de texto simples que qualquer editor de texto consegue abrir. Dentro, cada linha começa com um número (o <em>nível</em>), seguido de uma etiqueta e o valor — por exemplo: <code style="background:var(--bg-surface-2);padding:1px 6px;border-radius:4px;font-size:0.78rem;">1 NAME João /Silva/</code>.</p>
+              </div>
+              <div class="gedcom-step">
+                <div class="step-num">2</div>
+                <p>Cada <strong>pessoa</strong> (<code style="background:var(--bg-surface-2);padding:1px 6px;border-radius:4px;font-size:0.78rem;">INDI</code>) e cada <strong>família</strong> (<code style="background:var(--bg-surface-2);padding:1px 6px;border-radius:4px;font-size:0.78rem;">FAM</code>) tem um identificador único. As relações entre pais e filhos são estabelecidas por referências cruzadas entre esses identificadores.</p>
+              </div>
+              <div class="gedcom-step">
+                <div class="step-num">3</div>
+                <p>Ao <strong>importar</strong> um ficheiro GEDCOM nesta aplicação, todos os registos são lidos e convertidos para a base de dados local. Ao <strong>exportar</strong>, acontece o inverso — os seus dados são convertidos para o formato texto do GEDCOM.</p>
+              </div>
+              <div class="gedcom-step">
+                <div class="step-num">4</div>
+                <p>Pode usar o ficheiro exportado como <strong>cópia de segurança</strong>, para partilhar a sua árvore com familiares, ou para migrar os dados para outra ferramenta de genealogia.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- External link banner -->
+          <div class="gedcom-link-banner">
+            <div class="banner-icon"><i class="mdi mdi-open-in-new"></i></div>
+            <div class="banner-text">
+              <strong>Entidade responsável pela norma GEDCOM</strong>
+              <p>O padrão é atualmente mantido pela <strong>FamilySearch</strong>, uma organização sem fins lucrativos. A especificação completa e as versões mais recentes estão disponíveis no repositório oficial.</p>
+            </div>
+            <a class="ext-link" href="https://gedcom.io" target="_blank" rel="noopener noreferrer">
+              <i class="mdi mdi-web"></i> gedcom.io
+            </a>
+          </div>
+
+        </section>
+
       </main>
     </div>
 

@@ -30,13 +30,9 @@ WORKDIR /app
 # Copiar apenas os artefactos necessários para produção
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/server.js ./
-COPY --from=builder /app/remote-storage.js ./
-COPY --from=builder /app/history-logger.js ./
+COPY --from=builder /app/*.js ./
 COPY --from=builder /app/*.html ./
-COPY --from=builder /app/topola-bundle.js ./
-COPY --from=builder /app/family-chart-bundle.js ./
-COPY --from=builder /app/qrcode-bundle.js ./
+COPY --from=builder /app/*.svg ./
 COPY --from=builder /app/css ./css
 COPY --from=builder /app/lib ./lib
 

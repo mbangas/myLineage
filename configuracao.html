@@ -268,8 +268,11 @@
             }
           });
         } else {
-          openDocBtn.style.display = 'none';
-          docFileInput.addEventListener('change', function(e){
+          // Fallback para HTTP: o botão aciona o input file oculto
+          docFileInput.style.display = 'none';
+          openDocBtn.innerHTML = '<i class="mdi mdi-folder-open-outline"></i> Selecionar pasta...';
+          openDocBtn.addEventListener('click', function(){ docFileInput.click(); });
+          docFileInput.addEventListener('change', function(){
             handleDocFilesArray(Array.from(this.files || []));
           });
         }
@@ -306,8 +309,11 @@
             }
           });
         } else {
-          openBtn.style.display = 'none';
-          fileInput.addEventListener('change', function(e){
+          // Fallback para HTTP: o botão aciona o input file oculto
+          fileInput.style.display = 'none';
+          openBtn.innerHTML = '<i class="mdi mdi-folder-open-outline"></i> Selecionar pasta...';
+          openBtn.addEventListener('click', function(){ fileInput.click(); });
+          fileInput.addEventListener('change', function(){
             handleFilesArray(Array.from(this.files || []));
           });
         }

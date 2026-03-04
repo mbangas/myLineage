@@ -813,7 +813,22 @@ show_next_steps() {
 
   Log completo:
     ${LOG}" \
-        22 64
+        22 64 \
+        </dev/tty >/dev/tty 2>/dev/null || true
+
+    # Reapresentar os URLs no terminal depois de fechar o dialogo
+    echo ""
+    echo "======================================================================"
+    echo "  RESUMO DE ACESSO"
+    echo "======================================================================"
+    echo ""
+    echo "  myLineage  -->  http://${SERVER_IP}:${APP_PORT}"
+    echo "  Portainer  -->  https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}"
+    echo ""
+    echo "  Administrador: ${ADMIN_PHONE}"
+    echo ""
+    echo "======================================================================"
+    echo ""
 }
 
 # ==============================================================================

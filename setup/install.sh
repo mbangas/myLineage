@@ -334,35 +334,41 @@ step_install_docker() {
 # -- Corrigir overlayfs em LXC Proxmox -----------------------------------------
 # Em contentores LXC nao privilegiados, o kernel nao permite montar overlay.
 # A solucao e configurar o containerd para usar fuse-overlayfs como snapshotter.
+# Aplicado sempre (este instalador destina-se a LXC Proxmox).
 step_fix_lxc_overlay() {
-    # Detectar se estamos dentro de um contentor LXC
-    local is_lxc=0
-    if systemd-detect-virt --container 2>/dev/null | grep -qi "lxc"; then
-        is_lxc=1
-    elif grep -qa "container=lxc" /proc/1/environ 2>/dev/null; then
-        is_lxc=1
-    fi
-
-    if [[ $is_lxc -eq 0 ]]; then
-        log "Nao e LXC -- fuse-overlayfs nao necessario"
-        return 0
-    fi
-
-    info "LXC Proxmox detectado -- a configurar fuse-overlayfs para containerd..."
+    info "A configurar fuse-overlayfs (compatibilidade Proxmox LXC)..."
 
     # Instalar fuse-overlayfs
     apt-get install -y -qq fuse-overlayfs                      >> "$LOG" 2>&1
     info "fuse-overlayfs instalado."
 
-    # Gerar configuracao default do containerd e activar snapshotter fuse-overlayfs
+    # Gerar configuracao base do containerd
     mkdir -p /etc/containerd
-    containerd config default 2>> "$LOG" > /etc/containerd/config.toml
+    containerd config default > /etc/containerd/config.toml 2>> "$LOG"
 
-    # Substituir snapshotter overlayfs -> fuse-overlayfs
-    sed -i \
-        's|snapshotter = "overlayfs"|snapshotter = "fuse-overlayfs"|g' \
-        /etc/containerd/config.toml
-    log "containerd config actualizado para fuse-overlayfs"
+    # Verificar que o ficheiro foi gerado
+    if [[ ! -s /etc/containerd/config.toml ]]; then
+        echo "  AVISO: containerd config default falhou -- a tentar metodo alternativo..." >&2
+        log "AVISO: containerd config default falhou"
+        # Metodo alternativo: criar config minima directamente
+        cat > /etc/containerd/config.toml << 'CONTAINERD_CONF'
+version = 2
+
+[plugins."io.containerd.grpc.v1.cri".containerd]
+  snapshotter = "fuse-overlayfs"
+
+[proxy_plugins.fuse-overlayfs]
+  type = "snapshot"
+  address = "/run/containerd-fuse-overlayfs.sock"
+CONTAINERD_CONF
+    else
+        # Substituir snapshotter overlayfs -> fuse-overlayfs
+        sed -i \
+            's|snapshotter = "overlayfs"|snapshotter = "fuse-overlayfs"|g' \
+            /etc/containerd/config.toml
+    fi
+
+    log "containerd config actualizado: $(grep snapshotter /etc/containerd/config.toml | head -1)"
 
     # Reiniciar containerd e Docker para aplicar a nova configuracao
     info "A reiniciar containerd..."
@@ -735,7 +741,7 @@ step_update_system
 progress 20 "A instalar Docker CE..."
 step_install_docker
 
-progress 32 "A configurar overlayfs para LXC Proxmox..."
+progress 32 "A configurar fuse-overlayfs (Proxmox LXC)..."
 step_fix_lxc_overlay
 
 progress 38 "A instalar Portainer..."

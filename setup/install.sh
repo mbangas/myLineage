@@ -448,92 +448,169 @@ DAEMON_JSON
     log "Docker storage driver confirmado: ${active_driver}"
 }
 
+# -- Mostrar erro de nesting Proxmox e parar -----------------------------------
+_fail_nesting() {
+    local detail="${1:-}"
+    log "ERRO nesting: ${detail}"
+
+    echo "" >&2
+    echo "======================================================================"  >&2
+    echo "  ERRO: Docker nao pode arrancar contentores neste LXC"                 >&2
+    echo "======================================================================"  >&2
+    echo ""                                                                        >&2
+    echo "  Causa: o LXC Proxmox nao tem a opcao 'nesting' activa."              >&2
+    echo "  Sem ela, o Docker nao consegue correr NENHUM contentor."             >&2
+    echo ""                                                                        >&2
+    echo "  SOLUCAO -- executar NO HOST PROXMOX:"                                >&2
+    echo ""                                                                        >&2
+    echo "    1. Ver o ID deste LXC:"                                             >&2
+    echo "         pct list"                                                       >&2
+    echo ""                                                                        >&2
+    echo "    2. Activar nesting (substituir XXX pelo ID do LXC):"               >&2
+    echo "         pct set XXX --features nesting=1,keyctl=1"                     >&2
+    echo ""                                                                        >&2
+    echo "    3. Reiniciar o LXC:"                                                >&2
+    echo "         pct stop XXX && pct start XXX"                                 >&2
+    echo ""                                                                        >&2
+    echo "    4. Voltar a executar o instalador dentro do LXC:"                  >&2
+    echo "         bash install.sh"                                                >&2
+    echo ""                                                                        >&2
+    echo "  Alternativa (interface Proxmox):"                                     >&2
+    echo "    Container > Options > Features > Nesting (activar checkmark)"       >&2
+    echo ""                                                                        >&2
+
+    whiptail \
+        --backtitle "myLineage Installer  v2.1" \
+        --title "Configuracao Proxmox Necessaria" \
+        --msgbox \
+"O Docker nao consegue correr contentores.
+
+A opcao 'nesting' nao esta activa neste LXC.
+
+SOLUCAO -- no HOST Proxmox:
+
+  1. Ver o ID deste LXC:
+       pct list
+
+  2. Activar nesting (mudar XXX pelo ID):
+       pct set XXX --features nesting=1,keyctl=1
+
+  3. Reiniciar o LXC:
+       pct stop XXX && pct start XXX
+
+  4. Re-executar o instalador:
+       bash install.sh
+
+Alternativa (interface Proxmox):
+  Container > Options > Features
+  -> activar 'Nesting'" \
+        26 64 \
+        </dev/tty >/dev/tty 2>/dev/null || true
+
+    exit 1
+}
+
 # -- PASSO 3: Instalar Portainer ------------------------------------------------
 step_install_portainer() {
     step "PASSO 3/6: Instalar Portainer"
 
-    # Aguardar o daemon do Docker estar operacional
+    # -- 1. Aguardar daemon Docker -----------------------------------------------
     info "A aguardar servico Docker ficar operacional..."
     local waited=0
-    local max=60
     while ! docker info &>/dev/null; do
-        sleep 2
-        waited=$((waited + 2))
-        printf "\r  A aguardar Docker... %ds" "$waited"
-        if (( waited >= max )); then
-            echo ""
-            log "ERRO: Docker daemon nao disponivel apos ${max}s"
-            return 1
+        sleep 2; waited=$((waited + 2))
+        printf "\r  Aguardar... %ds" "$waited"
+        if (( waited >= 60 )); then
+            echo ""; log "ERRO: Docker nao disponivel apos 60s"; return 1
         fi
     done
     [[ $waited -gt 0 ]] && echo ""
-    info "Docker operacional."
 
-    # Verificar storage driver -- se nao for vfs re-aplicar a correcção
-    # (protecção para re-execuções com daemon.json antigo ainda activo)
+    # -- 2. Garantir storage driver = vfs ----------------------------------------
     local cur_driver
-    cur_driver=$(docker info --format '{{.Driver}}' 2>/dev/null || echo "desconhecido")
-    info "Storage driver actual: ${cur_driver}"
-    log "Storage driver antes de instalar Portainer: ${cur_driver}"
-
+    cur_driver=$(docker info --format '{{.Driver}}' 2>/dev/null || echo "?")
     if [[ "$cur_driver" != "vfs" ]]; then
-        info "Driver incompativel com LXC (${cur_driver}) -- a corrigir para vfs..."
-
-        systemctl stop docker docker.socket 2>/dev/null        >> "$LOG" 2>&1 || true
-        systemctl stop containerd                              >> "$LOG" 2>&1 || true
+        info "Storage driver incompativel (${cur_driver}) -- a corrigir..."
+        systemctl stop docker docker.socket containerd 2>/dev/null >> "$LOG" 2>&1 || true
         sleep 3
-
-        rm -rf /var/lib/docker/*
-        rm -rf /var/lib/containerd/*
-
+        rm -rf /var/lib/docker/* /var/lib/containerd/*
         mkdir -p /etc/docker
-        cat > /etc/docker/daemon.json << 'DAEMON_JSON'
-{
-  "storage-driver": "vfs"
-}
-DAEMON_JSON
-
-        systemctl start containerd                             >> "$LOG" 2>&1
-        sleep 3
-        systemctl start docker                                 >> "$LOG" 2>&1
-        sleep 5
-
-        cur_driver=$(docker info --format '{{.Driver}}' 2>/dev/null || echo "desconhecido")
-        info "Storage driver apos correcção: ${cur_driver}"
-        log "Storage driver apos correcção: ${cur_driver}"
+        printf '{\n  "storage-driver": "vfs"\n}\n' > /etc/docker/daemon.json
+        systemctl start containerd >> "$LOG" 2>&1; sleep 3
+        systemctl start docker     >> "$LOG" 2>&1; sleep 5
+        cur_driver=$(docker info --format '{{.Driver}}' 2>/dev/null || echo "?")
     fi
+    info "Storage driver: ${cur_driver}"
 
-    # Limpar artefactos de tentativas anteriores falhadas
-    if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^portainer$"; then
-        info "A remover contentor Portainer anterior (tentativa falhada)..."
-        docker rm -f portainer                                 >> "$LOG" 2>&1 || true
+    # -- 3. Verificar nesting ANTES de qualquer pull/run -------------------------
+    # Usa uma imagem local minima (hello-world) sem precisar de Internet.
+    # Se falhar com MS_PRIVATE -> Proxmox nao tem nesting=1 activo.
+    info "A verificar permissoes do LXC (nesting)..."
+    local nest_err
+    nest_err=$(docker run --rm --pull=never hello-world 2>&1) || true
+    if echo "$nest_err" | grep -q "MS_PRIVATE\|remount-private\|permission denied"; then
+        _fail_nesting "$nest_err"
     fi
-    if docker volume ls --format '{{.Name}}' 2>/dev/null | grep -q "^portainer_data$"; then
-        info "A remover volume Portainer anterior..."
-        docker volume rm portainer_data                        >> "$LOG" 2>&1 || true
+    # Se a imagem nao existia localmente, tentar com alpine (ja descarregado
+    # em tentativas anteriores) ou confirmar que funciona de outra forma
+    if echo "$nest_err" | grep -qi "Unable to find image"; then
+        # Tentar pull de uma imagem minima e testar arranque
+        info "  (a descarregar imagem de teste minima...)"
+        docker pull --quiet hello-world >> "$LOG" 2>&1 || true
+        nest_err=$(docker run --rm hello-world 2>&1) || true
+        if echo "$nest_err" | grep -q "MS_PRIVATE\|remount-private\|permission denied"; then
+            _fail_nesting "$nest_err"
+        fi
     fi
+    info "Permissoes LXC OK -- Docker pode correr contentores."
 
-    info "A criar volume do Portainer..."
-    docker volume create portainer_data 2>&1 | tee -a "$LOG"
+    # -- 4. Limpar artefactos de tentativas anteriores ---------------------------
+    docker rm -f portainer 2>/dev/null >> "$LOG" 2>&1 || true
+    docker volume rm portainer_data 2>/dev/null >> "$LOG" 2>&1 || true
 
-    info "A iniciar contentor Portainer..."
-    docker run -d \
+    # -- 5. Descarregar imagem Portainer com progresso limpo ---------------------
+    info "A descarregar imagem Portainer (pode demorar)..."
+    local layers_total=0 layers_done=0
+    while IFS= read -r line; do
+        log "pull: $line"
+        if echo "$line" | grep -q "Pull complete\|Already exists"; then
+            layers_done=$(( layers_done + 1 ))
+            printf "\r  Descarregado: %d camadas..." "$layers_done"
+        elif echo "$line" | grep -q "Pulling from"; then
+            printf "  --> %s\n" "$line"
+        elif echo "$line" | grep -q "^Status:"; then
+            echo ""; info "$line"
+        fi
+    done < <(docker pull portainer/portainer-ce:latest 2>&1)
+    echo ""
+
+    # -- 6. Criar volume e arrancar contentor ------------------------------------
+    info "A criar volume de dados..."
+    docker volume create portainer_data >> "$LOG" 2>&1
+
+    info "A arrancar contentor Portainer..."
+    local run_out
+    run_out=$(docker run -d \
         --name portainer \
         --restart=always \
         --network host \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v portainer_data:/data \
-        portainer/portainer-ce:latest \
-        2>&1 | tee -a "$LOG"
+        portainer/portainer-ce:latest 2>&1)
+    log "docker run: $run_out"
 
-    # tee devolve sempre 0 -- verificar se o contentor existe realmente
-    if ! docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^portainer$"; then
-        echo "  ERRO: O contentor Portainer nao foi criado." >&2
-        log "ERRO: contentor portainer nao encontrado apos docker run"
+    if echo "$run_out" | grep -q "MS_PRIVATE\|remount-private\|permission denied"; then
+        _fail_nesting "$run_out"
+    fi
+
+    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^portainer$"; then
+        echo "  ERRO ao arrancar Portainer:" >&2
+        echo "  $run_out" >&2
+        log "ERRO: portainer nao esta em execucao. Output: $run_out"
         return 1
     fi
 
-    info "Portainer instalado (porta HTTPS: ${PORTAINER_HTTPS_PORT})"
+    info "Portainer a correr (HTTPS: https://<IP>:${PORTAINER_HTTPS_PORT})"
 }
 
 # -- PASSO 4: Clonar repositorio -----------------------------------------------

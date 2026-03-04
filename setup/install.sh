@@ -266,8 +266,83 @@ Telemovel do administrador:" \
     done
 }
 
-# -- PASSO 1: Actualizar sistema ------------------------------------------------
-step_update_system() {
+# -- Verificar que o Docker consegue arrancar contentores (nesting Proxmox) ----
+# Em LXC nao privilegiado sem nesting=1, o runc falha sempre com
+# "MS_PRIVATE: permission denied" independentemente do storage driver.
+# Esta funcao detecta o problema cedo e mostra instrucoes claras.
+check_lxc_nesting() {
+    info "A verificar compatibilidade Docker/LXC..."
+
+    # Teste real: tentar correr um contentor minimo
+    local test_out
+    test_out=$(docker run --rm alpine echo ok 2>&1) || true
+
+    if echo "$test_out" | grep -q "ok"; then
+        info "Docker consegue correr contentores -- OK."
+        log "check_lxc_nesting: OK"
+        return 0
+    fi
+
+    # Falhou -- mostrar erro claro com instrucoes Proxmox
+    log "check_lxc_nesting: FALHOU -- output: ${test_out}"
+
+    echo ""
+    echo "======================================================================" >&2
+    echo "  ERRO: Docker nao consegue arrancar contentores neste LXC" >&2
+    echo "======================================================================" >&2
+    echo "" >&2
+    echo "  Causa: O LXC Proxmox nao tem 'nesting' activo." >&2
+    echo "  Sem esta opcao o Docker nao pode correr contentores." >&2
+    echo "" >&2
+    echo "  SOLUCAO -- executar NO HOST PROXMOX:" >&2
+    echo "" >&2
+    echo "    1. Descobrir o ID deste LXC:" >&2
+    echo "         pct list" >&2
+    echo "" >&2
+    echo "    2. Activar nesting (substituir 'XXX' pelo ID do LXC):" >&2
+    echo "         pct set XXX --features nesting=1,keyctl=1" >&2
+    echo "" >&2
+    echo "    3. Reiniciar o LXC:" >&2
+    echo "         pct stop XXX && pct start XXX" >&2
+    echo "" >&2
+    echo "    4. Voltar a executar este instalador dentro do LXC:" >&2
+    echo "         bash install.sh" >&2
+    echo "" >&2
+    echo "  Alternativa (Proxmox UI):" >&2
+    echo "    Container > Options > Features > Nesting (activar)" >&2
+    echo "" >&2
+
+    whiptail \
+        --backtitle "myLineage Installer  v2.1" \
+        --title "Configuracao Proxmox Necessaria" \
+        --msgbox \
+"O Docker nao consegue correr contentores neste LXC.
+
+O Proxmox precisa de ter 'nesting' activo neste
+contentor para o Docker funcionar.
+
+SOLUCAO -- no HOST Proxmox:
+
+  1. Descobrir o ID deste LXC:
+       pct list
+
+  2. Activar nesting (mudar XXX pelo ID):
+       pct set XXX --features nesting=1,keyctl=1
+
+  3. Reiniciar o LXC:
+       pct stop XXX && pct start XXX
+
+  4. Re-executar este instalador:
+       bash install.sh
+
+Alternativa (Proxmox UI):
+  Container > Options > Features > Nesting" \
+        28 64 \
+        </dev/tty >/dev/tty 2>/dev/null || true
+
+    exit 1
+}
+
     step "PASSO 1/6: Actualizar sistema operativo"
     export DEBIAN_FRONTEND=noninteractive
     info "A executar apt-get update..."
@@ -769,8 +844,11 @@ step_update_system
 progress 20 "A instalar Docker CE..."
 step_install_docker
 
-progress 32 "A configurar fuse-overlayfs (Proxmox LXC)..."
+progress 32 "A configurar storage driver (Proxmox LXC)..."
 step_fix_lxc_overlay
+
+progress 36 "A verificar compatibilidade Docker/LXC..."
+check_lxc_nesting
 
 progress 38 "A instalar Portainer..."
 step_install_portainer

@@ -74,18 +74,88 @@
   }
 
   /* ─────────────────────────────────────────────────────────────────────
+     Pure-JS SHA-1 + HMAC-SHA1 fallback (for HTTP / non-secure contexts
+     where crypto.subtle is unavailable)
+  ───────────────────────────────────────────────────────────────────── */
+  function _sha1(data) {
+    // data: Uint8Array → Uint8Array(20)
+    let H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+    const ml = data.length * 8;
+    const padded = Array.from(data);
+    padded.push(0x80);
+    while ((padded.length % 64) !== 56) padded.push(0);
+    // 64-bit big-endian bit-length (upper 32 bits always 0 for msgs < 512 MB)
+    padded.push(0, 0, 0, 0);
+    padded.push((ml >>> 24) & 0xff, (ml >>> 16) & 0xff, (ml >>> 8) & 0xff, ml & 0xff);
+    for (let i = 0; i < padded.length; i += 64) {
+      const W = [];
+      for (let t = 0; t < 16; t++) {
+        W[t] = ((padded[i+4*t]<<24)|(padded[i+4*t+1]<<16)|(padded[i+4*t+2]<<8)|padded[i+4*t+3]) >>> 0;
+      }
+      for (let t = 16; t < 80; t++) {
+        const v = W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16];
+        W[t] = ((v << 1) | (v >>> 31)) >>> 0;
+      }
+      let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4];
+      for (let t = 0; t < 80; t++) {
+        let f, k;
+        if      (t < 20) { f = (b & c) | ((~b >>> 0) & d); k = 0x5A827999; }
+        else if (t < 40) { f = b ^ c ^ d;                   k = 0x6ED9EBA1; }
+        else if (t < 60) { f = (b & c) | (b & d) | (c & d); k = 0x8F1BBCDC; }
+        else             { f = b ^ c ^ d;                   k = 0xCA62C1D6; }
+        const temp = (((a << 5) | (a >>> 27)) + f + e + k + W[t]) >>> 0;
+        e = d; d = c; c = ((b << 30) | (b >>> 2)) >>> 0; b = a; a = temp;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0; H[4] = (H[4] + e) >>> 0;
+    }
+    const out = new Uint8Array(20);
+    H.forEach((h, i) => { out[i*4]=(h>>>24)&0xff; out[i*4+1]=(h>>>16)&0xff; out[i*4+2]=(h>>>8)&0xff; out[i*4+3]=h&0xff; });
+    return out;
+  }
+
+  function _hmacSha1Fallback(key, data) {
+    // key, data: Uint8Array → Uint8Array(20)
+    const BLK = 64;
+    let k = key.length > BLK ? _sha1(key) : key;
+    const kPad = new Uint8Array(BLK);
+    kPad.set(k);
+    const iPad = new Uint8Array(BLK + data.length);
+    const oPad = new Uint8Array(BLK + 20);
+    for (let i = 0; i < BLK; i++) { iPad[i] = kPad[i] ^ 0x36; oPad[i] = kPad[i] ^ 0x5c; }
+    iPad.set(data, BLK);
+    const inner = _sha1(iPad);
+    oPad.set(inner, BLK);
+    return _sha1(oPad);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
      TOTP — RFC 6238  (HMAC-SHA1, 30 s, 6 digits)
+     Uses crypto.subtle when available (HTTPS), falls back to pure-JS
+     HMAC-SHA1 for HTTP deployments (e.g. Docker/LXC on Proxmox).
   ───────────────────────────────────────────────────────────────────── */
   async function totpCode(secret, timeOffset) {
     const counter = Math.floor(Date.now() / 30000) + (timeOffset | 0);
     const keyBytes = base32Decode(secret);
-    // 8-byte big-endian counter
-    const msgBuf = new ArrayBuffer(8);
-    new DataView(msgBuf).setUint32(4, counter >>> 0, false);
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
-    );
-    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, msgBuf));
+    // 8-byte big-endian counter (upper 32 bits = 0 for dates until ~year 4000)
+    const msgBuf = new Uint8Array(8);
+    const cv = counter >>> 0;
+    msgBuf[4] = (cv >>> 24) & 0xff;
+    msgBuf[5] = (cv >>> 16) & 0xff;
+    msgBuf[6] = (cv >>>  8) & 0xff;
+    msgBuf[7] =  cv         & 0xff;
+
+    let sig;
+    if (typeof crypto !== 'undefined' && crypto.subtle) {
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+      );
+      sig = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, msgBuf));
+    } else {
+      // Fallback for HTTP (non-secure) contexts
+      sig = _hmacSha1Fallback(keyBytes, msgBuf);
+    }
+
     const off = sig[19] & 0xf;
     const bin = ((sig[off] & 0x7f) << 24) | (sig[off + 1] << 16) | (sig[off + 2] << 8) | sig[off + 3];
     return String(bin % 1000000).padStart(6, '0');

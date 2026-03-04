@@ -355,6 +355,10 @@
       // Mark as verified (remove |unverified flag)
       Auth.saveTotpSecret(_phone, secret);
       doLogin();
+    }).catch(function(e) {
+      document.getElementById('btnQR').disabled = false;
+      err.textContent = 'Erro ao verificar código: ' + (e && e.message ? e.message : String(e));
+      console.error('verifyTOTP error:', e);
     });
   }
 
@@ -381,6 +385,10 @@
         return;
       }
       doLogin();
+    }).catch(function(e) {
+      document.getElementById('btnOTP').disabled = false;
+      err.textContent = 'Erro ao verificar código: ' + (e && e.message ? e.message : String(e));
+      console.error('verifyTOTP error:', e);
     });
   }
 

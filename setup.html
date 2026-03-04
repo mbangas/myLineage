@@ -190,6 +190,10 @@
       }
       Auth.saveTotpSecret(_phone, _secret);
       show('s3');
+    }).catch(function(e){
+      document.getElementById('s2Btn').disabled = false;
+      err.textContent = 'Erro ao verificar código: ' + (e && e.message ? e.message : String(e));
+      console.error('verifyTOTP error:', e);
     });
   }
 

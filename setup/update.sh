@@ -99,10 +99,25 @@ if [[ "$UPDATES" == "0" ]]; then
     exit 0
 fi
 
+# -- Preservar dados locais (nao devem ser sobrepostos pelo git pull) ----------
+DATA_BACKUP="/tmp/mylineage_data_backup_$(date +%Y%m%d_%H%M%S)"
+if [[ -d "$APP_DIR/JSON-DATA" ]]; then
+    info "A preservar dados locais (JSON-DATA)..."
+    cp -a "$APP_DIR/JSON-DATA" "$DATA_BACKUP"
+    log "Dados guardados em $DATA_BACKUP"
+fi
+
 info "${UPDATES} commit(s) novo(s) disponiveis. A actualizar..."
 git pull --ff-only >> "$LOG" 2>&1
 NEW_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "?")
 log "Actualizado de ${CURRENT_COMMIT} para ${NEW_COMMIT}"
+
+# -- Restaurar dados locais preservados ----------------------------------------
+if [[ -d "$DATA_BACKUP" ]]; then
+    info "A restaurar dados locais (JSON-DATA)..."
+    cp -a "$DATA_BACKUP/." "$APP_DIR/JSON-DATA/"
+    log "Dados restaurados de $DATA_BACKUP"
+fi
 
 # -- Detectar porta configurada ------------------------------------------------
 APP_PORT=$(grep -oP '(?<=PORT=)\d+' "$APP_DIR/docker-compose.yml" 2>/dev/null | head -1 || true)

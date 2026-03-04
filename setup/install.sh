@@ -752,83 +752,77 @@ get_server_ip() {
 # -- Ecra final ----------------------------------------------------------------
 show_next_steps() {
     get_server_ip
-    echo ""
-    echo "======================================================================"
-    echo "  INSTALACAO CONCLUIDA COM SUCESSO!"
-    echo "======================================================================"
-    echo ""
-    echo "  ACESSO AO myLineage"
-    echo "  --------------------------------------------------------------------"
-    echo "  Interface Web:  http://${SERVER_IP}:${APP_PORT}"
-    echo "  API REST:       http://${SERVER_IP}:${APP_PORT}/apis.html"
-    echo ""
-    echo "  PRIMEIRO LOGIN (Microsoft Authenticator)"
-    echo "  --------------------------------------------------------------------"
-    echo "  Administrador:  ${ADMIN_PHONE}"
-    echo ""
-    echo "  1. Abra a aplicacao no browser"
-    echo "  2. Introduza o numero de telemovel acima"
-    echo "  3. Leia o QR code com o Microsoft Authenticator"
-    echo "  4. Valide o codigo de 6 digitos"
-    echo ""
-    echo "  PORTAINER (Gestao Docker)"
-    echo "  --------------------------------------------------------------------"
-    echo "  Interface Web:  https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}"
-    echo "  (1a vez: crie o utilizador administrador)"
-    echo ""
-    echo "  VOLUMES DE DADOS (configuracao opcional)"
-    echo "  --------------------------------------------------------------------"
-    echo "  Para persistir dados em pastas do servidor, edite:"
-    echo "    ${APP_DIR}/docker-compose.yml"
-    echo "  e descomente a seccao 'volumes'."
-    echo "  Depois reinicie:  docker compose -f ${APP_DIR}/docker-compose.yml up -d --build"
-    echo ""
-    echo "  COMANDOS UTEIS"
-    echo "  --------------------------------------------------------------------"
-    echo "  Ver logs:    docker logs mylineage -f"
-    echo "  Parar:       docker compose -f ${APP_DIR}/docker-compose.yml down"
-    echo "  Actualizar:  cd ${APP_DIR} && git pull && docker compose up -d --build"
-    echo "  Log install: ${LOG}"
-    echo ""
-    echo "======================================================================"
-    echo ""
 
-    whiptail \
-        --backtitle "myLineage Installer  v2.1" \
-        --title "Instalacao Concluida" \
-        --msgbox \
-"A instalacao foi concluida com sucesso!
+    # Guardar resumo num ficheiro persistente (sempre consultavel depois)
+    local SUMMARY="/root/mylineage-access.txt"
+    cat > "$SUMMARY" << SUMMARY_EOF
+======================================================================
+  myLineage -- RESUMO DE ACESSO
+  Instalado em: $(date)
+======================================================================
 
-  Interface Web:
-    http://${SERVER_IP}:${APP_PORT}
-
-  Portainer:
-    https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}
+  myLineage  -->  http://${SERVER_IP}:${APP_PORT}
+  Portainer  -->  https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}
 
   Administrador: ${ADMIN_PHONE}
 
-  Para persistir dados em pastas do servidor,
-  edite o docker-compose.yml e descomente
-  a seccao 'volumes'.
+  PRIMEIRO LOGIN:
+    1. Abra http://${SERVER_IP}:${APP_PORT} no browser
+    2. Introduza o numero de telemovel acima
+    3. Leia o QR code com o Microsoft Authenticator
+    4. Valide o codigo de 6 digitos
 
-  Log completo:
-    ${LOG}" \
-        22 64 \
-        </dev/tty >/dev/tty 2>/dev/null || true
+  COMANDOS UTEIS:
+    Ver logs:     docker logs mylineage -f
+    Parar:        docker compose -f ${APP_DIR}/docker-compose.yml down
+    Actualizar:   cd ${APP_DIR} && git pull && docker compose up -d --build
+    Log install:  ${LOG}
 
-    # Reapresentar os URLs no terminal depois de fechar o dialogo
-    echo ""
-    echo "======================================================================"
-    echo "  RESUMO DE ACESSO"
-    echo "======================================================================"
-    echo ""
-    echo "  myLineage  -->  http://${SERVER_IP}:${APP_PORT}"
-    echo "  Portainer  -->  https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}"
-    echo ""
-    echo "  Administrador: ${ADMIN_PHONE}"
-    echo ""
-    echo "======================================================================"
-    echo ""
+  Este ficheiro: ${SUMMARY}
+======================================================================
+SUMMARY_EOF
+    log "Resumo de acesso guardado em: ${SUMMARY}"
+
+    # Imprimir directamente para /dev/tty -- sempre visivel independentemente
+    # de redirecionamentos de stdout/stderr no terminal do Proxmox/SSH
+    {
+        echo ""
+        echo "======================================================================"
+        echo "  myLineage -- INSTALACAO CONCLUIDA!"
+        echo "======================================================================"
+        echo ""
+        echo "  myLineage  -->  http://${SERVER_IP}:${APP_PORT}"
+        echo "  Portainer  -->  https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}"
+        echo ""
+        echo "  Administrador: ${ADMIN_PHONE}"
+        echo ""
+        echo "  PRIMEIRO LOGIN:"
+        echo "    1. Abra http://${SERVER_IP}:${APP_PORT} no browser"
+        echo "    2. Introduza o numero de telemovel acima"
+        echo "    3. Leia o QR code com o Microsoft Authenticator"
+        echo "    4. Valide o codigo de 6 digitos"
+        echo ""
+        echo "  (Este resumo foi guardado em: ${SUMMARY})"
+        echo ""
+        echo "======================================================================"
+        echo ""
+    } > /dev/tty 2>/dev/null || {
+        # /dev/tty nao disponivel -- imprimir para stdout como fallback
+        echo ""
+        echo "======================================================================"
+        echo "  myLineage -- INSTALACAO CONCLUIDA!"
+        echo "======================================================================"
+        echo ""
+        echo "  myLineage  -->  http://${SERVER_IP}:${APP_PORT}"
+        echo "  Portainer  -->  https://${SERVER_IP}:${PORTAINER_HTTPS_PORT}"
+        echo ""
+        echo "  Administrador: ${ADMIN_PHONE}"
+        echo ""
+        echo "  (Este resumo foi guardado em: ${SUMMARY})"
+        echo ""
+        echo "======================================================================"
+        echo ""
+    }
 }
 
 # ==============================================================================

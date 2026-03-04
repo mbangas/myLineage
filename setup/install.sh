@@ -331,6 +331,51 @@ step_install_docker() {
     info "Docker instalado: $(docker --version)"
 }
 
+# -- Corrigir overlayfs em LXC Proxmox -----------------------------------------
+# Em contentores LXC nao privilegiados, o kernel nao permite montar overlay.
+# A solucao e configurar o containerd para usar fuse-overlayfs como snapshotter.
+step_fix_lxc_overlay() {
+    # Detectar se estamos dentro de um contentor LXC
+    local is_lxc=0
+    if systemd-detect-virt --container 2>/dev/null | grep -qi "lxc"; then
+        is_lxc=1
+    elif grep -qa "container=lxc" /proc/1/environ 2>/dev/null; then
+        is_lxc=1
+    fi
+
+    if [[ $is_lxc -eq 0 ]]; then
+        log "Nao e LXC -- fuse-overlayfs nao necessario"
+        return 0
+    fi
+
+    info "LXC Proxmox detectado -- a configurar fuse-overlayfs para containerd..."
+
+    # Instalar fuse-overlayfs
+    apt-get install -y -qq fuse-overlayfs                      >> "$LOG" 2>&1
+    info "fuse-overlayfs instalado."
+
+    # Gerar configuracao default do containerd e activar snapshotter fuse-overlayfs
+    mkdir -p /etc/containerd
+    containerd config default 2>> "$LOG" > /etc/containerd/config.toml
+
+    # Substituir snapshotter overlayfs -> fuse-overlayfs
+    sed -i \
+        's|snapshotter = "overlayfs"|snapshotter = "fuse-overlayfs"|g' \
+        /etc/containerd/config.toml
+    log "containerd config actualizado para fuse-overlayfs"
+
+    # Reiniciar containerd e Docker para aplicar a nova configuracao
+    info "A reiniciar containerd..."
+    systemctl restart containerd                               >> "$LOG" 2>&1
+    sleep 5
+
+    info "A reiniciar Docker..."
+    systemctl restart docker                                   >> "$LOG" 2>&1
+    sleep 5
+
+    info "fuse-overlayfs activo -- Docker pronto."
+}
+
 # -- PASSO 3: Instalar Portainer ------------------------------------------------
 step_install_portainer() {
     step "PASSO 3/6: Instalar Portainer"
@@ -689,6 +734,9 @@ step_update_system
 
 progress 20 "A instalar Docker CE..."
 step_install_docker
+
+progress 32 "A configurar overlayfs para LXC Proxmox..."
+step_fix_lxc_overlay
 
 progress 38 "A instalar Portainer..."
 step_install_portainer

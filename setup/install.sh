@@ -377,7 +377,7 @@ DAEMON_JSON
 step_install_portainer() {
     step "PASSO 3/6: Instalar Portainer"
 
-    # Aguardar o daemon do Docker estar operacional (pode demorar apos instalacao)
+    # Aguardar o daemon do Docker estar operacional
     info "A aguardar servico Docker ficar operacional..."
     local waited=0
     local max=60
@@ -387,7 +387,6 @@ step_install_portainer() {
         printf "\r  A aguardar Docker... %ds" "$waited"
         if (( waited >= max )); then
             echo ""
-            echo "  ERRO: O servico Docker nao ficou disponivel apos ${max}s."
             log "ERRO: Docker daemon nao disponivel apos ${max}s"
             return 1
         fi
@@ -395,16 +394,54 @@ step_install_portainer() {
     [[ $waited -gt 0 ]] && echo ""
     info "Docker operacional."
 
+    # Verificar storage driver -- se nao for vfs re-aplicar a correcção
+    # (protecção para re-execuções com daemon.json antigo ainda activo)
+    local cur_driver
+    cur_driver=$(docker info --format '{{.Driver}}' 2>/dev/null || echo "desconhecido")
+    info "Storage driver actual: ${cur_driver}"
+    log "Storage driver antes de instalar Portainer: ${cur_driver}"
+
+    if [[ "$cur_driver" != "vfs" ]]; then
+        info "Driver incompativel com LXC (${cur_driver}) -- a corrigir para vfs..."
+
+        systemctl stop docker docker.socket 2>/dev/null        >> "$LOG" 2>&1 || true
+        systemctl stop containerd                              >> "$LOG" 2>&1 || true
+        sleep 3
+
+        rm -rf /var/lib/docker/*
+        rm -rf /var/lib/containerd/*
+
+        mkdir -p /etc/docker
+        cat > /etc/docker/daemon.json << 'DAEMON_JSON'
+{
+  "storage-driver": "vfs"
+}
+DAEMON_JSON
+
+        systemctl start containerd                             >> "$LOG" 2>&1
+        sleep 3
+        systemctl start docker                                 >> "$LOG" 2>&1
+        sleep 5
+
+        cur_driver=$(docker info --format '{{.Driver}}' 2>/dev/null || echo "desconhecido")
+        info "Storage driver apos correcção: ${cur_driver}"
+        log "Storage driver apos correcção: ${cur_driver}"
+    fi
+
+    # Limpar artefactos de tentativas anteriores falhadas
     if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^portainer$"; then
-        info "Portainer ja esta instalado."
-        return 0
+        info "A remover contentor Portainer anterior (tentativa falhada)..."
+        docker rm -f portainer                                 >> "$LOG" 2>&1 || true
+    fi
+    if docker volume ls --format '{{.Name}}' 2>/dev/null | grep -q "^portainer_data$"; then
+        info "A remover volume Portainer anterior..."
+        docker volume rm portainer_data                        >> "$LOG" 2>&1 || true
     fi
 
     info "A criar volume do Portainer..."
     docker volume create portainer_data 2>&1 | tee -a "$LOG"
 
     info "A iniciar contentor Portainer..."
-    # Mostrar erros no terminal E gravar no log (tee -a captura ambos)
     docker run -d \
         --name portainer \
         --restart=always \
@@ -414,7 +451,7 @@ step_install_portainer() {
         portainer/portainer-ce:latest \
         2>&1 | tee -a "$LOG"
 
-    # tee devolve sempre 0; verificar se o contentor foi criado
+    # tee devolve sempre 0 -- verificar se o contentor existe realmente
     if ! docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^portainer$"; then
         echo "  ERRO: O contentor Portainer nao foi criado." >&2
         log "ERRO: contentor portainer nao encontrado apos docker run"

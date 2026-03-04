@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <!-- Background rounded square -->
   <rect width="32" height="32" rx="7" fill="#161b22"/>
-  <!-- Tree trunk -->
-  <rect x="14.5" y="21" width="3" height="7" rx="1" fill="#4493f8"/>
-  <!-- Tree canopy layers (stylised deciduous/family tree) -->
-  <polygon points="16,3  8,14 24,14" fill="#4493f8"/>
-  <polygon points="16,9  7,20 25,20" fill="#4493f8"/>
+  <!-- MDI tree icon (mdi-tree) scaled from 24x24 to fit in a 4px padded 24x24 area centred in 32x32 -->
+  <g transform="translate(4,4) scale(1)">
+    <path d="M11,21V16.74C10.53,16.91 10.03,17 9.5,17C7,17 5,15 5,12.5C5,11.23 5.5,10.09 6.31,9.27C6.11,8.73 6,8.13 6,7.5C6,5 8,3 10.5,3C11.93,3 13.2,3.65 14.05,4.66C14.35,4.56 14.67,4.5 15,4.5C16.93,4.5 18.5,6.07 18.5,8C18.5,8.17 18.5,8.34 18.47,8.5H19C20.66,8.5 22,9.84 22,11.5C22,13.16 20.66,14.5 19,14.5H13V21H11Z" fill="#4493f8"/>
+  </g>
 </svg>

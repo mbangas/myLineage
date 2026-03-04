@@ -331,6 +331,24 @@
             </div>
           </div>
 
+          <!-- Row 3b · Distribuição por País -->
+          <div class="dash-row dash-row-half">
+            <div class="dash-panel">
+              <div class="dash-panel-header"><span class="panel-dot" style="background:#00c9e0"></span> Distribuição por País <span style="font-weight:400;opacity:.55;font-size:.68rem;margin-left:4px">(local de nascimento)</span></div>
+              <div class="dash-panel-body" style="align-items:center;padding:16px 14px">
+                <canvas id="chartPaises"></canvas>
+                <div id="paises-nodata" class="no-data" style="display:none">Sem locais de nascimento registados</div>
+              </div>
+            </div>
+            <div class="dash-panel">
+              <div class="dash-panel-header"><span class="panel-dot" style="background:#fda85b"></span> Top Localidades de Nascimento</div>
+              <div class="dash-panel-body">
+                <canvas id="chartLocalidades"></canvas>
+                <div id="localidades-nodata" class="no-data" style="display:none">Sem localidades registadas</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Row 4 · Top Nomes M + Top Nomes F + Top Apelidos -->
           <div class="dash-row dash-row-thirds">
             <div class="dash-panel">
@@ -742,6 +760,117 @@
             if(minEl)   minEl.textContent='—';
             if(canvasEl) canvasEl.style.display='none';
             if(nodataEl) nodataEl.style.display='';
+          }
+        }
+
+        // ── Distribuição por País ──────────────────────────────────────
+        {
+          // Extract country from the last comma-separated segment of a place string
+          function extractCountry(place){
+            if(!place || !place.trim()) return null;
+            const parts = place.split(',').map(s => s.trim()).filter(Boolean);
+            if(parts.length < 2) return null; // single token → can't confirm it's a country
+            return parts[parts.length - 1];
+          }
+
+          // Extract city/locality: second-to-last segment if ≥3 parts, else first segment
+          function extractLocality(place){
+            if(!place || !place.trim()) return null;
+            const parts = place.split(',').map(s => s.trim()).filter(Boolean);
+            if(parts.length === 0) return null;
+            if(parts.length === 1) return parts[0];
+            // second-to-last is usually the most specific named locality
+            return parts[parts.length - 2];
+          }
+
+          const countryCounts   = {};
+          const localityCounts  = {};
+          let semPais = 0;
+
+          pessoas.forEach(p => {
+            const bev = DB.getBirthEvent(p);
+            const place = bev ? (bev.place || '') : '';
+            const country = extractCountry(place);
+            if(country){
+              countryCounts[country] = (countryCounts[country] || 0) + 1;
+            } else {
+              semPais++;
+            }
+            const loc = place ? extractLocality(place) : null;
+            if(loc){
+              localityCounts[loc] = (localityCounts[loc] || 0) + 1;
+            }
+          });
+
+          if(semPais > 0) countryCounts['Sem país definido'] = semPais;
+
+          const countryEntries = Object.entries(countryCounts).sort((a,b) => b[1] - a[1]);
+          const paisesCanvas   = document.getElementById('chartPaises');
+          const paisesNodata   = document.getElementById('paises-nodata');
+
+          if(countryEntries.length > 0 && paisesCanvas){
+            const pieColors = [
+              '#5294e2','#73bf69','#f2cc0c','#f25757','#b877d9',
+              '#ff9830','#00c9e0','#ef799e','#56d4d4','#fda85b',
+              '#a0c4ff','#caffbf','#ffadad','#ffd6a5','#fdffb6'
+            ];
+            // "Sem país definido" always gets the grey slot
+            const sortedEntries = countryEntries.filter(([k]) => k !== 'Sem país definido');
+            if(countryCounts['Sem país definido']) sortedEntries.push(['Sem país definido', countryCounts['Sem país definido']]);
+
+            const labels = sortedEntries.map(([k]) => k);
+            const data   = sortedEntries.map(([,v]) => v);
+            const colors = sortedEntries.map(([k], i) =>
+              k === 'Sem país definido' ? '#3d4556' : pieColors[i % (pieColors.length - 1)]
+            );
+
+            mkChart('chartPaises', 'doughnut', {
+              labels,
+              datasets: [{ data, backgroundColor: colors, borderColor: '#1a1d27', borderWidth: 2, hoverOffset: 6 }]
+            }, {
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: { color: '#8a9ab5', font: { size: 11 }, boxWidth: 12, padding: 10 }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: ctx => ` ${ctx.label}: ${ctx.parsed} pessoa${ctx.parsed !== 1 ? 's' : ''} (${Math.round(ctx.parsed / pessoas.length * 100)}%)`
+                  }
+                }
+              },
+              cutout: '55%'
+            });
+            if(paisesNodata) paisesNodata.style.display = 'none';
+          } else {
+            if(paisesCanvas)  paisesCanvas.style.display = 'none';
+            if(paisesNodata)  paisesNodata.style.display = '';
+          }
+
+          // Top localities bar chart
+          const locEntries    = Object.entries(localityCounts).sort((a,b) => b[1]-a[1]).slice(0, 10);
+          const locCanvas     = document.getElementById('chartLocalidades');
+          const locNodata     = document.getElementById('localidades-nodata');
+          if(locEntries.length > 0 && locCanvas){
+            mkChart('chartLocalidades', 'bar', {
+              labels: locEntries.map(([k]) => k),
+              datasets: [{
+                label: 'Pessoas',
+                data:  locEntries.map(([,v]) => v),
+                backgroundColor: '#00c9e0b0', borderColor: '#00c9e0', borderWidth: 1, borderRadius: 3
+              }]
+            }, {
+              indexAxis: 'y',
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8a9ab5', stepSize: 1, precision: 0 } },
+                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8a9ab5', font: { size: 10 } } }
+              }
+            });
+            if(locNodata) locNodata.style.display = 'none';
+          } else {
+            if(locCanvas) locCanvas.style.display = 'none';
+            if(locNodata) locNodata.style.display = '';
           }
         }
 

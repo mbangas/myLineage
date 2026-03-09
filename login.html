@@ -156,7 +156,7 @@
     </div>
     <div class="err" id="errOTP"></div>
     <button class="btn-primary" id="btnOTP"><i class="mdi mdi-login"></i> Entrar</button>
-    <div class="login-link"><a id="backOTP">← Voltar</a></div>
+    <div class="login-link"><a id="backOTP">← Voltar</a> &nbsp;·&nbsp; <a id="showQRFromOTP">Ver QR Code</a></div>
   </div>
 
   <!-- ── STEP 4: Access Request ── -->
@@ -366,6 +366,12 @@
   wireDigits('otpOTP', function(code){ verifyOTP(code); });
   document.getElementById('btnOTP').addEventListener('click', function(){ verifyOTP(getDigits('otpOTP')); });
   document.getElementById('backOTP').addEventListener('click', function(){ show('stepPhone'); });
+  document.getElementById('showQRFromOTP').addEventListener('click', function(){
+    var stored = Auth.getTotpSecret(_phone) || '';
+    var secret = stored.replace('|unverified', '');
+    if (!secret) { show('stepPhone'); return; }
+    showQR(_phone, secret);
+  });
 
   function verifyOTP(code) {
     var err = document.getElementById('errOTP');

@@ -453,11 +453,32 @@
           }]);
 
           let summary = `Import concluído com sucesso!\nPessoas: ${result.stats.individuals}\nFamílias: ${result.stats.families}`;
+          if (result.pendingImages > 0) {
+            summary += `\n\n📥 ${result.pendingImages} fotos a descarregar em segundo plano.\nO álbum será preenchido progressivamente — aguarde alguns minutos.`;
+            // Poll until download complete
+            const pollInterval = setInterval(async () => {
+              try {
+                const st = await fetch('/api/multimedia/cache-status').then(r => r.json());
+                if (!st.running) {
+                  clearInterval(pollInterval);
+                  showImportLog(
+                    `Import concluído!\nPessoas: ${result.stats.individuals} · Famílias: ${result.stats.families}\n✅ ${st.cached} fotos guardadas localmente${st.pending > 0 ? ` (${st.pending} falharam)` : ''}.`,
+                    'success'
+                  );
+                } else {
+                  showImportLog(
+                    `Import concluído!\nPessoas: ${result.stats.individuals} · Famílias: ${result.stats.families}\n📥 A descarregar fotos... ${st.cached}/${st.total} guardadas.`,
+                    'info'
+                  );
+                }
+              } catch(e) { clearInterval(pollInterval); }
+            }, 5000);
+          }
           if (result.warnings && result.warnings.length) {
             summary += '\n\nAvisos:';
             result.warnings.forEach(w => summary += `\n• ${w.id || ''}: ${w.reason}`);
           }
-          showImportLog(summary, 'success');
+          showImportLog(summary, result.pendingImages > 0 ? 'info' : 'success');
         } catch(err) {
           console.error(err);
           showImportLog('Erro ao importar: ' + (err.message || err), 'error');

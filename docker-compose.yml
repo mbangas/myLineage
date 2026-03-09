@@ -1,0 +1,34 @@
+# -----------------------------------------------------------------------------
+#  myLineage — docker-compose.yml (desenvolvimento local / Windows)
+# -----------------------------------------------------------------------------
+
+services:
+
+  mylineage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mylineage:latest
+    container_name: mylineage
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      # Base de dados JSON — montada do directório local para persistência de dados
+      - ./JSON-DATA:/app/JSON-DATA
+      # Fotos e documentos descarregados do GEDCOM (persistência obrigatória)
+      - ./uploads:/app/uploads
+
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - ADMIN_PHONE=+351931018263
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

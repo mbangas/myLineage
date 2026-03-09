@@ -1582,8 +1582,8 @@
             let src = null;
             const fileName = mmFileName(m);
 
-            // If the file field is already an external URL, use it directly
-            if(fileName && /^https?:\/\//i.test(fileName)){
+            // If the file field is already an external URL or a server-relative path, use it directly
+            if(fileName && (/^https?:\/\//i.test(fileName) || /^\//.test(fileName))){
               src = fileName;
             }
             // Prefer reading from directory handle (file on disk)

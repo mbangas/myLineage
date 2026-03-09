@@ -6,6 +6,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const https = require('https');
+const http  = require('http');
 
 const { readCollection, writeCollection, nextId, nowISO, ensureDataDir, getDataDir } = require('./lib/crud-helpers');
 const { parseGedcomToJson } = require('./lib/gedcom-parser');
@@ -229,7 +231,73 @@ app.get('/api/gedcom/export', (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
-/* ── GEDCOM Import ───────────────────────────────────────────────────── */
+/* ── External image cache helpers ─────────────────────────────────────────── */
+const UPLOADS_FOTOS = path.join(__dirname, 'uploads', 'fotos');
+
+let _cacheRunning = false;
+
+function _fetchBuf(url) {
+  return new Promise(resolve => {
+    try {
+      const mod = url.startsWith('https') ? https : http;
+      const req = mod.get(url, { timeout: 15000 }, res => {
+        if (res.statusCode !== 200) { res.resume(); resolve(null); return; }
+        const chunks = [];
+        res.on('data', c => chunks.push(c));
+        res.on('end',  () => resolve(Buffer.concat(chunks)));
+        res.on('error', () => resolve(null));
+      });
+      req.on('error',   () => resolve(null));
+      req.on('timeout', () => { req.destroy(); resolve(null); });
+    } catch(e) { resolve(null); }
+  });
+}
+
+async function cacheExternalImages(multimedia) {
+  if (_cacheRunning) return;
+  _cacheRunning = true;
+  try {
+    fs.mkdirSync(UPLOADS_FOTOS, { recursive: true });
+    const pending = Object.values(multimedia).filter(m =>
+      !m.deletedAt && m.files && m.files[0] && /^https?:\/\//i.test(m.files[0].file)
+    );
+    if (!pending.length) return;
+    console.log(`[media] A descarregar ${pending.length} fotos externas...`);
+    const CONCURRENCY = 4;
+    let done = 0;
+    for (let i = 0; i < pending.length; i += CONCURRENCY) {
+      const batch = pending.slice(i, i + CONCURRENCY);
+      await Promise.all(batch.map(async m => {
+        const url     = m.files[0].file;
+        const rawExt  = url.split('?')[0].split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+        const ext     = ['jpg','jpeg','png','gif','webp','bmp'].includes(rawExt) ? rawExt : 'jpg';
+        const safeName = m.id.replace(/[^a-zA-Z0-9_-]/g, '_') + '.' + ext;
+        const destPath = path.join(UPLOADS_FOTOS, safeName);
+        const localPath = '/uploads/fotos/' + safeName;
+        if (fs.existsSync(destPath)) { m.files[0].file = localPath; done++; return; }
+        const buf = await _fetchBuf(url);
+        if (buf && buf.length > 0) {
+          try { fs.writeFileSync(destPath, buf); m.files[0].file = localPath; done++; } catch(e) {}
+        }
+      }));
+      writeCollection('multimedia', multimedia);
+    }
+    console.log(`[media] Concluído: ${done}/${pending.length} fotos guardadas.`);
+  } finally { _cacheRunning = false; }
+}
+
+/* ── Cache status ────────────────────────────────────────────────────────── */
+app.get('/api/multimedia/cache-status', (req, res) => {
+  try {
+    const mm = readCollection('multimedia');
+    const all     = Object.values(mm).filter(m => !m.deletedAt && m.files && m.files[0]);
+    const cached  = all.filter(m => !/^https?:\/\//i.test(m.files[0].file || '')).length;
+    const pending = all.length - cached;
+    res.json({ total: all.length, cached, pending, running: _cacheRunning });
+  } catch(e) { res.status(500).json({ error: String(e) }); }
+});
+
+/* ── GEDCOM Import ───────────────────────────────────────────────────────────── */
 app.post('/api/gedcom/import', express.text({ type: '*/*', limit: '50mb' }), (req, res) => {
   try {
     const text = typeof req.body === 'string' ? req.body : (req.body.text || '');
@@ -237,7 +305,13 @@ app.post('/api/gedcom/import', express.text({ type: '*/*', limit: '50mb' }), (re
     writeCollection('individuals', result.individuals);
     writeCollection('families', result.families);
     if (result.multimedia && Object.keys(result.multimedia).length) writeCollection('multimedia', result.multimedia);
-    res.json({ ok:true, stats:result.stats, warnings:result.warnings });
+    const pendingImages = Object.values(result.multimedia || {}).filter(m =>
+      !m.deletedAt && m.files && m.files[0] && /^https?:\/\//i.test(m.files[0].file)
+    ).length;
+    if (pendingImages > 0) {
+      cacheExternalImages(result.multimedia).catch(e => console.error('[media] Erro no cache:', e));
+    }
+    res.json({ ok:true, stats:result.stats, warnings:result.warnings, pendingImages });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
@@ -269,6 +343,21 @@ app.get('/api/topola-json', (req, res) => {
     res.json({indis:ti,fams:tf});
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
+
+/* ── Seed adminPhone from environment variable ───────────────────────── */
+if (process.env.ADMIN_PHONE) {
+  try {
+    ensureDataDir();
+    const fp = path.join(getDataDir(), 'settings.json');
+    let settings = {};
+    if (fs.existsSync(fp)) settings = JSON.parse(fs.readFileSync(fp, 'utf8'));
+    if (!settings.adminPhone) {
+      settings.adminPhone = process.env.ADMIN_PHONE;
+      fs.writeFileSync(fp, JSON.stringify(settings, null, 2), 'utf8');
+      console.log(`adminPhone configurado a partir de ADMIN_PHONE env var: ${process.env.ADMIN_PHONE}`);
+    }
+  } catch (e) { console.error('Aviso: não foi possível inicializar adminPhone:', e.message); }
+}
 
 /* ── Start ───────────────────────────────────────────────────────────── */
 if (require.main === module) {

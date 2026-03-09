@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-03-09T18:08:27.401Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM - 2026-02-28.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-09T18:05:13.726Z",
+    "entity": "Login",
+    "action": "Login: +351931018263",
+    "id": "+351931018263",
+    "detail": "+351931018263 · Administrador",
+    "category": "login"
+  },
+  {
     "ts": "2026-03-04T00:54:53.889Z",
     "entity": "Login",
     "action": "Login: +351931018263",

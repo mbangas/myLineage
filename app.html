@@ -1185,7 +1185,7 @@
     </script>
     <!-- ── Surname Research Modal ── -->
     <div id="surnameResearchOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:900;transition:opacity .2s;" onclick="closeSurnameModal()"></div>
-    <div id="surnameResearchModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:92%;max-width:640px;max-height:85vh;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:910;overflow:hidden;display:flex;flex-direction:column;">
+    <div id="surnameResearchModal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:92%;max-width:640px;max-height:85vh;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:910;overflow:hidden;flex-direction:column;display:none;">
       <div style="padding:16px 20px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
         <h2 id="surnameModalTitle" style="margin:0;font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="mdi mdi-book-search-outline" style="color:var(--blue);"></i> Pesquisa de Apelido</h2>
         <button onclick="closeSurnameModal()" class="btn btn-ghost btn-sm" style="padding:2px 6px;" aria-label="Fechar"><i class="mdi mdi-close"></i></button>

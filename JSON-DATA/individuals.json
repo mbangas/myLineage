@@ -4300,8 +4300,7 @@
       {
         "type": "BIRT",
         "date": "16 OCT 2006",
-        "place": "",
-        "notes": []
+        "place": "Maternidade da Estefânia, Lisboa, Portugal"
       },
       {
         "type": "BAPM",
@@ -4346,7 +4345,7 @@
       "M_I115_15"
     ],
     "createdAt": "2026-03-09T18:21:42.233Z",
-    "updatedAt": "2026-03-09T18:21:42.233Z",
+    "updatedAt": "2026-03-10T01:00:45.363Z",
     "deletedAt": null
   },
   "I116": {

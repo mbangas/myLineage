@@ -307,6 +307,30 @@
     return (indi.fams || []).map(fid => _families[fid]).filter(Boolean);
   };
 
+  /**
+   * Get families where indiId is husb or wife, using both indi.fams and
+   * a direct scan of all families as fallback.  This is more reliable than
+   * getFamiliesAsSpouse alone because indi.fams may be out of sync.
+   */
+  DB.getSpouseFamilies = function(indiId) {
+    const seen = new Set();
+    const result = [];
+    // Primary: via indi.fams
+    const indi = _individuals[indiId];
+    if (indi) {
+      (indi.fams || []).forEach(fid => {
+        const fam = _families[fid];
+        if (fam && !fam.deletedAt && !seen.has(fam.id)) { seen.add(fam.id); result.push(fam); }
+      });
+    }
+    // Fallback: scan all non-deleted families
+    Object.values(_families).forEach(fam => {
+      if (fam.deletedAt || seen.has(fam.id)) return;
+      if (fam.husb === indiId || fam.wife === indiId) { seen.add(fam.id); result.push(fam); }
+    });
+    return result;
+  };
+
   /** Create or find family for a couple, returns family record */
   DB.ensureFamily = function(spouse1Id, spouse2Id) {
     const s1 = _individuals[spouse1Id], s2 = _individuals[spouse2Id];

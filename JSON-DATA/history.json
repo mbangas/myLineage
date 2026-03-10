@@ -1,5 +1,179 @@
 [
   {
+    "ts": "2026-03-10T00:16:29.603Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "id": "I112",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "Miguel Filipe do Amaral Bangueses",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-10T00:16:25.394Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "id": "I112",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "Miguel Filipe do Amaral Bangueses",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:05:54.984Z",
+    "entity": "Individual",
+    "action": "Eliminar Indivíduo",
+    "id": "I101",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "teste ggg",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:05:40.699Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "id": "I101",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "teste ggg",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:05:40.698Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "id": "I500215",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "Henrique Vaz",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:05:40.698Z",
+    "entity": "Family",
+    "action": "Criar Família",
+    "id": "F109",
+    "detail": "Família F109",
+    "category": "relacoes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:05:40.697Z",
+    "entity": "Individual",
+    "action": "Criar Indivíduo",
+    "id": "I101",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "teste ggg",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:05:09.475Z",
+    "entity": "Individual",
+    "action": "Eliminar Indivíduo",
+    "id": "I100",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "ffff c",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:04:53.928Z",
+    "entity": "Family",
+    "action": "Actualizar Família",
+    "id": "F500091",
+    "detail": "Família F500091",
+    "category": "relacoes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:04:53.927Z",
+    "entity": "Individual",
+    "action": "Criar Indivíduo",
+    "id": "I100",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "ffff c",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:03:19.718Z",
+    "entity": "Family",
+    "action": "Actualizar Família",
+    "id": "F25",
+    "detail": "Família F25",
+    "category": "relacoes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:03:19.717Z",
+    "entity": "Individual",
+    "action": "Criar Indivíduo",
+    "id": "I99",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "teste b",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:02:59.581Z",
+    "entity": "Individual",
+    "action": "Eliminar Indivíduo",
+    "id": "I98",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "teste a",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:02:45.239Z",
+    "entity": "Individual",
+    "action": "Eliminar Indivíduo",
+    "id": "e0441064-d532-447c-9da6-2f3e75f7eeb3",
+    "detail": "Indivíduo e0441064-d532-447c-9da6-2f3e75f7eeb3",
+    "category": "pessoas",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:02:11.867Z",
+    "entity": "Family",
+    "action": "Actualizar Família",
+    "id": "F25",
+    "detail": "Família F25",
+    "category": "relacoes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:02:11.866Z",
+    "entity": "Individual",
+    "action": "Criar Indivíduo",
+    "id": "I98",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "teste a",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:02:11.866Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "id": "I500215",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "Henrique Vaz",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-09T23:02:11.865Z",
+    "entity": "Family",
+    "action": "Criar Família",
+    "id": "F25",
+    "detail": "Família F25",
+    "category": "relacoes",
+    "actor": "+351931018263"
+  },
+  {
     "ts": "2026-03-09T18:21:43.790Z",
     "action": "GEDCOM importado — 4258 registos",
     "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",

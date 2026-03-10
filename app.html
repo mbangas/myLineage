@@ -593,12 +593,19 @@
       function _renderEvents(personId){
         const indi=DB.getIndividual(personId);
         const evs=(indi&&indi.events||[]);
+        const marrEvs=[];
+        DB.getFamilies().filter(f=>f.husb===personId||f.wife===personId).forEach(fam=>{
+          (fam.events||[]).forEach((ev,i)=>{ if(ev.type==='MARR') marrEvs.push({ev,famId:fam.id,famIdx:i}); });
+        });
         let html='<div style="margin-bottom:12px;"><button class="btn btn-sm" onclick="_drawerShowAddEvent(\''+_esc(personId)+'\')" style="font-size:0.83rem;"><i class="mdi mdi-plus"></i> Adicionar Evento</button></div>';
-        if(!evs.length){ html+='<div style="color:#888;padding:4px 0 12px;">Nenhum evento cadastrado.</div>'; return html; }
+        if(!evs.length&&!marrEvs.length){ html+='<div style="color:#888;padding:4px 0 12px;">Nenhum evento cadastrado.</div>'; return html; }
         html+='<div class="mini-list">';
         evs.forEach((ev,i)=>{
           const label=EVENT_TYPES[ev.type]||ev.type||'';
           html+='<div class="mini-card" style="padding:10px 12px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="flex:1;"><span style="font-weight:600;font-size:0.9rem;">'+_esc(label)+'</span><span style="color:#888;font-size:0.82rem;margin-left:8px;">'+_esc(fmtEventDate(ev))+'</span></div><div style="display:flex;gap:2px;flex-shrink:0;"><button onclick="_drawerEditEvent('+i+',\''+_esc(personId)+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#4493f8;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-pencil-outline"></i></button><button onclick="_drawerDeleteEvent('+i+',\''+_esc(personId)+'\')" title="Apagar" style="background:none;border:none;cursor:pointer;color:#e06060;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-trash-can-outline"></i></button></div></div>'+(ev.place?'<div style="color:#aaa;font-size:0.82rem;margin-top:3px;">&#128205; '+_esc(ev.place)+'</div>':'')+(ev.notes?'<div style="color:#bbb;font-size:0.82rem;margin-top:3px;">'+_esc(ev.notes)+'</div>':'')+'</div>';
+        });
+        marrEvs.forEach(({ev,famId,famIdx})=>{
+          html+='<div class="mini-card" style="padding:10px 12px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="flex:1;"><span style="font-weight:600;font-size:0.9rem;">Casamento</span><span style="color:#888;font-size:0.82rem;margin-left:8px;">'+_esc(fmtEventDate(ev))+'</span></div><div style="display:flex;gap:2px;flex-shrink:0;"><button onclick="_drawerEditMarrEvent(\''+_esc(famId)+'\','+famIdx+',\''+_esc(personId)+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#4493f8;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-pencil-outline"></i></button><button onclick="_drawerDeleteMarrEvent(\''+_esc(famId)+'\','+famIdx+',\''+_esc(personId)+'\')" title="Apagar" style="background:none;border:none;cursor:pointer;color:#e06060;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-trash-can-outline"></i></button></div></div>'+(ev.place?'<div style="color:#aaa;font-size:0.82rem;margin-top:3px;">&#128205; '+_esc(ev.place)+'</div>':'')+(ev.notes?'<div style="color:#bbb;font-size:0.82rem;margin-top:3px;">'+_esc(ev.notes)+'</div>':'')+'</div>';
         });
         html+='</div>';
         return html;
@@ -638,7 +645,11 @@
 
       window._drawerShowAddEvent = function(personId){
         const opts=Object.entries(EVENT_TYPES).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('');
-        document.getElementById('drawerBody').innerHTML='<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Novo Evento</h3><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="addEvType" style="width:100%;">'+opts+'</select></div><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="addEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente" selected>Exatamente</option><option value="Antes de">Antes de</option><option value="Depois de">Depois de</option><option value="Cerca de">Cerca de</option></select><div style="display:flex;gap:6px;"><input id="addEvDay" type="number" min="1" max="31" placeholder="Dia" style="flex:1;min-width:0;text-align:center;"/><input id="addEvMonth" type="number" min="1" max="12" placeholder="Mês" style="flex:1;min-width:0;text-align:center;"/><input id="addEvYear" type="number" min="1" max="9999" placeholder="Ano" style="flex:2;min-width:0;text-align:center;"/></div></div><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="addEvPlace" type="text" placeholder="Local do evento" style="width:100%;"/></div><div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="addEvNotes" rows="3" placeholder="Notas..." style="width:100%;resize:vertical;"></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\''+_esc(personId)+'\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveNewEvent(\''+_esc(personId)+'\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
+        const spouseFams=DB.getFamilies().filter(f=>f.husb===personId||f.wife===personId);
+        const marrOpt=spouseFams.length?'<option value="MARR">Casamento</option>':'';
+        const famOpts=spouseFams.map(fam=>{ const spouseId=(fam.husb===personId)?fam.wife:fam.husb; const spouse=spouseId?DB.getIndividual(spouseId):null; const label=spouse?DB.getDisplayName(spouse):'(família '+fam.id+')'; return '<option value="'+_esc(fam.id)+'">'+_esc(label)+'</option>'; }).join('');
+        const famRow=spouseFams.length?'<div id="addEvFamRow" style="margin-bottom:10px;display:none;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Cônjuge</label><select id="addEvFamId" style="width:100%;">'+famOpts+'</select></div>':'';
+        document.getElementById('drawerBody').innerHTML='<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Novo Evento</h3><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="addEvType" onchange="_drawerToggleMarrFamily(this.value)" style="width:100%;">'+opts+marrOpt+'</select></div>'+famRow+'<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="addEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente" selected>Exatamente</option><option value="Antes de">Antes de</option><option value="Depois de">Depois de</option><option value="Cerca de">Cerca de</option></select><div style="display:flex;gap:6px;"><input id="addEvDay" type="number" min="1" max="31" placeholder="Dia" style="flex:1;min-width:0;text-align:center;"/><input id="addEvMonth" type="number" min="1" max="12" placeholder="Mês" style="flex:1;min-width:0;text-align:center;"/><input id="addEvYear" type="number" min="1" max="9999" placeholder="Ano" style="flex:2;min-width:0;text-align:center;"/></div></div><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="addEvPlace" type="text" placeholder="Local do evento" style="width:100%;"/></div><div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="addEvNotes" rows="3" placeholder="Notas..." style="width:100%;resize:vertical;"></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\''+_esc(personId)+'\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveNewEvent(\''+_esc(personId)+'\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
       };
 
       window._drawerSaveNewEvent = function(personId){
@@ -651,10 +662,54 @@
         if(!day&&!month&&!year){ alert('Preencha pelo menos um campo de data.'); return; }
         const place=((document.getElementById('addEvPlace')||{}).value||'').trim();
         const notes=((document.getElementById('addEvNotes')||{}).value||'').trim();
-        if(!indi.events) indi.events=[];
-        indi.events.push({type,date:buildGedcomDate(day,month,year,qual),place:place||undefined,notes:notes||undefined});
-        DB.saveIndividual(indi);
+        if(type==='MARR'){
+          const famId=((document.getElementById('addEvFamId')||{}).value||'');
+          const fam=famId?DB.getFamily(famId):(DB.getFamilies().filter(f=>f.husb===personId||f.wife===personId)[0]||null);
+          if(!fam){ alert('Não foi encontrado cônjuge.'); return; }
+          if(!fam.events) fam.events=[];
+          fam.events.push({type:'MARR',date:buildGedcomDate(day,month,year,qual),place:place||undefined,notes:notes||undefined});
+          DB.saveFamily(fam);
+        } else {
+          if(!indi.events) indi.events=[];
+          indi.events.push({type,date:buildGedcomDate(day,month,year,qual),place:place||undefined,notes:notes||undefined});
+          DB.saveIndividual(indi);
+        }
         openDrawerSection(personId,'eventos');
+      };
+
+      window._drawerToggleMarrFamily = function(type){
+        const row=document.getElementById('addEvFamRow');
+        if(row) row.style.display=type==='MARR'?'':'none';
+      };
+
+      window._drawerEditMarrEvent = function(famId,famIdx,personId){
+        const fam=DB.getFamily(famId); if(!fam) return;
+        const ev=fam.events[famIdx]; if(!ev) return;
+        const p=parseGedcomDate(ev.date);
+        const body=document.getElementById('drawerBody');
+        body.innerHTML='<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Editar Casamento</h3><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="marrEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente"'+((!p.qualifier||p.qualifier==='Exatamente')?' selected':'')+'>Exatamente</option><option value="Antes de"'+(p.qualifier==='Antes de'?' selected':'')+'>Antes de</option><option value="Depois de"'+(p.qualifier==='Depois de'?' selected':'')+'>Depois de</option><option value="Cerca de"'+(p.qualifier==='Cerca de'?' selected':'')+'>Cerca de</option></select><div style="display:flex;gap:6px;"><input id="marrEvDay" type="number" min="1" max="31" placeholder="Dia" value="'+(p.day||'')+'" style="flex:1;min-width:0;text-align:center;"/><input id="marrEvMonth" type="number" min="1" max="12" placeholder="Mês" value="'+(p.month||'')+'" style="flex:1;min-width:0;text-align:center;"/><input id="marrEvYear" type="number" min="1" max="9999" placeholder="Ano" value="'+(p.year||'')+'" style="flex:2;min-width:0;text-align:center;"/></div></div><div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="marrEvPlace" type="text" value="'+_esc(ev.place||'')+'" style="width:100%;"/></div><div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="marrEvNotes" rows="3" style="width:100%;resize:vertical;">'+_esc(ev.notes||'')+'</textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\''+_esc(personId)+'\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveEditMarrEvent(\''+_esc(famId)+'\','+famIdx+',\''+_esc(personId)+'\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
+      };
+
+      window._drawerSaveEditMarrEvent = function(famId,famIdx,personId){
+        const fam=DB.getFamily(famId); if(!fam) return;
+        const qual=(document.getElementById('marrEvQual')||{}).value;
+        const day=parseInt((document.getElementById('marrEvDay')||{}).value)||null;
+        const month=parseInt((document.getElementById('marrEvMonth')||{}).value)||null;
+        const year=parseInt((document.getElementById('marrEvYear')||{}).value)||null;
+        if(!day&&!month&&!year){ alert('Preencha pelo menos um campo de data.'); return; }
+        const place=((document.getElementById('marrEvPlace')||{}).value||'').trim();
+        const notes=((document.getElementById('marrEvNotes')||{}).value||'').trim();
+        fam.events[famIdx]={type:'MARR',date:buildGedcomDate(day,month,year,qual),place:place||undefined,notes:notes||undefined};
+        DB.saveFamily(fam);
+        openDrawerSection(personId,'eventos');
+      };
+
+      window._drawerDeleteMarrEvent = function(famId,famIdx,personId){
+        if(!confirm('Apagar este evento de casamento?')) return;
+        const fam=DB.getFamily(famId); if(!fam) return;
+        fam.events.splice(famIdx,1);
+        DB.saveFamily(fam);
+        document.getElementById('drawerBody').innerHTML=_renderEvents(personId);
       };
 
       /* ── Relations section ─────────────────────────────────────────────── */

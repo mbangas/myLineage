@@ -349,47 +349,54 @@
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
     .plb-add-person-btn:hover {
-      background: rgba(99,102,241,0.12);
-      color: var(--accent, #818cf8);
-      border-color: var(--accent, #818cf8);
+      background: var(--accent-soft, rgba(68,147,248,0.12));
+      color: var(--accent, #4493f8);
+      border-color: var(--accent, #4493f8);
     }
-    #plbPersonSearchWrap { display: none; }
+    #plbPersonSearchWrap {
+      display: none;
+      border: 1px solid var(--border-accent, rgba(68,147,248,0.3));
+      border-radius: 8px;
+      background: var(--bg-surface, #161b22);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3);
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
     .plb-person-search-input {
       width: 100%;
-      padding: 6px 9px;
-      border-radius: 7px 7px 0 0;
-      border: 1px solid var(--border, rgba(255,255,255,0.15));
-      border-bottom: none;
-      background: rgba(20,25,45,0.95);
-      color: var(--text-main, #e8eaf6);
+      padding: 8px 10px;
+      border: none;
+      border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+      background: var(--bg-surface-2, #21262d);
+      color: var(--text-main, #e6edf3);
       box-sizing: border-box;
       font-size: 0.85rem;
       font-family: inherit;
       outline: none;
     }
-    .plb-person-search-input:focus { border-color: var(--accent, #818cf8); }
+    .plb-person-search-input:focus { border-bottom-color: var(--accent, #4493f8); }
     .plb-person-dropdown {
-      background: rgba(20,25,45,0.98);
-      border: 1px solid var(--border, rgba(255,255,255,0.15));
-      border-radius: 0 0 7px 7px;
-      max-height: 140px;
+      background: transparent;
+      max-height: 180px;
       overflow-y: auto;
       display: none;
     }
     .plb-person-dropdown.open { display: block; }
     .plb-person-option {
-      padding: 7px 10px;
+      padding: 7px 12px;
       font-size: 0.82rem;
       cursor: pointer;
-      color: var(--text-main, #e8eaf6);
-      transition: background 0.12s;
+      color: var(--text-main, #e6edf3);
+      transition: background 0.13s;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.04));
     }
-    .plb-person-option:hover { background: rgba(99,102,241,0.22); }
+    .plb-person-option:last-child { border-bottom: none; }
+    .plb-person-option:hover { background: var(--accent-hover, rgba(68,147,248,0.18)); }
     .plb-person-option.already-linked {
-      color: var(--text-secondary, #888);
+      color: var(--text-secondary, #8b949e);
       cursor: default;
       font-style: italic;
     }
@@ -455,51 +462,57 @@
     /* Bbox person popup */
     #plbBboxPersonPopup {
       position: fixed;
-      background: var(--bg-surface, #1e2030);
-      border: 1px solid var(--border, rgba(255,255,255,0.15));
-      border-radius: 8px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-      padding: 10px;
+      background: var(--bg-surface, #161b22);
+      border: 1px solid var(--border-accent, rgba(68,147,248,0.3));
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.3);
+      padding: 0;
       z-index: 2147483647;
-      width: 220px;
+      width: 240px;
       display: none;
+      overflow: hidden;
     }
     #plbBboxPersonPopup.open { display: block; }
     #plbBboxSearchInput {
       width: 100%;
-      padding: 5px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border, rgba(255,255,255,0.15));
-      background: rgba(20,25,45,0.9);
-      color: var(--text-main, #e8eaf6);
+      padding: 8px 10px;
+      border: none;
+      border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+      background: var(--bg-surface-2, #21262d);
+      color: var(--text-main, #e6edf3);
       box-sizing: border-box;
       font-size: 0.82rem;
       font-family: inherit;
-      margin-bottom: 4px;
       outline: none;
+      display: block;
     }
-    #plbBboxPersonList { max-height: 120px; overflow-y: auto; }
+    #plbBboxSearchInput:focus { border-bottom-color: var(--accent, #4493f8); }
+    #plbBboxPersonList { max-height: 150px; overflow-y: auto; padding: 4px 0; }
     .plb-bbox-person-opt {
-      padding: 5px 8px;
+      padding: 6px 12px;
       font-size: 0.8rem;
       cursor: pointer;
-      color: var(--text-main, #e8eaf6);
-      border-radius: 4px;
+      color: var(--text-main, #e6edf3);
+      border-radius: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: background 0.13s;
     }
-    .plb-bbox-person-opt:hover { background: rgba(59,130,246,0.2); }
+    .plb-bbox-person-opt:hover { background: var(--accent-hover, rgba(68,147,248,0.18)); }
     .plb-bbox-popup-cancel {
-      margin-top: 6px;
+      padding: 8px 12px;
       font-size: 0.75rem;
-      color: var(--text-secondary, #888);
+      color: var(--text-secondary, #8b949e);
       cursor: pointer;
       text-align: center;
-      padding: 3px 0;
-      border-radius: 4px;
+      border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+      transition: background 0.13s, color 0.13s;
     }
-    .plb-bbox-popup-cancel:hover { color: var(--text-main, #e8eaf6); }
+    .plb-bbox-popup-cancel:hover {
+      color: var(--text-main, #e6edf3);
+      background: var(--bg-surface-2, #21262d);
+    }
   `;
 
   /* ── HTML ─────────────────────────────────────────────────────────────── */
@@ -1091,7 +1104,7 @@
       // Position and open person popup (fixed positioning to avoid clip by overflow:hidden)
       const vpW = window.innerWidth;
       const vpH = window.innerHeight;
-      const popW = 220;
+      const popW = 240;
       const popH = 200;  // approximate max height
       let popLeft = e.clientX + 12;
       let popTop  = e.clientY + 12;

@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Aniversários – myLineage</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+    <script src="remote-storage.js"></script>
+    <script src="auth.js"></script>
+    <script>
+      window.DRAWER_CONFIG = {
+        treeBtnAction: function(personId) {
+          window.location.href = 'arvore.html?focus=' + encodeURIComponent(personId);
+        },
+        afterSave: function() {},
+        afterDelete: function() {}
+      };
+    </script>
+    <style>
+      .aniv-outer {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      .aniv-wrap {
+        padding: 0 32px 80px;
+        margin-top: 24px;
+        width: 100%;
+        max-width: 1000px;
+        box-sizing: border-box;
+      }
+
+      /* Scroll-to-top button */
+      .aniv-top-btn {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        z-index: 200;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s, transform 0.2s;
+        transform: translateY(8px);
+      }
+      .aniv-top-btn.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      .aniv-top-btn:hover { background: var(--accent-hover, #5aa8ff); }
+
+      /* Month group heading */
+      .aniv-month-group { margin-top: 28px; }
+      .aniv-month-group:first-child { margin-top: 0; }
+
+      .aniv-month-heading {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: capitalize;
+        letter-spacing: 0.04em;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .aniv-month-heading .mdi { font-size: 0.9rem; opacity: 0.7; }
+
+      /* Individual row */
+      .aniv-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .aniv-row:last-child { border-bottom: none; }
+
+      /* Date box */
+      .aniv-datebox {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        min-width: 54px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 6px 4px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .aniv-datebox-weekday {
+        font-size: 0.58rem;
+        color: var(--text-disabled);
+        text-transform: capitalize;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+      }
+      .aniv-datebox-day {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: var(--text-main);
+        line-height: 1.1;
+      }
+      .aniv-datebox-month {
+        font-size: 0.58rem;
+        color: var(--text-secondary);
+        text-transform: capitalize;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .aniv-datebox.today {
+        border-color: var(--green);
+        background: var(--green-soft);
+      }
+      .aniv-datebox.today .aniv-datebox-day {
+        color: var(--green);
+      }
+
+      /* Photo / avatar */
+      .aniv-photo {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid var(--border);
+        background: var(--bg-surface-2);
+      }
+      .aniv-photo-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, var(--accent), #00b4d8);
+        border: 2px solid var(--border);
+      }
+
+      /* Balloon icon */
+      .aniv-balloon {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        line-height: 1;
+        user-select: none;
+      }
+
+      /* Text info */
+      .aniv-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .aniv-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .aniv-name a {
+        color: var(--text-main);
+        text-decoration: none;
+        transition: color var(--transition);
+      }
+      .aniv-name a:hover { color: var(--accent); }
+      .aniv-sub {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* Days badge */
+      .aniv-badge {
+        font-weight: 600;
+        font-size: 0.72rem;
+        border-radius: 9px;
+        padding: 3px 9px;
+        flex-shrink: 0;
+        white-space: nowrap;
+        color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .aniv-badge.today {
+        color: var(--green);
+        background: var(--green-soft);
+      }
+
+      /* Empty state */
+      .aniv-empty {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        padding: 48px 0;
+        text-align: center;
+      }
+
+      @media (max-width: 700px) {
+        .aniv-wrap { padding: 0 16px 60px; }
+        .aniv-datebox { width: 46px; min-width: 46px; }
+        .aniv-balloon { display: none; }
+        .aniv-top-btn { bottom: 16px; right: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a href="index.html" class="logo"><i class="mdi mdi-tree" aria-hidden="true"></i><span>myLineage</span></a>
+        <nav>
+          <a href="app.html"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
+          <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
+          <a href="mundo.html"><i class="mdi mdi-earth" aria-hidden="true"></i>Mundo</a>
+          <a href="arvore.html"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
+          <a href="gedcom.html"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
+          <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
+          <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
+          <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
+          <a href="historico.html"><i class="mdi mdi-history" aria-hidden="true"></i>Histórico</a>
+        </nav>
+        <div class="sidebar-footer">
+          <a href="apis.html"><i class="mdi mdi-api" aria-hidden="true"></i>APIs</a>
+          <a href="configuracao.html"><i class="mdi mdi-cog" aria-hidden="true"></i>Definições</a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <!-- Drawer overlay & panel (shared module) -->
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+        <div class="drawer" id="personDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+          <div class="drawer-header">
+            <button class="btn btn-ghost btn-sm" id="drawerBackBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Voltar"><i class="mdi mdi-arrow-left"></i></button>
+            <h2 id="drawerTitle" style="flex:1;">Editar Pessoa</h2>
+            <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Ver na Árvore"><i class="mdi mdi-sitemap"></i></button>
+            <button class="drawer-close" id="drawerCloseBtn" aria-label="Fechar painel"><i class="mdi mdi-close"></i></button>
+          </div>
+          <div class="drawer-person-header" id="drawerPersonHeader">
+            <div class="drawer-avatar" id="drawerAvatar"></div>
+            <div>
+              <div class="drawer-person-name" id="drawerPersonName">—</div>
+              <div class="drawer-person-sub" id="drawerPersonSub"></div>
+            </div>
+          </div>
+          <div class="drawer-body" id="drawerBody"></div>
+          <div class="drawer-footer">
+            <button class="btn btn-danger btn-sm" id="drawerDeleteBtn"><i class="mdi mdi-delete-outline"></i> Apagar</button>
+            <button class="btn btn-ghost btn-sm" id="drawerCancelBtn">Cancelar</button>
+            <button class="btn btn-sm" id="drawerSaveBtn"><i class="mdi mdi-content-save-outline"></i> Guardar</button>
+          </div>
+        </div>
+        <div class="topbar">
+          <div style="display:flex;align-items:center;gap:10px">
+            <a href="index.html" class="btn btn-ghost" style="padding:6px 10px" title="Voltar ao início">
+              <i class="mdi mdi-arrow-left" aria-hidden="true"></i>
+            </a>
+            <h1 style="margin:0"><i class="mdi mdi-cake-variant" aria-hidden="true" style="color:var(--accent);margin-right:6px"></i>Aniversários</h1>
+          </div>
+        </div>
+
+        <div class="aniv-outer">
+          <div class="aniv-wrap" id="aniv-wrap">
+            <p class="aniv-empty">A carregar…</p>
+          </div>
+        </div>
+        <button class="aniv-top-btn" id="aniv-top-btn" title="Subir ao topo" aria-label="Subir ao topo">
+          <i class="mdi mdi-chevron-up" aria-hidden="true"></i>
+        </button>
+      </main>
+    </div>
+
+    <script>
+    (function () {
+      'use strict';
+
+      const DB = window.GedcomDB;
+
+      const GEDCOM_MONTHS = {
+        JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
+        JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11
+      };
+      const WEEKDAYS_PT  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+      const MONTHS_PT    = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+      const MONTHS_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+      /* ── Relationship calculator (mirrors app.html) ── */
+      function _esc(s) {
+        return String(s || '').replace(/[&<>"']/g, function(c) {
+          return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+      }
+
+      function _kinshipLabel(ups, downs, sex) {
+        const f = sex === 'F', m = sex === 'M';
+        if (ups===1&&downs===0) return f?'Mãe':m?'Pai':'Pai/Mãe';
+        if (ups===2&&downs===0) return f?'Avó':m?'Avô':'Avô/Avó';
+        if (ups===3&&downs===0) return f?'Bisavó':m?'Bisavô':'Bisavô/ó';
+        if (ups===4&&downs===0) return f?'Trisavó':m?'Trisavô':'Trisavô/ó';
+        if (ups>=5&&downs===0)  return (f?'Tetravó ('+ups+'ª)':'Tetravo ('+ups+'º)');
+        if (ups===0&&downs===1) return f?'Filha':m?'Filho':'Filho/a';
+        if (ups===0&&downs===2) return f?'Neta':m?'Neto':'Neto/a';
+        if (ups===0&&downs===3) return f?'Bisneta':m?'Bisneto':'Bisneto/a';
+        if (ups===0&&downs===4) return f?'Trineta':m?'Trineto':'Trineto/a';
+        if (ups===0&&downs>=5)  return 'Descendente ('+downs+'x)';
+        if (ups===1&&downs===1) return f?'Irmã':m?'Irmão':'Irmão/ã';
+        if (ups===1&&downs===2) return f?'Sobrinha':m?'Sobrinho':'Sobrinho/a';
+        if (ups===1&&downs===3) return f?'Sobrinha-neta':m?'Sobrinho-neto':'Sobrinho/a-neto';
+        if (ups===1&&downs===4) return f?'Sobrinha-bisneta':m?'Sobrinho-bisneto':'Sobrinho/a-bisneto';
+        if (ups===2&&downs===1) return f?'Tia':m?'Tio':'Tio/Tia';
+        if (ups===3&&downs===1) return f?'Tia-avó':m?'Tio-avô':'Tio-avô/ó';
+        if (ups===4&&downs===1) return f?'Tia-bisavó':m?'Tio-bisavô':'Tio-bisavô/ó';
+        if (ups===2&&downs===2) return f?'1ª Prima':m?'1º Primo':'1º Primo/a';
+        if (ups===3&&downs===3) return f?'2ª Prima':m?'2º Primo':'2º Primo/a';
+        if (ups===4&&downs===4) return f?'3ª Prima':m?'3º Primo':'3º Primo/a';
+        if (ups===2&&downs===3) return (f?'1ª Prima':'1º Primo')+' 1x afastado/a';
+        if (ups===3&&downs===2) return (f?'1ª Prima':'1º Primo')+' 1x afastado/a';
+        if (ups===2&&downs===4) return (f?'1ª Prima':'1º Primo')+' 2x afastado/a';
+        if (ups===4&&downs===2) return (f?'1ª Prima':'1º Primo')+' 2x afastado/a';
+        if (ups===3&&downs===4) return (f?'2ª Prima':'2º Primo')+' 1x afastado/a';
+        if (ups===4&&downs===3) return (f?'2ª Prima':'2º Primo')+' 1x afastado/a';
+        const minDeg = Math.min(ups, downs);
+        const removed = Math.abs(ups - downs);
+        if (minDeg >= 2) {
+          const deg = minDeg - 1;
+          const label = f ? deg+'ª Prima' : m ? deg+'º Primo' : deg+'º Primo/a';
+          return removed > 0 ? label + ' ' + removed + 'x afastado/a' : label;
+        }
+        return 'Parente';
+      }
+
+      function computeRelationships(focusId) {
+        const rels = new Map();
+        if (!focusId) return rels;
+        const indiMap = {};
+        DB.getIndividuals(true).forEach(function(i){ indiMap[i.id] = i; });
+        const famMap = {};
+        DB.getFamilies(true).forEach(function(f){ famMap[f.id] = f; });
+        const bioVisited = new Map();
+        bioVisited.set(focusId, {ups:0, downs:0});
+        const queue = [{id:focusId, ups:0, downs:0}];
+        while (queue.length > 0) {
+          const item = queue.shift();
+          const id = item.id, ups = item.ups, downs = item.downs;
+          const indi = indiMap[id];
+          if (!indi) continue;
+          if (downs === 0 && indi.famc) {
+            const famcIds = Array.isArray(indi.famc) ? indi.famc : [indi.famc];
+            famcIds.forEach(function(fid) {
+              const fam = famMap[fid];
+              if (!fam) return;
+              [fam.husb, fam.wife].forEach(function(pId) {
+                if (pId && !bioVisited.has(pId)) {
+                  bioVisited.set(pId, {ups:ups+1, downs:0});
+                  queue.push({id:pId, ups:ups+1, downs:0});
+                }
+              });
+            });
+          }
+          (indi.fams || []).forEach(function(fid) {
+            const fam = famMap[fid];
+            if (!fam) return;
+            (fam.children || []).forEach(function(cId) {
+              if (!bioVisited.has(cId)) {
+                bioVisited.set(cId, {ups:ups, downs:downs+1});
+                queue.push({id:cId, ups:ups, downs:downs+1});
+              }
+            });
+          });
+        }
+        bioVisited.forEach(function(v, id) {
+          const indi = indiMap[id];
+          const sex = (indi && indi.sex) || '';
+          rels.set(id, id === focusId ? null : _kinshipLabel(v.ups, v.downs, sex));
+        });
+        // spouses
+        bioVisited.forEach(function(v, id) {
+          const indi = indiMap[id];
+          if (!indi) return;
+          (indi.fams || []).forEach(function(fid) {
+            const fam = famMap[fid];
+            if (!fam) return;
+            [fam.husb, fam.wife].forEach(function(spId) {
+              if (!spId || spId === id || rels.has(spId)) return;
+              const spIndi = indiMap[spId];
+              const sf = (spIndi && spIndi.sex) === 'F', sm = (spIndi && spIndi.sex) === 'M';
+              let label = null;
+              if (id === focusId)              label = sf?'Esposa':sm?'Esposo':'Cônjuge';
+              else if (v.ups===0&&v.downs===1) label = sf?'Nora':sm?'Genro':'Cônjuge de filho/a';
+              else if (v.ups===1&&v.downs===0) label = sf?'Madrasta':sm?'Padrasto':'Cônjuge do pai/mãe';
+              else if (v.ups===1&&v.downs===1) label = sf?'Cunhada':sm?'Cunhado':'Cunhado/a';
+              else if (v.ups===0&&v.downs===2) label = sf?'Cônjuge da neta':sm?'Cônjuge do neto':'Cônjuge do neto/a';
+              else if (v.ups===2&&v.downs===0) label = sf?'Cônjuge da avó':sm?'Cônjuge do avô':'Cônjuge avô/avó';
+              if (label) rels.set(spId, label);
+            });
+          });
+        });
+        // in-laws
+        const focusIndi = indiMap[focusId];
+        if (focusIndi) {
+          (focusIndi.fams || []).forEach(function(fid) {
+            const fam = famMap[fid];
+            if (!fam) return;
+            [fam.husb, fam.wife].forEach(function(spId) {
+              if (!spId || spId === focusId) return;
+              const spVisited = new Map();
+              spVisited.set(spId, {ups:0, downs:0});
+              const spQ = [{id:spId, ups:0, downs:0}];
+              while (spQ.length > 0) {
+                const it = spQ.shift();
+                const sid = it.id, sups = it.ups, sdowns = it.downs;
+                const si = indiMap[sid];
+                if (!si) continue;
+                if (sdowns === 0 && si.famc) {
+                  const fids = Array.isArray(si.famc) ? si.famc : [si.famc];
+                  fids.forEach(function(pfid) {
+                    const pfam = famMap[pfid];
+                    if (!pfam) return;
+                    [pfam.husb, pfam.wife].forEach(function(pId) {
+                      if (pId && !spVisited.has(pId)) {
+                        spVisited.set(pId, {ups:sups+1, downs:0});
+                        spQ.push({id:pId, ups:sups+1, downs:0});
+                      }
+                    });
+                  });
+                }
+                (si.fams || []).forEach(function(sfid) {
+                  const sfam = famMap[sfid];
+                  if (!sfam) return;
+                  (sfam.children || []).forEach(function(cId) {
+                    if (!spVisited.has(cId)) {
+                      spVisited.set(cId, {ups:sups, downs:sdowns+1});
+                      spQ.push({id:cId, ups:sups, downs:sdowns+1});
+                    }
+                  });
+                });
+              }
+              spVisited.forEach(function(v, id) {
+                if (rels.has(id)) return;
+                const indi = indiMap[id];
+                const sex = (indi && indi.sex) || '';
+                const f = sex === 'F', m = sex === 'M';
+                const ups = v.ups, downs = v.downs;
+                if (ups===0 && downs===0) return;
+                let label;
+                if      (ups===1&&downs===0) label = f?'Sogra':m?'Sogro':'Sogro/Sogra';
+                else if (ups===2&&downs===0) label = f?'Avó do cônjuge':m?'Avô do cônjuge':'Avô/ó do cônjuge';
+                else if (ups===3&&downs===0) label = f?'Bisavó do cônjuge':m?'Bisavô do cônjuge':'Bisavô/ó do cônjuge';
+                else if (ups===1&&downs===1) label = f?'Cunhada':m?'Cunhado':'Cunhado/a';
+                else if (ups===0&&downs===1) label = f?'Enteada':m?'Enteado':'Enteado/a';
+                else if (ups===0&&downs===2) label = f?'Neta do cônjuge':m?'Neto do cônjuge':'Neto/a do cônjuge';
+                else if (ups===1&&downs===2) label = f?'Sobrinha do cônjuge':m?'Sobrinho do cônjuge':'Sobrinho/a do cônjuge';
+                else if (ups===2&&downs===1) label = f?'Tia do cônjuge':m?'Tio do cônjuge':'Tio/a do cônjuge';
+                else if (ups===2&&downs===2) label = f?'Prima do cônjuge':m?'Primo do cônjuge':'Primo/a do cônjuge';
+                else label = 'Parente do cônjuge';
+                rels.set(id, label);
+              });
+            });
+          });
+        }
+        return rels;
+      }
+
+      function _relBadgeHtml(label, focusId, targetId) {
+        if (label === null) {
+          return '<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.73rem;font-weight:600;background:rgba(255,215,0,0.15);border:1px solid rgba(200,170,0,0.4);color:#c8a600;white-space:nowrap;">Este é você</span>';
+        }
+        if (!label) return '';
+        const isDirect = /^(Pai|M\u00e3e|Filho|Filha|Av\u00f4|Av\u00f3|Bisav|Trisav|Trineto|Trineta|Bisneto|Bisneta|Neto|Neta|Tetrav|Descend)/.test(label);
+        const isInLaw  = /^(Esposo|Esposa|C\u00f4njuge|Genro|Nora|Padrasto|Madrasta|Cunhado|Cunhada|Sogro|Sogra|Enteado|Enteada|Parente)/.test(label) || /c\u00f4njuge/.test(label);
+        var bg, bd, col;
+        if (isDirect)     { bg='rgba(68,147,248,0.13)';   bd='rgba(68,147,248,0.35)';   col='#4493f8'; }
+        else if (isInLaw) { bg='rgba(130,100,220,0.13)';  bd='rgba(130,100,220,0.35)';  col='#9b7fe8'; }
+        else              { bg='rgba(255,155,60,0.13)';   bd='rgba(255,155,60,0.35)';   col='#c97c28'; }
+        const inner = '<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.73rem;font-weight:500;background:'+bg+';border:1px solid '+bd+';color:'+col+';white-space:nowrap;">'+_esc(label)+'</span>';
+        if (focusId && targetId && focusId !== targetId) {
+          return '<a href="arvore.html?pathFrom='+encodeURIComponent(focusId)+'&pathTo='+encodeURIComponent(targetId)+'" title="Ver caminho na árvore" style="text-decoration:none;">'+inner+'</a>';
+        }
+        return inner;
+      }
+
+      /* ── Months shown per page ── */
+      const PAGE_MONTHS = 2;
+      let shownMonths   = PAGE_MONTHS;
+      let allGroups     = [];
+      let relMap        = new Map();
+      let focusId       = '';
+
+      function parseGedcomDate(d) {
+        if (!d) return null;
+        const m = String(d).match(/(?:(\d{1,2})\s+)?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+(\d{3,4})/i);
+        if (!m) return null;
+        return { day: m[1] ? parseInt(m[1], 10) : 1, month: GEDCOM_MONTHS[m[2].toUpperCase()], year: parseInt(m[3], 10) };
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function renderGroup(g) {
+        let html = '<div class="aniv-month-group">';
+        html += `<div class="aniv-month-heading"><i class="mdi mdi-calendar-month"></i>${MONTHS_PT[g.month]} de ${g.year}</div>`;
+        g.items.forEach(function (item) {
+          const isToday   = item.daysUntil === 0;
+          const thumb     = DB.getThumbnailForPerson(item.id);
+          const photoHtml = thumb
+            ? `<img class="aniv-photo" src="${escapeHtml(thumb)}" alt="" loading="lazy">`
+            : `<div class="aniv-photo-avatar">${escapeHtml(item.name.charAt(0).toUpperCase())}</div>`;
+          const daysText  = isToday ? 'hoje!' : item.daysUntil === 1 ? 'amanhã' : `em ${item.daysUntil} dias`;
+          const badgeCls  = isToday ? 'aniv-badge today' : 'aniv-badge';
+          const boxCls    = isToday ? 'aniv-datebox today' : 'aniv-datebox';
+          html += `
+            <div class="aniv-row">
+              <div class="${boxCls}">
+                <span class="aniv-datebox-weekday">${WEEKDAYS_PT[item.next.getDay()]}</span>
+                <span class="aniv-datebox-day">${item.next.getDate()}</span>
+                <span class="aniv-datebox-month">${MONTHS_SHORT[item.next.getMonth()]}</span>
+              </div>
+              ${photoHtml}
+              <span class="aniv-balloon">🎈</span>
+              <div class="aniv-info">
+                <div class="aniv-name"><a href="#" onclick="event.preventDefault();window.openDrawer('edit','${escapeHtml(item.id)}');return false;">${escapeHtml(item.name)}</a></div>
+                <div class="aniv-sub" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span>${item.ageWillTurn}.º aniversário</span>
+                  ${_relBadgeHtml(item.relLabel, focusId, item.id)}
+                </div>
+              </div>
+              <span class="${badgeCls}">${daysText}</span>
+            </div>`;
+        });
+        html += '</div>';
+        return html;
+      }
+
+      function render() {
+        const wrap   = document.getElementById('aniv-wrap');
+        const slice  = allGroups.slice(0, shownMonths);
+        const more   = shownMonths < allGroups.length;
+
+        let html = slice.map(renderGroup).join('');
+
+        if (more) {
+          html += `<div style="text-align:center;margin-top:20px">
+            <button id="aniv-more-btn" class="btn btn-ghost">
+              <i class="mdi mdi-chevron-down"></i> Ver mais
+            </button>
+          </div>`;
+        }
+
+        wrap.innerHTML = html;
+
+        if (more) {
+          document.getElementById('aniv-more-btn').addEventListener('click', function () {
+            shownMonths += PAGE_MONTHS;
+            render();
+          });
+        }
+      }
+
+      try {
+        const people = DB.getIndividuals().filter(function (p) { return !p.deletedAt; });
+        const living = people.filter(function (p) { return !DB.getDeathEvent(p); });
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcoming = [];
+        living.forEach(function (p) {
+          const bev = DB.getBirthEvent(p);
+          if (!bev || !bev.date) return;
+          const bd = parseGedcomDate(bev.date);
+          if (!bd || bd.month === undefined) return;
+
+          let next = new Date(today.getFullYear(), bd.month, bd.day);
+          next.setHours(0, 0, 0, 0);
+          if (next < today) next = new Date(today.getFullYear() + 1, bd.month, bd.day);
+
+          upcoming.push({
+            name:        DB.getDisplayName(p),
+            id:          p.id,
+            daysUntil:   Math.round((next - today) / 86400000),
+            ageWillTurn: next.getFullYear() - bd.year,
+            next:        next
+          });
+        });
+
+        upcoming.sort(function (a, b) { return a.daysUntil - b.daysUntil; });
+
+        // Compute relationships from the focused person
+        const focusSetting = DB.getSetting('focusedPerson');
+        focusId = (focusSetting && focusSetting.id) || '';
+        relMap  = computeRelationships(focusId);
+        upcoming.forEach(function(item) {
+          item.relLabel = relMap.has(item.id) ? relMap.get(item.id) : '';
+        });
+
+        const groupMap = new Map();
+        upcoming.forEach(function (item) {
+          const key = item.next.getFullYear() + '-' + item.next.getMonth();
+          if (!groupMap.has(key)) {
+            groupMap.set(key, { year: item.next.getFullYear(), month: item.next.getMonth(), items: [] });
+          }
+          groupMap.get(key).items.push(item);
+        });
+        allGroups = Array.from(groupMap.values());
+
+        const wrap = document.getElementById('aniv-wrap');
+        if (upcoming.length === 0) {
+          wrap.innerHTML = '<p class="aniv-empty"><i class="mdi mdi-cake-variant" style="font-size:2rem;display:block;margin-bottom:8px;opacity:0.3"></i>Sem aniversários registados.</p>';
+        } else {
+          render();
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById('aniv-wrap').innerHTML =
+          '<p class="aniv-empty">Erro ao carregar aniversários.</p>';
+      }
+    }());
+    </script>
+    <script src="photo-lightbox.js"></script>
+    <script src="edit-person-drawer.js"></script>
+    <script>
+      (function() {
+        const btn = document.getElementById('aniv-top-btn');
+        const scroller = document.querySelector('main.content');
+        if (!btn || !scroller) return;
+        scroller.addEventListener('scroll', function() {
+          if (scroller.scrollTop > 200) btn.classList.add('visible');
+          else btn.classList.remove('visible');
+        }, { passive: true });
+        btn.addEventListener('click', function() {
+          scroller.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }());
+    </script>
+    <script src="history-logger.js"></script>
+  </body>
+</html>

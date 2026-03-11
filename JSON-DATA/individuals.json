@@ -47083,9 +47083,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -47098,6 +47096,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [
@@ -47119,11 +47120,11 @@
     "fams": [
       "F400"
     ],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T14:03:16.604Z",
     "deletedAt": null
   },
   "I994": {
@@ -67456,9 +67457,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67471,6 +67470,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
@@ -67478,9 +67480,7 @@
     "fams": [
       "F500089"
     ],
-    "notes": [
-      "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1540."
-    ],
+    "notes": "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1540.",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67490,7 +67490,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T14:03:02.814Z",
     "deletedAt": null
   },
   "I500208": {
@@ -67596,9 +67596,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67611,12 +67609,15 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
     "famc": "F500067",
     "fams": [],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67626,7 +67627,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T14:03:11.783Z",
     "deletedAt": null
   },
   "I500211": {
@@ -67728,9 +67729,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67743,6 +67742,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
@@ -67750,7 +67752,7 @@
     "fams": [
       "F500090"
     ],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67760,7 +67762,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T14:03:07.617Z",
     "deletedAt": null
   },
   "I500214": {
@@ -67820,9 +67822,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67835,6 +67835,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
@@ -67842,9 +67845,7 @@
     "fams": [
       "F500091"
     ],
-    "notes": [
-      "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1516."
-    ],
+    "notes": "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1516.",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67854,7 +67855,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T14:02:51.874Z",
     "deletedAt": null
   },
   "I500216": {
@@ -67916,9 +67917,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67931,6 +67930,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
@@ -67938,9 +67940,7 @@
     "fams": [
       "F500092"
     ],
-    "notes": [
-      "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1521."
-    ],
+    "notes": "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1521.",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67950,7 +67950,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T14:02:56.531Z",
     "deletedAt": null
   },
   "I500218": {

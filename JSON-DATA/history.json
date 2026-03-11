@@ -1,5 +1,137 @@
 [
   {
+    "ts": "2026-03-11T14:03:16.505Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I993",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "Domingos Antunes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:14.539Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I993",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "Domingos Antunes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:11.711Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500210",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "João Henriques Henriques",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:10.841Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500210",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "João Henriques Henriques",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:07.487Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500213",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "João Vaz",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:06.331Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500213",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "João Vaz",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:02.730Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500207",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "Gregório Fernandes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:03:01.125Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500207",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "Gregório Fernandes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:02:56.442Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500217",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "Ambrósio João",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:02:55.357Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500217",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "Ambrósio João",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:02:51.830Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500215",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "Henrique Vaz",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T14:02:49.583Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500215",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "Henrique Vaz",
+    "actor": "+351931018263"
+  },
+  {
     "ts": "2026-03-11T13:32:24.204Z",
     "action": "GEDCOM importado — 3504 registos",
     "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",

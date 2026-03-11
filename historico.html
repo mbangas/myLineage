@@ -227,6 +227,23 @@
         line-height: 1.5;
       }
 
+      /* ── Action type badges ──────────────────────────────────────────── */
+      .hist-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.63rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+      .hist-badge-create { background: var(--green-soft);  color: var(--green); }
+      .hist-badge-update { background: var(--accent-soft); color: var(--accent); }
+      .hist-badge-delete { background: var(--red-soft);    color: var(--red); }
+
       @media (max-width: 700px) {
         .hist-wrap { padding: 0 16px 40px !important; margin-top: 16px; }
         .hist-search-wrap { max-width: 100%; }
@@ -386,11 +403,16 @@
             const meta = CAT_META[cat] || CAT_META['geral'];
             const subjectHtml = buildSubjectHtml(e);
             const actorHtml   = buildActorHtml(e);
+            const aType  = getActionType(e);
+            const ABADGE = { create: { cls:'create', lbl:'Criar' }, update: { cls:'update', lbl:'Actualizar' }, delete: { cls:'delete', lbl:'Eliminar' } };
+            const abMeta = ABADGE[aType] || ABADGE.update;
+            // Entity label = action text with the verb stripped
+            const entityLabel = escHtml(e.action.replace(/^(Criar|Actualizar|Eliminar)\s*/i, ''));
             html += `
               <div class="hist-entry">
                 <div class="hist-icon cat-${escHtml(cat)}"><i class="mdi ${escHtml(meta.icon)}" aria-hidden="true"></i></div>
                 <div class="hist-body">
-                  <div class="hist-action">${escHtml(e.action)}</div>
+                  <div class="hist-action"><span class="hist-badge hist-badge-${abMeta.cls}">${abMeta.lbl}</span> ${entityLabel}</div>
                   ${subjectHtml}
                   ${e.detail ? `<div class="hist-detail" title="${escHtml(e.detail)}">${escHtml(e.detail)}</div>` : ''}
                   ${actorHtml}
@@ -407,10 +429,18 @@
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       }
 
+      /** Detect action type from entry (new field or legacy text parsing) */
+      function getActionType(entry) {
+        if (entry.actionType) return entry.actionType;
+        if (/^Criar\b/i.test(entry.action))    return 'create';
+        if (/^Eliminar\b/i.test(entry.action)) return 'delete';
+        return 'update';
+      }
+
       /**
        * Build the subject HTML: the person/entity that was changed.
-       * For Individual entries shows a clickable link to open "Editar Pessoa".
-       * Falls back to legacy entries where the name was embedded in action text.
+       * For Individual entries shows a clickable link to open "Editar Pessoa",
+       * EXCEPT when the action was a deletion (person no longer exists).
        */
       function buildSubjectHtml(entry) {
         // New entries store subjectName; legacy entries embed name in action
@@ -423,8 +453,9 @@
         if (!name && entry.entity !== 'Individual') return '';
         if (!name) return '';
         const icon = '<i class="mdi mdi-account" aria-hidden="true"></i>';
-        const nameDisplay = (entry.entity === 'Individual' && entry.id && entry.id !== '?')
-          ? `<a href="app.html?edit=${encodeURIComponent(entry.id)}" title="Abrir Editar Pessoa">${escHtml(name)}</a>`
+        const isDeleted = getActionType(entry) === 'delete';
+        const nameDisplay = (!isDeleted && entry.entity === 'Individual' && entry.id && entry.id !== '?')
+          ? `<a href="app.html?edit=${encodeURIComponent(entry.id)}" title="Abrir editar pessoa">${escHtml(name)}</a>`
           : escHtml(name);
         return `<div class="hist-actor">${icon} ${nameDisplay}</div>`;
       }

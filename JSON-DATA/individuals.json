@@ -46997,9 +46997,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -47012,6 +47010,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [
@@ -47033,11 +47034,11 @@
     "fams": [
       "F400"
     ],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T09:53:27.891Z",
-    "updatedAt": "2026-03-11T09:53:27.891Z",
+    "updatedAt": "2026-03-11T11:42:22.044Z",
     "deletedAt": null
   },
   "I994": {
@@ -67431,9 +67432,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67446,12 +67445,15 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
     "famc": "F500067",
     "fams": [],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67461,7 +67463,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T09:53:27.891Z",
-    "updatedAt": "2026-03-11T09:53:27.891Z",
+    "updatedAt": "2026-03-11T11:51:22.946Z",
     "deletedAt": null
   },
   "I500210": {
@@ -67475,9 +67477,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -67490,12 +67490,15 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
     "famc": "F500067",
     "fams": [],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67505,7 +67508,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T09:53:27.891Z",
-    "updatedAt": "2026-03-11T09:53:27.891Z",
+    "updatedAt": "2026-03-11T11:41:06.529Z",
     "deletedAt": null
   },
   "I500211": {

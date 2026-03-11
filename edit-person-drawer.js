@@ -265,7 +265,9 @@
     var DB = _db(); if (!DB) return;
     if (!confirm('Apagar este evento?')) return;
     var indi = DB.getIndividual(personId); if (!indi) return;
+    var removedType = (indi.events[idx] || {}).type || 'EVEN';
     indi.events.splice(idx, 1);
+    indi._changeDetail = 'Evento removido: ' + (EVENT_TYPES[removedType] || removedType);
     DB.saveIndividual(indi);
     document.getElementById('drawerBody').innerHTML = _renderEvents(personId);
   };
@@ -304,6 +306,7 @@
     var age         = ((document.getElementById('editEvAge')        || {}).value || '').trim();
     var dateStr = buildGedcomDate(day, month, year, qual);
     indi.events[idx] = { type: type, date: dateStr || undefined, place: place || undefined, notes: notes || undefined, description: description || undefined, cause: cause || undefined, age: age || undefined };
+    indi._changeDetail = 'Evento editado: ' + (EVENT_TYPES[type] || type);
     DB.saveIndividual(indi);
     openDrawerSection(personId, 'eventos');
   };
@@ -338,6 +341,7 @@
     if (row) row.style.display = (type === 'MARR') ? '' : 'none';
   };
 
+  var EVENT_LABELS = { BIRT: 'Nascimento', BAPM: 'Batismo', CHR: 'Batizado', DEAT: 'Óbito', BURI: 'Sepultamento', CREM: 'Cremação', ADOP: 'Adoção', OCCU: 'Ocupação', RESI: 'Residência', EVEN: 'Evento', MARR: 'Casamento' };
   window._drawerSaveNewEvent = function (personId) {
     var DB   = _db(); if (!DB) return;
     var indi = DB.getIndividual(personId); if (!indi) return;
@@ -363,6 +367,7 @@
     } else {
       if (!indi.events) indi.events = [];
       indi.events.push(newEv);
+      indi._changeDetail = 'Novo evento: ' + (EVENT_TYPES[type] || type);
       DB.saveIndividual(indi);
     }
     openDrawerSection(personId, 'eventos');
@@ -418,12 +423,14 @@
       var hasDeat = indi.events.some(function (e) { return e.type === 'DEAT'; });
       if (!hasDeat) {
         indi.events.push({ type: 'DEAT' });
+        indi._changeDetail = 'Marcado/a como falecido/a';
         DB.saveIndividual(indi);
       }
     } else {
       var hadDeat = indi.events.some(function (e) { return e.type === 'DEAT'; });
       if (hadDeat) {
         indi.events = indi.events.filter(function (e) { return e.type !== 'DEAT'; });
+        indi._changeDetail = 'Falecido/a desmarcado/a';
         DB.saveIndividual(indi);
       }
     }
@@ -981,10 +988,25 @@
     } else if (_drawerPersonId) {
       var indi = DB.getIndividual(_drawerPersonId);
       if (indi) {
-        indi.names = [Object.assign({}, (indi.names && indi.names[0]) || {}, { given: given.trim(), surname: surname.trim(), marriedName: marriedName || undefined, aka: aka || undefined, type: 'birth' })];
-        indi.sex   = sex;
-        indi.notes = notes;
-        DB.saveIndividual(indi);
+        var oldN = (indi.names && indi.names[0]) || {};
+        var newGiven   = given.trim();
+        var newSurname = surname.trim();
+        var newMarried = marriedName || undefined;
+        var newAka     = aka || undefined;
+        var unchanged  = (oldN.given        || '') === newGiven
+                      && (oldN.surname      || '') === newSurname
+                      && (oldN.marriedName  || '') === (newMarried || '')
+                      && (oldN.aka          || '') === (newAka     || '')
+                      && (indi.sex          || 'U') === sex
+                      && (indi.notes        || '') === notes;
+        if (!unchanged) {
+          indi.names = [Object.assign({}, oldN, { given: newGiven, surname: newSurname, marriedName: newMarried, aka: newAka, type: 'birth' })];
+          indi.sex   = sex;
+          indi.notes = notes;
+          indi._changeDetail = 'Dados pessoais actualizados';
+          DB.saveIndividual(indi);
+          savedId = indi.id;
+        }
       }
     }
     closeDrawer();

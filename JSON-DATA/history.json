@@ -1,5 +1,71 @@
 [
   {
+    "ts": "2026-03-11T11:51:22.914Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500209",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "Domingos Henriques",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T11:51:21.029Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500209",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "Domingos Henriques",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T11:42:21.984Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I993",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "Domingos Antunes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T11:42:19.947Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I993",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "Domingos Antunes",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T11:41:06.435Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500210",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "João Henriques Henriques",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T11:41:04.517Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500210",
+    "detail": "",
+    "category": "pessoas",
+    "subjectName": "João Henriques Henriques",
+    "actor": "+351931018263"
+  },
+  {
     "ts": "2026-03-11T11:34:02.437Z",
     "entity": "Individual",
     "action": "Actualizar Indivíduo",

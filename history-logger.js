@@ -47,6 +47,13 @@
       const data = arguments[0];
       const isDelete = fnName.startsWith('delete');
 
+      // Consume optional caller-supplied change description before saving
+      let changeDetail = '';
+      if (data && typeof data === 'object' && data._changeDetail) {
+        changeDetail = data._changeDetail;
+        delete data._changeDetail;
+      }
+
       // For deletions, resolve the person's name BEFORE the record disappears
       let preDeleteName = '';
       if (isDelete && entityType === 'Individual') {
@@ -75,7 +82,7 @@
         }
 
         const actionText = `${verb} ${label}`;
-        const detail = personName ? '' : (label + ' ' + id);
+        const detail = changeDetail || (personName ? '' : (label + ' ' + id));
 
         // Capture the currently logged-in user
         let actorName = '';
@@ -92,6 +99,7 @@
           ts:          new Date().toISOString(),
           entity:      entityType,
           action:      actionText,
+          actionType:  actionKey,
           id:          String(id),
           detail:      detail,
           category:    category,

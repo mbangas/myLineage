@@ -314,8 +314,45 @@
       </main>
     </div>
 
+    <!-- ── Drawer overlay ── -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <!-- ── Person drawer ── -->
+    <div class="drawer" id="personDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-header">
+        <button class="btn btn-ghost btn-sm" id="drawerBackBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Voltar"><i class="mdi mdi-arrow-left"></i></button>
+        <h2 id="drawerTitle" style="flex:1;">Editar Pessoa</h2>
+        <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Ver na Árvore"><i class="mdi mdi-sitemap"></i></button>
+        <button class="drawer-close" id="drawerCloseBtn" aria-label="Fechar painel"><i class="mdi mdi-close"></i></button>
+      </div>
+      <div class="drawer-person-header" id="drawerPersonHeader">
+        <div class="drawer-avatar" id="drawerAvatar"></div>
+        <div>
+          <div class="drawer-person-name" id="drawerPersonName">—</div>
+          <div class="drawer-person-sub" id="drawerPersonSub"></div>
+        </div>
+      </div>
+      <div class="drawer-body" id="drawerBody"></div>
+      <div class="drawer-footer">
+        <button class="btn btn-danger btn-sm" id="drawerDeleteBtn"><i class="mdi mdi-delete-outline"></i> Apagar</button>
+        <button class="btn btn-ghost btn-sm" id="drawerCancelBtn">Cancelar</button>
+        <button class="btn btn-sm" id="drawerSaveBtn"><i class="mdi mdi-content-save-outline"></i> Guardar</button>
+      </div>
+    </div>
+
     <script src="remote-storage.js"></script>
     <script src="auth.js"></script>
+    <script>
+      window.DRAWER_CONFIG = {
+        treeBtnAction: function(personId) {
+          if (window.GedcomDB) window.GedcomDB.setSetting('tempFocusPerson', personId);
+          window.location.href = 'arvore.html';
+        },
+        afterSave:   function() { render(); },
+        afterDelete: function() { render(); }
+      };
+    </script>
+    <script src="edit-person-drawer.js"></script>
     <script>
       /* ── config ──────────────────────────────────────────────────────── */
       const DB = window.GedcomDB;
@@ -401,19 +438,33 @@
           for (const e of entries) {
             const cat  = e.category || 'geral';
             const meta = CAT_META[cat] || CAT_META['geral'];
-            const subjectHtml = buildSubjectHtml(e);
-            const actorHtml   = buildActorHtml(e);
+            const actorHtml = buildActorHtml(e);
             const aType  = getActionType(e);
             const ABADGE = { create: { cls:'create', lbl:'Criar' }, update: { cls:'update', lbl:'Actualizar' }, delete: { cls:'delete', lbl:'Eliminar' } };
             const abMeta = ABADGE[aType] || ABADGE.update;
-            // Entity label = action text with the verb stripped
-            const entityLabel = escHtml(e.action.replace(/^(Criar|Actualizar|Eliminar)\s*/i, ''));
+            const isDeleted = aType === 'delete';
+            // Resolve subject name (new field or legacy parse)
+            let subjName = e.subjectName || '';
+            if (!subjName && e.entity === 'Individual') {
+              const m = e.action.match(/:\s*(.+)$/);
+              if (m) subjName = m[1].trim();
+            }
+            // Action label: person name (linked) for individuals, entity type otherwise
+            let actionLabel;
+            if (e.entity === 'Individual' && subjName) {
+              const safeId   = escHtml(e.id || '');
+              const safeName = escHtml(subjName);
+              actionLabel = (!isDeleted && e.id && e.id !== '?')
+                ? `<a href="#" onclick="event.preventDefault();window.openDrawer('edit','${safeId}')" title="Abrir editar pessoa">${safeName}</a>`
+                : safeName;
+            } else {
+              actionLabel = escHtml(e.action.replace(/^(Criar|Actualizar|Eliminar)\s*/i, ''));
+            }
             html += `
               <div class="hist-entry">
                 <div class="hist-icon cat-${escHtml(cat)}"><i class="mdi ${escHtml(meta.icon)}" aria-hidden="true"></i></div>
                 <div class="hist-body">
-                  <div class="hist-action"><span class="hist-badge hist-badge-${abMeta.cls}">${abMeta.lbl}</span> ${entityLabel}</div>
-                  ${subjectHtml}
+                  <div class="hist-action"><span class="hist-badge hist-badge-${abMeta.cls}">${abMeta.lbl}</span> ${actionLabel}</div>
                   ${e.detail ? `<div class="hist-detail" title="${escHtml(e.detail)}">${escHtml(e.detail)}</div>` : ''}
                   ${actorHtml}
                 </div>
@@ -455,7 +506,7 @@
         const icon = '<i class="mdi mdi-account" aria-hidden="true"></i>';
         const isDeleted = getActionType(entry) === 'delete';
         const nameDisplay = (!isDeleted && entry.entity === 'Individual' && entry.id && entry.id !== '?')
-          ? `<a href="app.html?edit=${encodeURIComponent(entry.id)}" title="Abrir editar pessoa">${escHtml(name)}</a>`
+          ? `<a href="#" onclick="event.preventDefault();window.openDrawer('edit',${JSON.stringify(entry.id)})" title="Abrir editar pessoa">${escHtml(name)}</a>`
           : escHtml(name);
         return `<div class="hist-actor">${icon} ${nameDisplay}</div>`;
       }

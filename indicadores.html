@@ -794,6 +794,26 @@
               </div>
             </div>
 
+            <div class="dash-row dash-row-thirds">
+              <div class="dash-panel">
+                <div class="dash-panel-header"><span class="panel-dot" style="background:#e2a052"></span> Pai mais velho</div>
+                <div class="dash-panel-body"><div class="rec-list" id="rec-oldest-father"><p class="no-data">A calcular…</p></div></div>
+              </div>
+              <div class="dash-panel">
+                <div class="dash-panel-header"><span class="panel-dot" style="background:#ef799e"></span> Mãe mais velha</div>
+                <div class="dash-panel-body"><div class="rec-list" id="rec-oldest-mother"><p class="no-data">A calcular…</p></div></div>
+              </div>
+              <div class="dash-panel stat-panel" style="--stat-clr:#73bf69">
+                <div class="dash-panel-header"><span class="panel-dot" style="background:#73bf69"></span> Média de filhos por casal</div>
+                <div class="dash-panel-body">
+                  <div class="stat-icon"><i class="mdi mdi-account-group"></i></div>
+                  <div class="stat-value" id="stat-avg-children">—</div>
+                  <div class="stat-label">filhos por casal</div>
+                  <div class="stat-sub" id="stat-avg-children-sub"></div>
+                </div>
+              </div>
+            </div>
+
             <div class="dash-row">
               <div class="dash-panel">
                 <div class="dash-panel-header">
@@ -1452,6 +1472,69 @@
           if(elLongest) elLongest.innerHTML = longest
             ? recCardFamily(longest.f, 'Casal vivo — casado desde '+longest.yr, longest.duration+' anos', longest.f.id, '#ff9830')
             : '<p class="no-data">Sem casais vivos com data de casamento</p>';
+
+          // ── Oldest father & oldest mother ─────────────────────────────
+          // For each parent, find the child birth year furthest from the parent birth year
+          const oldestFatherCandidates = [];
+          const oldestMotherCandidates = [];
+          families.forEach(f => {
+            const childBirthYears = (f.children || []).map(cid => {
+              const child = personMap[cid];
+              return child ? birthYear(child) : null;
+            }).filter(y => y !== null);
+            if(childBirthYears.length === 0) return;
+            // Use the latest child's birth year (maximum age at parenthood)
+            const latestChildYear = Math.max(...childBirthYears);
+            if(f.husb) {
+              const father = personMap[f.husb];
+              if(father) {
+                const fy = birthYear(father);
+                if(fy !== null) {
+                  const ageAtParenthood = latestChildYear - fy;
+                  if(ageAtParenthood >= 10 && ageAtParenthood < 100) {
+                    oldestFatherCandidates.push({ p: father, age: ageAtParenthood, childYear: latestChildYear });
+                  }
+                }
+              }
+            }
+            if(f.wife) {
+              const mother = personMap[f.wife];
+              if(mother) {
+                const my = birthYear(mother);
+                if(my !== null) {
+                  const ageAtParenthood = latestChildYear - my;
+                  if(ageAtParenthood >= 10 && ageAtParenthood < 80) {
+                    oldestMotherCandidates.push({ p: mother, age: ageAtParenthood, childYear: latestChildYear });
+                  }
+                }
+              }
+            }
+          });
+          oldestFatherCandidates.sort((a, b) => b.age - a.age);
+          oldestMotherCandidates.sort((a, b) => b.age - a.age);
+          const oldestFather = oldestFatherCandidates[0];
+          const oldestMother = oldestMotherCandidates[0];
+
+          const elOldestFather = document.getElementById('rec-oldest-father');
+          if(elOldestFather) elOldestFather.innerHTML = oldestFather
+            ? recCard(DB.getDisplayName(oldestFather.p), 'Pai mais velho ao ter um filho', oldestFather.age + ' anos', 'filho em ' + oldestFather.childYear, '#e2a052', oldestFather.p.id)
+            : '<p class="no-data">Sem dados suficientes</p>';
+
+          const elOldestMother = document.getElementById('rec-oldest-mother');
+          if(elOldestMother) elOldestMother.innerHTML = oldestMother
+            ? recCard(DB.getDisplayName(oldestMother.p), 'Mãe mais velha ao ter um filho', oldestMother.age + ' anos', 'filho em ' + oldestMother.childYear, '#ef799e', oldestMother.p.id)
+            : '<p class="no-data">Sem dados suficientes</p>';
+
+          // ── Average children per couple ────────────────────────────────
+          const famsWithSpouse = families.filter(f => f.husb || f.wife);
+          const totalChildren = famsWithSpouse.reduce((acc, f) => acc + (f.children || []).length, 0);
+          const avgChildren = famsWithSpouse.length > 0 ? (totalChildren / famsWithSpouse.length) : 0;
+          const elAvgChildren = document.getElementById('stat-avg-children');
+          const elAvgChildrenSub = document.getElementById('stat-avg-children-sub');
+          if(elAvgChildren) elAvgChildren.textContent = avgChildren > 0 ? avgChildren.toFixed(1) : '—';
+          if(elAvgChildrenSub) elAvgChildrenSub.textContent = famsWithSpouse.length > 0
+            ? totalChildren + ' filhos em ' + famsWithSpouse.length + ' fam' + (famsWithSpouse.length !== 1 ? 'ílias' : 'ília')
+            : '';
 
         })();
 

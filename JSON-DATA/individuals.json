@@ -67965,9 +67965,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "F",
@@ -67980,6 +67978,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [],
@@ -67987,9 +67988,7 @@
     "fams": [
       "F500092"
     ],
-    "notes": [
-      "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1516"
-    ],
+    "notes": "Não existem registos de nascimento (baptismos, Igreja Católica) anteriores a 1604 na freguesia da Freixiosa, concelho de Mangualde, distrito de Viseu, Portugal. Provavelmente nasceu em 1516",
     "sourceRefs": [
       {
         "sourceId": "S500002",
@@ -67999,7 +67998,7 @@
     ],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-11T18:25:59.265Z",
     "deletedAt": null
   },
   "I500227": {

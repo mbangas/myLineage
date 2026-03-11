@@ -198,6 +198,53 @@
       }
       .dash-row-4 { grid-template-columns: repeat(4, 1fr); }
 
+      /* ── Mini KPI cards – Qualidade dos Dados ────────────────── */
+      .val-kpi-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        height: 100%;
+        justify-content: space-between;
+      }
+      .val-kpi-mini {
+        flex: 1;
+        background: #111520;
+        border-radius: 4px;
+        border-left: 3px solid var(--vkpi-clr, #5294e2);
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s;
+        min-height: 72px;
+      }
+      .val-kpi-mini:hover { background: #161925; }
+      .val-kpi-mini-erro  { --vkpi-clr: #e05252; }
+      .val-kpi-mini-aviso { --vkpi-clr: #e0a132; }
+      .val-kpi-mini-info  { --vkpi-clr: #5294e2; }
+      .val-kpi-mini-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--vkpi-clr, #5294e2);
+      }
+      .val-kpi-mini-value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .val-kpi-mini-sub {
+        font-size: 0.68rem;
+        color: #6b7a94;
+        margin-top: 2px;
+      }
+
       /* Responsive */
       @media (max-width: 1200px) {
         .dash-row-kpi      { grid-template-columns: repeat(3,1fr); }
@@ -558,13 +605,38 @@
           <!-- Tab: Geral ─────────────────────────────────────────────── -->
           <div class="dash-tab-content active" id="tab-geral">
 
-            <div class="dash-row dash-row-half">
+            <div class="dash-row dash-row-thirds">
+              <!-- Qualidade dos Dados -->
+              <div class="dash-panel">
+                <div class="dash-panel-header"><span class="panel-dot" style="background:#e05252"></span> Qualidade dos Dados <a href="validacao.html" style="font-size:0.65rem;font-weight:400;opacity:.5;margin-left:6px;color:inherit;text-decoration:none;">→ Validação</a></div>
+                <div class="dash-panel-body" style="padding:10px 14px">
+                  <div class="val-kpi-stack">
+                    <a class="val-kpi-mini val-kpi-mini-erro" href="validacao.html" title="Ver erros na Validação">
+                      <div class="val-kpi-mini-label">Erros</div>
+                      <div class="val-kpi-mini-value" id="dash-val-erros">–</div>
+                      <div class="val-kpi-mini-sub">impacto crítico</div>
+                    </a>
+                    <a class="val-kpi-mini val-kpi-mini-aviso" href="validacao.html" title="Ver avisos na Validação">
+                      <div class="val-kpi-mini-label">Avisos</div>
+                      <div class="val-kpi-mini-value" id="dash-val-avisos">–</div>
+                      <div class="val-kpi-mini-sub">requer atenção</div>
+                    </a>
+                    <a class="val-kpi-mini val-kpi-mini-info" href="validacao.html" title="Ver informações na Validação">
+                      <div class="val-kpi-mini-label">Informações</div>
+                      <div class="val-kpi-mini-value" id="dash-val-infos">–</div>
+                      <div class="val-kpi-mini-sub">boa prática</div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <!-- Distribuição por Género -->
               <div class="dash-panel">
                 <div class="dash-panel-header"><span class="panel-dot" style="background:#5294e2"></span> Distribuição por Género</div>
                 <div class="dash-panel-body" style="align-items:center;padding:16px 14px">
                   <canvas id="chartGenero"></canvas>
                 </div>
               </div>
+              <!-- Eventos por Tipo -->
               <div class="dash-panel">
                 <div class="dash-panel-header"><span class="panel-dot" style="background:#ff9830"></span> Eventos por Tipo</div>
                 <div class="dash-panel-body">
@@ -904,6 +976,130 @@
         return DB.extractYear(dateStr);
       }
 
+      // ── Validation issue counter (mirrors validacao.html rules) ───────
+      function countValidationIssues(){
+        const individuals = DB.getIndividuals();
+        const families    = DB.getFamilies();
+        const counts = { erro: 0, aviso: 0, info: 0 };
+        function add(sev){ counts[sev]++; }
+
+        const indiMap = {};
+        individuals.forEach(p => { indiMap[p.id] = p; });
+        const famMap = {};
+        families.forEach(f => { famMap[f.id] = f; });
+        const active     = individuals.filter(p => !p.deletedAt);
+        const activeFams = families.filter(f => !f.deletedAt);
+        const curYear    = new Date().getFullYear();
+
+        function evYear(ev){ return ev ? DB.extractYear(ev.date || '') : null; }
+        function evOf(p, t){ return (p.events||[]).filter(e=>e.type===t); }
+        function firstYear(p, t){ const es=evOf(p,t); return es.length ? evYear(es[0]) : null; }
+        function marrYears(p){
+          const yrs=[];
+          (p.fams||[]).forEach(fid=>{
+            const f=famMap[fid]; if(!f||f.deletedAt) return;
+            (f.events||[]).filter(e=>e.type==='MARR').forEach(e=>{ const y=evYear(e); if(y!==null) yrs.push(y); });
+          });
+          return yrs;
+        }
+
+        // F1 – no given name
+        active.forEach(p=>{ const g=(((p.names&&p.names[0])||{}).given||'').trim();
+          if(!g||g.toLowerCase()==='<desconhecido>'||g.toLowerCase()==='desconhecido') add('aviso'); });
+        // F2 – gender not defined
+        active.forEach(p=>{ if(!p.sex||p.sex==='U'||p.sex==='') add('info'); });
+        // F3 – no family connection
+        if(active.length>1) active.forEach(p=>{ if(!p.famc&&!(p.fams&&p.fams.length)) add('info'); });
+        // F5 – birth after death
+        active.forEach(p=>{ const by=firstYear(p,'BIRT'),dy=firstYear(p,'DEAT');
+          if(by!==null&&dy!==null&&by>dy) add('erro'); });
+        // F6 – birth in future
+        active.forEach(p=>{ const by=firstYear(p,'BIRT'); if(by!==null&&by>curYear) add('aviso'); });
+        // F7 – age > 120 (alive)
+        active.forEach(p=>{ const by=firstYear(p,'BIRT'),dy=firstYear(p,'DEAT');
+          if(by!==null&&dy===null&&curYear-by>120) add('aviso'); });
+        // F8 / F8b – child born before or too close to parent
+        active.forEach(p=>{
+          const cy=firstYear(p,'BIRT'); if(cy===null||!p.famc) return;
+          const fam=famMap[p.famc]; if(!fam||fam.deletedAt) return;
+          [fam.husb,fam.wife].forEach(pid=>{
+            if(!pid) return;
+            const par=indiMap[pid]; if(!par||par.deletedAt) return;
+            const py=firstYear(par,'BIRT'); if(py===null) return;
+            if(cy<=py) add('erro'); else if(cy-py<16) add('aviso');
+          });
+        });
+        // F9 – multiple birth/death events
+        active.forEach(p=>{ ['BIRT','DEAT'].forEach(t=>{ if(evOf(p,t).length>1) add('aviso'); }); });
+        // F10 – event before birth
+        active.forEach(p=>{ const by=firstYear(p,'BIRT'); if(by===null) return;
+          (p.events||[]).filter(e=>e.type!=='BIRT').forEach(ev=>{ const y=evYear(ev); if(y!==null&&y<by) add('erro'); }); });
+        // F11 – siblings too close in age
+        activeFams.forEach(fam=>{
+          const ch=(fam.children||[]).map(cid=>indiMap[cid]).filter(c=>c&&!c.deletedAt);
+          if(ch.length<2) return;
+          const MONTHS={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+          const sb=ch.map(c=>{ const es=evOf(c,'BIRT'); if(!es.length) return null;
+            const yr=evYear(es[0]); if(yr===null) return null;
+            const mm=es[0].date.match(/\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/);
+            return {yr,mo:mm?MONTHS[mm[1]]:null}; }).filter(Boolean);
+          for(let i=0;i<sb.length;i++) for(let j=i+1;j<sb.length;j++){
+            const a=sb[i],b=sb[j],d=Math.abs(a.yr-b.yr);
+            let close=d===0||(d===1&&a.mo!==null&&b.mo!==null&&((12-(a.yr<b.yr?a.mo:b.mo))+(a.yr<b.yr?b.mo:a.mo))<9);
+            if(close) add('aviso');
+          }
+        });
+        // F12 – married too young
+        active.forEach(p=>{ const by=firstYear(p,'BIRT'); if(by===null) return;
+          marrYears(p).forEach(my=>{ if(my-by<16) add('aviso'); }); });
+        // F13 – died before marriage
+        active.forEach(p=>{ const dy=firstYear(p,'DEAT'); if(dy===null) return;
+          marrYears(p).forEach(my=>{ if(dy<my) add('erro'); }); });
+        // F14 – siblings with same given name
+        activeFams.forEach(fam=>{
+          const ch=(fam.children||[]).map(cid=>indiMap[cid]).filter(c=>c&&!c.deletedAt);
+          if(ch.length<2) return;
+          const nm=new Map();
+          ch.forEach(c=>{ const fn=(((c.names&&c.names[0])||{}).given||'').trim().toLowerCase();
+            if(!fn||fn==='<desconhecido>'||fn==='desconhecido') return;
+            nm.set(fn,(nm.get(fn)||0)+1); });
+          nm.forEach(cnt=>{ if(cnt>=2) add('aviso'); });
+        });
+        // T1 – families referencing non-existent individuals
+        activeFams.forEach(fam=>{
+          [fam.husb,fam.wife].filter(Boolean).forEach(pid=>{ if(!indiMap[pid]) add('erro'); });
+          (fam.children||[]).forEach(cid=>{ if(!indiMap[cid]) add('erro'); });
+        });
+        // T1b – individual referencing non-existent families
+        active.forEach(p=>{
+          if(p.famc&&!famMap[p.famc]) add('erro');
+          (p.fams||[]).forEach(fid=>{ if(!famMap[fid]) add('erro'); });
+        });
+        // T2 – missing reciprocal refs
+        active.forEach(p=>{
+          if(p.famc&&famMap[p.famc]&&!(famMap[p.famc].children||[]).includes(p.id)) add('aviso');
+          (p.fams||[]).forEach(fid=>{ const f=famMap[fid]; if(f&&f.husb!==p.id&&f.wife!==p.id) add('aviso'); });
+        });
+        activeFams.forEach(fam=>{
+          [fam.husb,fam.wife].filter(Boolean).forEach(pid=>{ const p=indiMap[pid]; if(p&&!p.deletedAt&&!(p.fams||[]).includes(fam.id)) add('aviso'); });
+          (fam.children||[]).forEach(cid=>{ const c=indiMap[cid]; if(c&&!c.deletedAt&&c.famc!==fam.id) add('aviso'); });
+        });
+        // T3 – duplicate children/fams entries
+        activeFams.forEach(fam=>{ const s=new Set(); (fam.children||[]).forEach(cid=>{ if(s.has(cid)) add('aviso'); s.add(cid); }); });
+        active.forEach(p=>{ const s=new Set(); (p.fams||[]).forEach(fid=>{ if(s.has(fid)) add('aviso'); s.add(fid); }); });
+        // T4 – duplicate individual IDs
+        const idCnt={}; individuals.forEach(p=>{ idCnt[p.id]=(idCnt[p.id]||0)+1; });
+        Object.values(idCnt).forEach(c=>{ if(c>1) add('erro'); });
+        // T5 – circular ancestry
+        active.forEach(p=>{ const vis=new Set(); let cur=p;
+          while(cur&&cur.famc){ if(vis.has(cur.id)){ add('erro'); break; } vis.add(cur.id);
+            const f=famMap[cur.famc]; if(!f) break; const pid=f.husb||f.wife; if(!pid) break; cur=indiMap[pid]; } });
+        // T6 – BIRT/DEAT without parseable date
+        active.forEach(p=>{ ['BIRT','DEAT'].forEach(t=>{ evOf(p,t).forEach(ev=>{ if(evYear(ev)===null) add('info'); }); }); });
+
+        return counts;
+      }
+
       // ── Main build ────────────────────────────────────────────────────
       function buildDashboard(){
         const pessoas  = DB.getIndividuals();
@@ -940,6 +1136,17 @@
 
         const luEl = document.getElementById('lastUpdated');
         if(luEl) luEl.textContent = 'Atualizado: '+new Date().toLocaleTimeString('pt-BR');
+
+        // ── Validação – Qualidade dos Dados ──────────────────────────
+        {
+          const vc = countValidationIssues();
+          const eEl = document.getElementById('dash-val-erros');
+          const aEl = document.getElementById('dash-val-avisos');
+          const iEl = document.getElementById('dash-val-infos');
+          if(eEl) eEl.textContent = vc.erro;
+          if(aEl) aEl.textContent = vc.aviso;
+          if(iEl) iEl.textContent = vc.info;
+        }
 
         // ── Distribuição por Género (donut) ───────────────────────────
         {

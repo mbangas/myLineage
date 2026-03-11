@@ -223,7 +223,7 @@
   /* ══════════════════════════════════════════════════════════════════════════
      EVENTS SECTION
   ══════════════════════════════════════════════════════════════════════════ */
-  var EVENT_TYPES = {BIRT:'Nascimento',BAPM:'Batismo',DEAT:'Óbito',ADOP:'Adoção',DIV:'Divórcio',EVEN:'Outro'};
+  var EVENT_TYPES = {BIRT:'Nascimento',BAPM:'Batismo',CHR:'Crisma',DEAT:'Óbito',ADOP:'Adoção',DIV:'Divórcio',EVEN:'Outro'};
 
   function _renderEvents(personId) {
     var DB   = _db();
@@ -360,7 +360,7 @@
     if (row) row.style.display = (type === 'DEAT') ? '' : 'none';
   };
 
-  var EVENT_LABELS = { BIRT: 'Nascimento', BAPM: 'Batismo', DEAT: 'Óbito', ADOP: 'Adoção', DIV: 'Divórcio', EVEN: 'Evento', MARR: 'Casamento' };
+  var EVENT_LABELS = { BIRT: 'Nascimento', BAPM: 'Batismo', CHR: 'Crisma', DEAT: 'Óbito', ADOP: 'Adoção', DIV: 'Divórcio', EVEN: 'Evento', MARR: 'Casamento' };
   window._drawerSaveNewEvent = function (personId) {
     var DB   = _db(); if (!DB) return;
     var indi = DB.getIndividual(personId); if (!indi) return;

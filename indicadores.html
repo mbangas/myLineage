@@ -573,10 +573,14 @@
               </div>
             </div>
 
-            <div class="dash-row">
+            <div class="dash-row dash-row-half">
               <div class="dash-panel">
                 <div class="dash-panel-header"><span class="panel-dot" style="background:#b877d9"></span> Mais antigos na árvore</div>
                 <div class="dash-panel-body"><div class="rec-list" id="rec-mais-antigos"><p class="no-data">A calcular…</p></div></div>
+              </div>
+              <div class="dash-panel">
+                <div class="dash-panel-header"><span class="panel-dot" style="background:#43b89c"></span> Mais novos na árvore</div>
+                <div class="dash-panel-body"><div class="rec-list" id="rec-mais-novos-arvore"><p class="no-data">A calcular…</p></div></div>
               </div>
             </div>
 
@@ -1423,6 +1427,15 @@
           if(elAntigos) elAntigos.innerHTML =
             recCard(antM ? DB.getDisplayName(antM.p) : null, 'Homem mais antigo na árvore', antM ? antM.by.toString() : '', antM ? (isAlive(antM.p) ? 'vivo' : 'falecido') : '', '#b877d9', antM ? antM.p.id : null) +
             recCard(antF ? DB.getDisplayName(antF.p) : null, 'Mulher mais antiga na árvore', antF ? antF.by.toString() : '', antF ? (isAlive(antF.p) ? 'viva' : 'falecida') : '', '#b877d9', antF ? antF.p.id : null);
+
+          // ── 7b. Newest in tree (any status) by latest birth year ──
+          const novArvM = treeAged.filter(x => x.p.sex==='M').sort((a,b)=>b.by-a.by)[0];
+          const novArvF = treeAged.filter(x => x.p.sex==='F').sort((a,b)=>b.by-a.by)[0];
+
+          const elNovosArvore = document.getElementById('rec-mais-novos-arvore');
+          if(elNovosArvore) elNovosArvore.innerHTML =
+            recCard(novArvM ? DB.getDisplayName(novArvM.p) : null, 'Homem mais novo na árvore', novArvM ? novArvM.by.toString() : '', novArvM ? (isAlive(novArvM.p) ? 'vivo' : 'falecido') : '', '#43b89c', novArvM ? novArvM.p.id : null) +
+            recCard(novArvF ? DB.getDisplayName(novArvF.p) : null, 'Mulher mais nova na árvore', novArvF ? novArvF.by.toString() : '', novArvF ? (isAlive(novArvF.p) ? 'viva' : 'falecida') : '', '#43b89c', novArvF ? novArvF.p.id : null);
 
           // ── 3 & 4. Oldest / most recent marriage ─────────────────────
           const marrFams = [];

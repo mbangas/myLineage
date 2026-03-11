@@ -223,7 +223,7 @@
   /* ══════════════════════════════════════════════════════════════════════════
      EVENTS SECTION
   ══════════════════════════════════════════════════════════════════════════ */
-  var EVENT_TYPES = {BIRT:'Nascimento',BAPM:'Batismo',CHR:'Batizado',DEAT:'\u00d3bito',BURI:'Sepultamento',CREM:'Crema\u00e7\u00e3o',ADOP:'Ado\u00e7\u00e3o',OCCU:'Ocupa\u00e7\u00e3o',RESI:'Resid\u00eancia',EVEN:'Outro'};
+  var EVENT_TYPES = {BIRT:'Nascimento',BAPM:'Batismo',DEAT:'Óbito',ADOP:'Adoção',DIV:'Divórcio',EVEN:'Outro'};
 
   function _renderEvents(personId) {
     var DB   = _db();
@@ -283,14 +283,14 @@
     var pid  = _esc(personId);
     var opts = Object.entries(EVENT_TYPES).map(function (e) { return '<option value="' + e[0] + '"' + (ev.type === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('');
     document.getElementById('drawerBody').innerHTML = '<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Editar Evento</h3>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="editEvType" onchange="_drawerToggleAgeField(\'edit\',this.value)" style="width:100%;">' + opts + '</select></div>'
+      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="editEvType" onchange="_drawerToggleAgeField(\'edit\',this.value);_drawerToggleCauseField(\'edit\',this.value)" style="width:100%;">' + opts + '</select></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="editEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente"' + ((!p.qualifier || p.qualifier === 'Exatamente') ? ' selected' : '') + '>Exatamente</option><option value="Antes de"' + (p.qualifier === 'Antes de' ? ' selected' : '') + '>Antes de</option><option value="Depois de"' + (p.qualifier === 'Depois de' ? ' selected' : '') + '>Depois de</option><option value="Cerca de"' + (p.qualifier === 'Cerca de' ? ' selected' : '') + '>Cerca de</option></select>'
       + '<div style="display:flex;gap:6px;"><input id="editEvDay" type="number" min="1" max="31" placeholder="Dia" value="' + (p.day || '') + '" style="flex:1;min-width:0;text-align:center;"/><input id="editEvMonth" type="number" min="1" max="12" placeholder="M\u00eas" value="' + (p.month || '') + '" style="flex:1;min-width:0;text-align:center;"/><input id="editEvYear" type="number" min="1" max="9999" placeholder="Ano" value="' + (p.year || '') + '" style="flex:2;min-width:0;text-align:center;"/></div></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="editEvPlace" type="text" value="' + _esc(ev.place || '') + '" style="width:100%;"/></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Pa\u00eds</label><input id="editEvCountry" type="text" list="ctCountryList" autocomplete="off" value="' + _esc(ev.country || '') + '" style="width:100%;"/></div>'
       + _CT_DATALIST
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Descri\u00e7\u00e3o</label><input id="editEvDescription" type="text" value="' + _esc(ev.description || '') + '" placeholder="Descri\u00e7\u00e3o do evento" style="width:100%;"/></div>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Causa</label><input id="editEvCause" type="text" value="' + _esc(ev.cause || '') + '" placeholder="Causa (ex: doen\u00e7a)" style="width:100%;"/></div>'
+      + '<div id="editEvCauseRow" style="margin-bottom:10px;' + (ev.type === 'DEAT' ? '' : 'display:none;') + '"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Causa</label><input id="editEvCause" type="text" value="' + _esc(ev.cause || '') + '" placeholder="Causa (ex: doen\u00e7a)" style="width:100%;"/></div>'
       + '<div id="editEvAgeRow" style="margin-bottom:10px;' + (ev.type === 'BIRT' ? 'display:none;' : '') + '"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Idade</label><input id="editEvAge" type="text" value="' + _esc(ev.age || '') + '" placeholder="Idade na altura" style="width:100%;"/></div>'
       + '<div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="editEvNotes" rows="3" style="width:100%;resize:vertical;">' + _esc(ev.notes || '') + '</textarea></div>'
       + '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\'' + pid + '\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveEditEvent(' + idx + ',\'' + pid + '\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
@@ -320,7 +320,8 @@
   window._drawerShowAddEvent = function (personId) {
     var DB   = _db(); if (!DB) return;
     var pid  = _esc(personId);
-    var opts = Object.entries(EVENT_TYPES).map(function (e) { return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join('');
+    var opts = Object.entries(EVENT_TYPES).filter(function (e) { return e[0] !== 'EVEN'; }).map(function (e) { return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join('');
+    var evenOpt = '<option value="EVEN">Outro</option>';
     var spouseFams = DB.getFamilies().filter(function (f) { return f.husb === personId || f.wife === personId; });
     var marrOpt  = spouseFams.length ? '<option value="MARR">Casamento</option>' : '';
     var famOpts  = spouseFams.map(function (fam) {
@@ -331,14 +332,14 @@
     }).join('');
     var famRow = spouseFams.length ? '<div id="addEvFamRow" style="margin-bottom:10px;display:none;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">C\u00f4njuge</label><select id="addEvFamId" style="width:100%;">' + famOpts + '</select></div>' : '';
     document.getElementById('drawerBody').innerHTML = '<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Novo Evento</h3>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="addEvType" onchange="_drawerToggleMarrFamily(this.value);_drawerToggleAgeField(\'add\',this.value)" style="width:100%;">' + opts + marrOpt + '</select></div>'
+      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="addEvType" onchange="_drawerToggleMarrFamily(this.value);_drawerToggleAgeField(\'add\',this.value);_drawerToggleCauseField(\'add\',this.value)" style="width:100%;">' + opts + marrOpt + evenOpt + '</select></div>'
       + famRow
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="addEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente" selected>Exatamente</option><option value="Antes de">Antes de</option><option value="Depois de">Depois de</option><option value="Cerca de">Cerca de</option></select><div style="display:flex;gap:6px;"><input id="addEvDay" type="number" min="1" max="31" placeholder="Dia" style="flex:1;min-width:0;text-align:center;"/><input id="addEvMonth" type="number" min="1" max="12" placeholder="M\u00eas" style="flex:1;min-width:0;text-align:center;"/><input id="addEvYear" type="number" min="1" max="9999" placeholder="Ano" style="flex:2;min-width:0;text-align:center;"/></div></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="addEvPlace" type="text" placeholder="Local do evento" style="width:100%;"/></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Pa\u00eds</label><input id="addEvCountry" type="text" list="ctCountryList" autocomplete="off" placeholder="Pa\u00eds do evento" style="width:100%;"/></div>'
       + _CT_DATALIST
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Descri\u00e7\u00e3o</label><input id="addEvDescription" type="text" placeholder="Descri\u00e7\u00e3o do evento" style="width:100%;"/></div>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Causa</label><input id="addEvCause" type="text" placeholder="Causa (ex: doen\u00e7a)" style="width:100%;"/></div>'
+      + '<div id="addEvCauseRow" style="margin-bottom:10px;display:none;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Causa</label><input id="addEvCause" type="text" placeholder="Causa (ex: doen\u00e7a)" style="width:100%;"/></div>'
       + '<div id="addEvAgeRow" style="margin-bottom:10px;display:none;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Idade</label><input id="addEvAge" type="text" placeholder="Idade na altura" style="width:100%;"/></div>'
       + '<div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="addEvNotes" rows="3" placeholder="Notas..." style="width:100%;resize:vertical;"></textarea></div>'
       + '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\'' + pid + '\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveNewEvent(\'' + pid + '\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
@@ -354,7 +355,12 @@
     if (row) row.style.display = (type === 'BIRT') ? 'none' : '';
   };
 
-  var EVENT_LABELS = { BIRT: 'Nascimento', BAPM: 'Batismo', CHR: 'Batizado', DEAT: 'Óbito', BURI: 'Sepultamento', CREM: 'Cremação', ADOP: 'Adoção', OCCU: 'Ocupação', RESI: 'Residência', EVEN: 'Evento', MARR: 'Casamento' };
+  window._drawerToggleCauseField = function (prefix, type) {
+    var row = document.getElementById(prefix + 'EvCauseRow');
+    if (row) row.style.display = (type === 'DEAT') ? '' : 'none';
+  };
+
+  var EVENT_LABELS = { BIRT: 'Nascimento', BAPM: 'Batismo', DEAT: 'Óbito', ADOP: 'Adoção', DIV: 'Divórcio', EVEN: 'Evento', MARR: 'Casamento' };
   window._drawerSaveNewEvent = function (personId) {
     var DB   = _db(); if (!DB) return;
     var indi = DB.getIndividual(personId); if (!indi) return;

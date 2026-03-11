@@ -564,9 +564,10 @@
         individuals.forEach(person => {
           const events = person.events || [];
           events.forEach(ev => {
-            if (!ev.place) return;
-            const place = ev.place.trim();
-            if (!place) return;
+            const hasPlace   = ev.place   && ev.place.trim();
+            const hasCountry = ev.country && ev.country.trim();
+            if (!hasPlace && !hasCountry) return;
+            const place = hasPlace ? ev.place.trim() : ev.country.trim();
 
             // Filter by event type
             const evType = (ev.type || '').toUpperCase();
@@ -577,8 +578,8 @@
             // Place count
             placeCount[place] = (placeCount[place] || 0) + 1;
 
-            // Country extraction
-            const countryStr = extractCountry(place);
+            // Country extraction — use explicit country field first, then parse from place
+            const countryStr = hasCountry ? ev.country.trim() : extractCountry(place);
             if (!countryStr) { withoutCountry++; return; }
 
             const normKey = countryStr.toLowerCase().trim();

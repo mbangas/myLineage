@@ -1,6 +1,6 @@
 [
   {
-    "ts": "2026-03-11T12:40:37.105Z",
+    "ts": "2026-03-11T13:03:12.664Z",
     "entity": "Individual",
     "action": "Actualizar Indivíduo",
     "actionType": "update",
@@ -11,31 +11,9 @@
     "actor": "+351931018263"
   },
   {
-    "ts": "2026-03-11T12:37:25.678Z",
-    "entity": "Individual",
-    "action": "Actualizar Indivíduo",
-    "actionType": "update",
-    "id": "I1",
-    "detail": "",
-    "category": "pessoas",
-    "subjectName": "Maria do Rosario Alves Ferreira",
-    "actor": "+351931018263"
-  },
-  {
-    "ts": "2026-03-11T12:29:14.528Z",
+    "ts": "2026-03-11T13:02:34.620Z",
     "action": "GEDCOM importado — 3504 registos",
     "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
     "category": "gedcom"
-  },
-  {
-    "ts": "2026-03-11T12:28:17.887Z",
-    "entity": "Individual",
-    "action": "Criar Indivíduo",
-    "actionType": "create",
-    "id": "I1",
-    "detail": "",
-    "category": "pessoas",
-    "subjectName": "teste",
-    "actor": "+351931018263"
   }
 ]

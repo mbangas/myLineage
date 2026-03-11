@@ -242,8 +242,11 @@
     html += '<div class="mini-list">';
     evs.forEach(function (ev, i) {
       var label = EVENT_TYPES[ev.type] || ev.type || '';
+      var _placeDisplay = (ev.place || ev.country)
+        ? (ev.place ? _esc(ev.place) + (ev.country ? ' &mdash; ' + _esc(ev.country) : '') : _esc(ev.country))
+        : null;
       html += '<div class="mini-card" style="padding:10px 12px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="flex:1;"><span style="font-weight:600;font-size:0.9rem;">' + _esc(label) + '</span><span style="color:#888;font-size:0.82rem;margin-left:8px;">' + _esc(fmtEventDate(ev)) + '</span></div><div style="display:flex;gap:2px;flex-shrink:0;"><button onclick="_drawerEditEvent(' + i + ',\'' + pid + '\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#4493f8;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-pencil-outline"></i></button><button onclick="_drawerDeleteEvent(' + i + ',\'' + pid + '\')" title="Apagar" style="background:none;border:none;cursor:pointer;color:#e06060;padding:2px 4px;font-size:1rem;"><i class="mdi mdi-trash-can-outline"></i></button></div></div>'
-        + (ev.place       ? '<div style="color:#aaa;font-size:0.82rem;margin-top:3px;">&#128205; ' + _esc(ev.place)       + '</div>' : '')
+        + (_placeDisplay  ? '<div style="color:#aaa;font-size:0.82rem;margin-top:3px;">&#128205; ' + _placeDisplay + '</div>' : '')
         + (ev.description ? '<div style="color:#aaa;font-size:0.82rem;margin-top:3px;"><i class="mdi mdi-tag-outline" style="margin-right:3px;"></i>'            + _esc(ev.description) + '</div>' : '')
         + (ev.cause       ? '<div style="color:#aaa;font-size:0.82rem;margin-top:3px;"><i class="mdi mdi-alert-circle-outline" style="margin-right:3px;"></i>'   + _esc(ev.cause)       + '</div>' : '')
         + (ev.age         ? '<div style="color:#aaa;font-size:0.82rem;margin-top:3px;"><i class="mdi mdi-account-clock-outline" style="margin-right:3px;"></i>'  + _esc(ev.age)         + '</div>' : '')
@@ -280,13 +283,15 @@
     var pid  = _esc(personId);
     var opts = Object.entries(EVENT_TYPES).map(function (e) { return '<option value="' + e[0] + '"' + (ev.type === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('');
     document.getElementById('drawerBody').innerHTML = '<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Editar Evento</h3>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="editEvType" style="width:100%;">' + opts + '</select></div>'
+      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="editEvType" onchange="_drawerToggleAgeField(\'edit\',this.value)" style="width:100%;">' + opts + '</select></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="editEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente"' + ((!p.qualifier || p.qualifier === 'Exatamente') ? ' selected' : '') + '>Exatamente</option><option value="Antes de"' + (p.qualifier === 'Antes de' ? ' selected' : '') + '>Antes de</option><option value="Depois de"' + (p.qualifier === 'Depois de' ? ' selected' : '') + '>Depois de</option><option value="Cerca de"' + (p.qualifier === 'Cerca de' ? ' selected' : '') + '>Cerca de</option></select>'
       + '<div style="display:flex;gap:6px;"><input id="editEvDay" type="number" min="1" max="31" placeholder="Dia" value="' + (p.day || '') + '" style="flex:1;min-width:0;text-align:center;"/><input id="editEvMonth" type="number" min="1" max="12" placeholder="M\u00eas" value="' + (p.month || '') + '" style="flex:1;min-width:0;text-align:center;"/><input id="editEvYear" type="number" min="1" max="9999" placeholder="Ano" value="' + (p.year || '') + '" style="flex:2;min-width:0;text-align:center;"/></div></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="editEvPlace" type="text" value="' + _esc(ev.place || '') + '" style="width:100%;"/></div>'
+      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Pa\u00eds</label><input id="editEvCountry" type="text" list="ctCountryList" autocomplete="off" value="' + _esc(ev.country || '') + '" style="width:100%;"/></div>'
+      + _CT_DATALIST
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Descri\u00e7\u00e3o</label><input id="editEvDescription" type="text" value="' + _esc(ev.description || '') + '" placeholder="Descri\u00e7\u00e3o do evento" style="width:100%;"/></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Causa</label><input id="editEvCause" type="text" value="' + _esc(ev.cause || '') + '" placeholder="Causa (ex: doen\u00e7a)" style="width:100%;"/></div>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Idade</label><input id="editEvAge" type="text" value="' + _esc(ev.age || '') + '" placeholder="Idade na altura" style="width:100%;"/></div>'
+      + '<div id="editEvAgeRow" style="margin-bottom:10px;' + (ev.type === 'BIRT' ? 'display:none;' : '') + '"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Idade</label><input id="editEvAge" type="text" value="' + _esc(ev.age || '') + '" placeholder="Idade na altura" style="width:100%;"/></div>'
       + '<div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="editEvNotes" rows="3" style="width:100%;resize:vertical;">' + _esc(ev.notes || '') + '</textarea></div>'
       + '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\'' + pid + '\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveEditEvent(' + idx + ',\'' + pid + '\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
   };
@@ -300,12 +305,13 @@
     var month = parseInt((document.getElementById('editEvMonth')|| {}).value) || null;
     var year  = parseInt((document.getElementById('editEvYear') || {}).value) || null;
     var place       = ((document.getElementById('editEvPlace')      || {}).value || '').trim();
+    var country     = ((document.getElementById('editEvCountry')     || {}).value || '').trim();
     var notes       = ((document.getElementById('editEvNotes')      || {}).value || '').trim();
     var description = ((document.getElementById('editEvDescription')|| {}).value || '').trim();
     var cause       = ((document.getElementById('editEvCause')      || {}).value || '').trim();
     var age         = ((document.getElementById('editEvAge')        || {}).value || '').trim();
     var dateStr = buildGedcomDate(day, month, year, qual);
-    indi.events[idx] = { type: type, date: dateStr || undefined, place: place || undefined, notes: notes || undefined, description: description || undefined, cause: cause || undefined, age: age || undefined };
+    indi.events[idx] = { type: type, date: dateStr || undefined, place: place || undefined, country: country || undefined, notes: notes || undefined, description: description || undefined, cause: cause || undefined, age: age || undefined };
     indi._changeDetail = 'Evento editado: ' + (EVENT_TYPES[type] || type);
     DB.saveIndividual(indi);
     openDrawerSection(personId, 'eventos');
@@ -325,13 +331,15 @@
     }).join('');
     var famRow = spouseFams.length ? '<div id="addEvFamRow" style="margin-bottom:10px;display:none;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">C\u00f4njuge</label><select id="addEvFamId" style="width:100%;">' + famOpts + '</select></div>' : '';
     document.getElementById('drawerBody').innerHTML = '<div style="padding:4px 0 8px;"><h3 style="font-size:0.95rem;margin:0 0 14px;">Novo Evento</h3>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="addEvType" onchange="_drawerToggleMarrFamily(this.value)" style="width:100%;">' + opts + marrOpt + '</select></div>'
+      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Tipo</label><select id="addEvType" onchange="_drawerToggleMarrFamily(this.value);_drawerToggleAgeField(\'add\',this.value)" style="width:100%;">' + opts + marrOpt + '</select></div>'
       + famRow
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Data</label><select id="addEvQual" style="width:100%;margin-bottom:6px;"><option value="Exatamente" selected>Exatamente</option><option value="Antes de">Antes de</option><option value="Depois de">Depois de</option><option value="Cerca de">Cerca de</option></select><div style="display:flex;gap:6px;"><input id="addEvDay" type="number" min="1" max="31" placeholder="Dia" style="flex:1;min-width:0;text-align:center;"/><input id="addEvMonth" type="number" min="1" max="12" placeholder="M\u00eas" style="flex:1;min-width:0;text-align:center;"/><input id="addEvYear" type="number" min="1" max="9999" placeholder="Ano" style="flex:2;min-width:0;text-align:center;"/></div></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Local</label><input id="addEvPlace" type="text" placeholder="Local do evento" style="width:100%;"/></div>'
+      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Pa\u00eds</label><input id="addEvCountry" type="text" list="ctCountryList" autocomplete="off" placeholder="Pa\u00eds do evento" style="width:100%;"/></div>'
+      + _CT_DATALIST
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Descri\u00e7\u00e3o</label><input id="addEvDescription" type="text" placeholder="Descri\u00e7\u00e3o do evento" style="width:100%;"/></div>'
       + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Causa</label><input id="addEvCause" type="text" placeholder="Causa (ex: doen\u00e7a)" style="width:100%;"/></div>'
-      + '<div style="margin-bottom:10px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Idade</label><input id="addEvAge" type="text" placeholder="Idade na altura" style="width:100%;"/></div>'
+      + '<div id="addEvAgeRow" style="margin-bottom:10px;display:none;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Idade</label><input id="addEvAge" type="text" placeholder="Idade na altura" style="width:100%;"/></div>'
       + '<div style="margin-bottom:14px;"><label style="font-size:0.82rem;color:#aaa;display:block;margin-bottom:4px;">Notas</label><textarea id="addEvNotes" rows="3" placeholder="Notas..." style="width:100%;resize:vertical;"></textarea></div>'
       + '<div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="openDrawerSection(\'' + pid + '\',\'eventos\')">Cancelar</button><button class="btn btn-sm" onclick="_drawerSaveNewEvent(\'' + pid + '\')"><i class="mdi mdi-content-save-outline"></i> Guardar</button></div></div>';
   };
@@ -339,6 +347,11 @@
   window._drawerToggleMarrFamily = function (type) {
     var row = document.getElementById('addEvFamRow');
     if (row) row.style.display = (type === 'MARR') ? '' : 'none';
+  };
+
+  window._drawerToggleAgeField = function (prefix, type) {
+    var row = document.getElementById(prefix + 'EvAgeRow');
+    if (row) row.style.display = (type === 'BIRT') ? 'none' : '';
   };
 
   var EVENT_LABELS = { BIRT: 'Nascimento', BAPM: 'Batismo', CHR: 'Batizado', DEAT: 'Óbito', BURI: 'Sepultamento', CREM: 'Cremação', ADOP: 'Adoção', OCCU: 'Ocupação', RESI: 'Residência', EVEN: 'Evento', MARR: 'Casamento' };
@@ -351,12 +364,13 @@
     var month = parseInt((document.getElementById('addEvMonth')|| {}).value) || null;
     var year  = parseInt((document.getElementById('addEvYear') || {}).value) || null;
     var place       = ((document.getElementById('addEvPlace')      || {}).value || '').trim();
+    var country     = ((document.getElementById('addEvCountry')     || {}).value || '').trim();
     var notes       = ((document.getElementById('addEvNotes')      || {}).value || '').trim();
     var description = ((document.getElementById('addEvDescription')|| {}).value || '').trim();
     var cause       = ((document.getElementById('addEvCause')      || {}).value || '').trim();
     var age         = ((document.getElementById('addEvAge')        || {}).value || '').trim();
     var dateStr = buildGedcomDate(day, month, year, qual);
-    var newEv = { type: type, date: dateStr || undefined, place: place || undefined, notes: notes || undefined, description: description || undefined, cause: cause || undefined, age: age || undefined };
+    var newEv = { type: type, date: dateStr || undefined, place: place || undefined, country: country || undefined, notes: notes || undefined, description: description || undefined, cause: cause || undefined, age: age || undefined };
     if (type === 'MARR') {
       var famId = ((document.getElementById('addEvFamId') || {}).value || '');
       var fam   = famId ? DB.getFamily(famId) : (DB.getFamilies().filter(function (f) { return f.husb === personId || f.wife === personId; })[0] || null);

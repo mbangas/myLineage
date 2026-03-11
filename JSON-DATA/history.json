@@ -1,5 +1,49 @@
 [
   {
+    "ts": "2026-03-11T01:52:55.910Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-11T01:44:03.675Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-11T01:04:23.342Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-11T01:01:30.597Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-11T00:35:06.751Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-11T00:20:27.283Z",
+    "action": "GEDCOM importado — 4258 registos",
+    "detail": "GEDCOM 2026-03-09.ged: 1859 pessoas, 782 famílias",
+    "category": "gedcom"
+  },
+  {
+    "ts": "2026-03-10T23:37:55.791Z",
+    "entity": "Login",
+    "action": "Login: +351931018263",
+    "id": "+351931018263",
+    "detail": "+351931018263 · Administrador",
+    "category": "login"
+  },
+  {
     "ts": "2026-03-10T01:00:45.330Z",
     "entity": "Individual",
     "action": "Actualizar Indivíduo",

@@ -189,6 +189,125 @@ describe('GEDCOM Import — lib/gedcom-parser (pure unit)', () => {
     expect(obje.files[0].file).toBe('foto.jpg');
   });
 
+  test('parses inline OBJE with _POSITION and photo metadata', () => {
+    const gedcom = [
+      '0 HEAD', '1 CHAR UTF-8',
+      '0 @I1@ INDI', '1 NAME Test /Test/',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE https://example.com/cutout.jpg',
+      '2 TITL Test cutout',
+      '2 _PRIM Y',
+      '2 _CUTOUT Y',
+      '2 _PARENTRIN MH:P100',
+      '2 _PERSONALPHOTO Y',
+      '2 _PHOTO_RIN MH:P101',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE https://example.com/group.jpg',
+      '2 TITL Group photo',
+      '2 _PRIM_CUTOUT Y',
+      '2 _PARENTPHOTO Y',
+      '2 _POSITION 26 58 230 330',
+      '2 _PHOTO_RIN MH:P100',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE https://example.com/other-group.jpg',
+      '2 _POSITION 541 380 631 486',
+      '2 _PHOTO_RIN MH:P200',
+      '0 TRLR',
+    ].join('\n');
+    const result = parseGedcomToJson(gedcom);
+    const indi   = result.individuals['I1'];
+    expect(indi.multimediaRefs).toHaveLength(3);
+
+    const cutout = result.multimedia[indi.multimediaRefs[0]].files[0];
+    expect(cutout.primary).toBe(true);
+    expect(cutout.cutout).toBe(true);
+    expect(cutout.parentRin).toBe('MH:P100');
+    expect(cutout.personalPhoto).toBe(true);
+    expect(cutout.photoRin).toBe('MH:P101');
+    expect(cutout.position).toBeNull();
+    expect(cutout.title).toBe('Test cutout');
+
+    const parent = result.multimedia[indi.multimediaRefs[1]].files[0];
+    expect(parent.primaryCutout).toBe(true);
+    expect(parent.parentPhoto).toBe(true);
+    expect(parent.position).toBe('26 58 230 330');
+    expect(parent.photoRin).toBe('MH:P100');
+
+    const other = result.multimedia[indi.multimediaRefs[2]].files[0];
+    expect(other.position).toBe('541 380 631 486');
+    expect(other.photoRin).toBe('MH:P200');
+    expect(other.primary).toBe(false);
+    expect(other.cutout).toBe(false);
+  });
+
+  test('creates tags with pixelCoords from _POSITION during import', () => {
+    const gedcom = [
+      '0 HEAD', '1 CHAR UTF-8',
+      '0 @I1@ INDI', '1 NAME João /Silva/',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE https://example.com/group.jpg',
+      '2 _PARENTPHOTO Y',
+      '2 _POSITION 26 58 230 330',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE https://example.com/cutout.jpg',
+      '2 _CUTOUT Y',
+      '0 TRLR',
+    ].join('\n');
+    const result = parseGedcomToJson(gedcom);
+    const indi   = result.individuals['I1'];
+
+    // Parent photo should have a tag with pixelCoords
+    const parentMm = result.multimedia[indi.multimediaRefs[0]];
+    expect(parentMm.tags).toHaveLength(1);
+    expect(parentMm.tags[0].personId).toBe('I1');
+    expect(parentMm.tags[0].personName).toBe('João Silva');
+    expect(parentMm.tags[0].pixelCoords).toEqual({ x1: 26, y1: 58, x2: 230, y2: 330 });
+
+    // Cutout (no _POSITION) should have no tags
+    const cutoutMm = result.multimedia[indi.multimediaRefs[1]];
+    expect(cutoutMm.tags).toHaveLength(0);
+  });
+
+  test('does not duplicate tags on _POSITION for same person', () => {
+    const gedcom = [
+      '0 HEAD', '1 CHAR UTF-8',
+      '0 @I1@ INDI', '1 NAME Ana /Costa/',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE photo.jpg',
+      '2 _POSITION 10 20 100 200',
+      '0 TRLR',
+    ].join('\n');
+    const result = parseGedcomToJson(gedcom);
+    const mm = result.multimedia[result.individuals['I1'].multimediaRefs[0]];
+    expect(mm.tags).toHaveLength(1);
+    expect(mm.tags[0].personId).toBe('I1');
+  });
+
+  test('parses top-level OBJE with photo metadata on file sub-tags', () => {
+    const gedcom = [
+      '0 HEAD', '1 CHAR UTF-8',
+      '0 @M1@ OBJE',
+      '1 FILE group.jpg',
+      '2 FORM jpg',
+      '2 _POSITION 10 20 100 200',
+      '2 _PHOTO_RIN MH:P50',
+      '1 TITL Grupo familiar',
+      '0 TRLR',
+    ].join('\n');
+    const result = parseGedcomToJson(gedcom);
+    const obje   = result.multimedia['M1'];
+    expect(obje.files[0].position).toBe('10 20 100 200');
+    expect(obje.files[0].photoRin).toBe('MH:P50');
+    expect(obje.title).toBe('Grupo familiar');
+    expect(obje.tags).toEqual([]);
+  });
+
   test('handles Windows-style CRLF line endings', () => {
     const gedcom = MINIMAL_GEDCOM.replace(/\n/g, '\r\n');
     const result = parseGedcomToJson(gedcom);
@@ -240,5 +359,42 @@ describe('GEDCOM Import — POST /api/gedcom/import (API)', () => {
     // The mock import handler tries to parse the body as text first,
     // falls back to body.text — both paths should produce ok:true
     expect(res.status).toBe(200);
+  });
+
+  test('re-import preserves existing multimedia tags (zones)', async () => {
+    const gedcom = [
+      '0 HEAD', '1 CHAR UTF-8',
+      '0 @I1@ INDI', '1 NAME Test /User/',
+      '2 GIVN Test', '2 SURN User',
+      '1 SEX M',
+      '1 OBJE',
+      '2 FORM jpg',
+      '2 FILE photo.jpg',
+      '0 TRLR',
+    ].join('\n');
+
+    // First import
+    await request(app).post('/api/gedcom/import').set('Content-Type', 'text/plain').send(gedcom);
+
+    // Manually add a bbox tag to the multimedia via PUT
+    const mmList = (await request(app).get('/api/multimedia')).body;
+    const mm = mmList.find(m => m.files && m.files[0] && m.files[0].file === 'photo.jpg');
+    expect(mm).toBeDefined();
+    mm.tags = [{ personId: 'I1', personName: 'Test User', bbox: { x: 0.1, y: 0.2, w: 0.3, h: 0.4 } }];
+    await request(app).put('/api/multimedia/' + mm.id).send(mm);
+
+    // Verify tag was saved
+    const mmAfterTag = (await request(app).get('/api/multimedia/' + mm.id)).body;
+    expect(mmAfterTag.tags).toHaveLength(1);
+
+    // Re-import the same GEDCOM
+    const res = await request(app).post('/api/gedcom/import').set('Content-Type', 'text/plain').send(gedcom);
+    expect(res.body.ok).toBe(true);
+
+    // The tag should be preserved after re-import
+    const mmAfterReimport = (await request(app).get('/api/multimedia/' + mm.id)).body;
+    expect(mmAfterReimport.tags).toHaveLength(1);
+    expect(mmAfterReimport.tags[0].personId).toBe('I1');
+    expect(mmAfterReimport.tags[0].bbox).toEqual({ x: 0.1, y: 0.2, w: 0.3, h: 0.4 });
   });
 });

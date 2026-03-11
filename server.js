@@ -110,6 +110,75 @@ app.get('/api/multimedia/cache-status', (req, res) => {
   } catch(e) { res.status(500).json({ error: String(e) }); }
 });
 
+/* ── Refresh zone tags from _POSITION data already in multimedia ───── */
+app.post('/api/multimedia/refresh-zones', (req, res) => {
+  try {
+    const individuals = readCollection('individuals');
+    const multimedia  = readCollection('multimedia');
+    let added = 0;
+
+    for (const indi of Object.values(individuals)) {
+      if (indi.deletedAt) continue;
+      const nameRec = (indi.names && indi.names[0]) || {};
+      const personName = ((nameRec.given || '') + ' ' + (nameRec.surname || '')).trim() || indi.id;
+      for (const mref of (indi.multimediaRefs || [])) {
+        const mm = multimedia[mref];
+        if (!mm || !mm.files) continue;
+        if (!mm.tags) mm.tags = [];
+        const alreadyTagged = mm.tags.some(t => t.personId === indi.id);
+        if (alreadyTagged) continue;
+        // Try to build pixelCoords from files[].position
+        let pixelCoords = null;
+        for (const f of mm.files) {
+          if (!f.position) continue;
+          const parts = f.position.trim().split(/\s+/).map(Number);
+          if (parts.length === 4 && !parts.some(n => isNaN(n))) {
+            const [x1, y1, x2, y2] = parts;
+            pixelCoords = { x1, y1, x2, y2 };
+            break;
+          }
+        }
+        const tag = { personId: indi.id, personName };
+        if (pixelCoords) tag.pixelCoords = pixelCoords;
+        mm.tags.push(tag);
+        added++;
+      }
+    }
+
+    // Cross-link tags across multimedia entries sharing the same photoRin
+    const byPhotoRin = {};
+    for (const mm of Object.values(multimedia)) {
+      if (!mm.files) continue;
+      for (const f of mm.files) {
+        if (!f.photoRin) continue;
+        if (!byPhotoRin[f.photoRin]) byPhotoRin[f.photoRin] = [];
+        byPhotoRin[f.photoRin].push(mm);
+      }
+    }
+    for (const group of Object.values(byPhotoRin)) {
+      if (group.length < 2) continue;
+      const allTags = [];
+      for (const mm of group) {
+        for (const t of (mm.tags || [])) {
+          if (!allTags.some(a => a.personId === t.personId)) allTags.push(t);
+        }
+      }
+      for (const mm of group) {
+        for (const t of allTags) {
+          if (!(mm.tags || []).some(a => a.personId === t.personId)) {
+            if (!mm.tags) mm.tags = [];
+            mm.tags.push(t);
+            added++;
+          }
+        }
+      }
+    }
+
+    writeCollection('multimedia', multimedia);
+    res.json({ ok: true, zonesAdded: added });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
 /* ── Mount entity CRUD routes ────────────────────────────────────────── */
 app.use('/api/individuals',  entityRoutes('individuals','I',defaultIndividual));
 app.use('/api/families',     entityRoutes('families','F',defaultFamily));
@@ -229,6 +298,7 @@ app.get('/api/gedcom/export', (req, res) => {
     const gedText = buildGedcomText({
       individuals:  readCollection('individuals'),
       families:     readCollection('families'),
+      multimedia:   readCollection('multimedia'),
       sources:      readCollection('sources'),
       repositories: readCollection('repositories'),
       notes:        readCollection('notes'),
@@ -306,7 +376,47 @@ app.post('/api/gedcom/import', express.text({ type: '*/*', limit: '50mb' }), (re
     const result = parseGedcomToJson(text);
     writeCollection('individuals', result.individuals);
     writeCollection('families', result.families);
-    if (result.multimedia && Object.keys(result.multimedia).length) writeCollection('multimedia', result.multimedia);
+    // Merge existing multimedia tags (zones) into newly imported records
+    // and preserve local file paths from previously cached images
+    if (result.multimedia && Object.keys(result.multimedia).length) {
+      const oldMm = readCollection('multimedia');
+      // Build maps from old multimedia: id→record and localPath→tags
+      const oldByFile = {};
+      const oldIdToLocal = {};
+      for (const om of Object.values(oldMm)) {
+        if (!om.files || !om.files[0]) continue;
+        const localFile = om.files[0].file;
+        if (om.tags && om.tags.length && localFile) {
+          oldByFile[localFile] = om.tags;
+        }
+        oldIdToLocal[om.id] = localFile;
+      }
+      for (const nm of Object.values(result.multimedia)) {
+        // Preserve local file path if the image was already cached
+        if (nm.files && nm.files[0] && /^https?:\/\//i.test(nm.files[0].file)) {
+          const oldLocal = oldIdToLocal[nm.id];
+          if (oldLocal && /^\/uploads\//.test(oldLocal)) {
+            const destPath = path.join(__dirname, oldLocal);
+            if (fs.existsSync(destPath)) {
+              nm.files[0].file = oldLocal;
+            }
+          }
+        }
+        // Merge existing zone tags
+        const existingTags = (oldMm[nm.id] && oldMm[nm.id].tags && oldMm[nm.id].tags.length)
+          ? oldMm[nm.id].tags
+          : (nm.files && nm.files[0] && nm.files[0].file && oldByFile[nm.files[0].file]) || null;
+        if (existingTags && existingTags.length) {
+          const merged = [...(nm.tags || [])];
+          for (const et of existingTags) {
+            if (!et.personId) continue;
+            if (!merged.some(t => t.personId === et.personId)) merged.push(et);
+          }
+          nm.tags = merged;
+        }
+      }
+      writeCollection('multimedia', result.multimedia);
+    }
     const pendingImages = Object.values(result.multimedia || {}).filter(m =>
       !m.deletedAt && m.files && m.files[0] && /^https?:\/\//i.test(m.files[0].file)
     ).length;

@@ -220,6 +220,129 @@ describe('GEDCOM Export — lib/gedcom-builder (pure unit)', () => {
     const indiCount = (text.match(/0 @.*@ INDI/g) || []).length;
     expect(indiCount).toBe(0);
   });
+
+  test('INDI emits inline OBJE with photo region metadata', () => {
+    const col = makeCollection();
+    col.multimedia = {
+      M1: {
+        id: 'M1', type: 'OBJE', deletedAt: null,
+        files: [{
+          file: 'cutout.jpg', form: 'jpg', title: 'Dennis cutout',
+          primary: true, cutout: true, parentRin: 'MH:P100',
+          personalPhoto: true, photoRin: 'MH:P101',
+          primaryCutout: false, parentPhoto: false, position: null, note: '',
+        }],
+        notes: [], sourceRefs: [], dataUrl: null, tags: [],
+        createdAt: NOW, updatedAt: NOW,
+      },
+      M2: {
+        id: 'M2', type: 'OBJE', deletedAt: null,
+        files: [{
+          file: 'group.jpg', form: 'jpg', title: 'Foto grupo',
+          primary: false, cutout: false, parentRin: '',
+          personalPhoto: false, photoRin: 'MH:P100',
+          primaryCutout: true, parentPhoto: true, position: '26 58 230 330', note: '',
+        }],
+        notes: [], sourceRefs: [], dataUrl: null, tags: [],
+        createdAt: NOW, updatedAt: NOW,
+      },
+    };
+    col.individuals['I1'].multimediaRefs = ['M1', 'M2'];
+    const text = buildGedcomText(col);
+
+    expect(text).toContain('1 OBJE');
+    expect(text).toContain('2 FILE cutout.jpg');
+    expect(text).toContain('2 FORM jpg');
+    expect(text).toContain('2 TITL Dennis cutout');
+    expect(text).toContain('2 _PRIM Y');
+    expect(text).toContain('2 _CUTOUT Y');
+    expect(text).toContain('2 _PARENTRIN MH:P100');
+    expect(text).toContain('2 _PERSONALPHOTO Y');
+    expect(text).toContain('2 _PHOTO_RIN MH:P101');
+    expect(text).toContain('2 _PRIM_CUTOUT Y');
+    expect(text).toContain('2 _PARENTPHOTO Y');
+    expect(text).toContain('2 _POSITION 26 58 230 330');
+  });
+
+  test('OBJE with null position omits _POSITION tag', () => {
+    const col = makeCollection();
+    col.multimedia = {
+      M1: {
+        id: 'M1', type: 'OBJE', deletedAt: null,
+        files: [{
+          file: 'photo.jpg', form: 'jpg', title: '',
+          primary: false, cutout: false, parentRin: '',
+          personalPhoto: false, photoRin: '',
+          primaryCutout: false, parentPhoto: false, position: null, note: '',
+        }],
+        notes: [], sourceRefs: [], dataUrl: null, tags: [],
+        createdAt: NOW, updatedAt: NOW,
+      },
+    };
+    col.individuals['I1'].multimediaRefs = ['M1'];
+    const text = buildGedcomText(col);
+    expect(text).toContain('2 FILE photo.jpg');
+    expect(text).not.toContain('_POSITION');
+    expect(text).not.toContain('_PRIM Y');
+  });
+
+  test('soft-deleted multimedia refs are excluded from export', () => {
+    const col = makeCollection();
+    col.multimedia = {
+      M1: {
+        id: 'M1', type: 'OBJE', deletedAt: '2026-01-01T00:00:00.000Z',
+        files: [{ file: 'deleted.jpg', form: 'jpg' }],
+        notes: [], sourceRefs: [], dataUrl: null, tags: [],
+        createdAt: NOW, updatedAt: NOW,
+      },
+    };
+    col.individuals['I1'].multimediaRefs = ['M1'];
+    const text = buildGedcomText(col);
+    expect(text).not.toContain('deleted.jpg');
+  });
+
+  test('exports pixelCoords tags as _POSITION when files[].position is absent', () => {
+    const col = makeCollection();
+    col.multimedia = {
+      M1: {
+        id: 'M1', type: 'OBJE', deletedAt: null,
+        files: [{
+          file: 'group.jpg', form: 'jpg', title: '',
+          primary: false, cutout: false, parentRin: '',
+          personalPhoto: false, photoRin: '',
+          primaryCutout: false, parentPhoto: true, position: null, note: '',
+        }],
+        notes: [], sourceRefs: [], dataUrl: null,
+        tags: [{ personId: 'I1', personName: 'João Silva', pixelCoords: { x1: 26, y1: 58, x2: 230, y2: 330 } }],
+        createdAt: NOW, updatedAt: NOW,
+      },
+    };
+    col.individuals['I1'].multimediaRefs = ['M1'];
+    const text = buildGedcomText(col);
+    expect(text).toContain('2 _POSITION 26 58 230 330');
+  });
+
+  test('prefers files[].position over pixelCoords tags for _POSITION', () => {
+    const col = makeCollection();
+    col.multimedia = {
+      M1: {
+        id: 'M1', type: 'OBJE', deletedAt: null,
+        files: [{
+          file: 'group.jpg', form: 'jpg', title: '',
+          primary: false, cutout: false, parentRin: '',
+          personalPhoto: false, photoRin: '',
+          primaryCutout: false, parentPhoto: true, position: '10 20 100 200', note: '',
+        }],
+        notes: [], sourceRefs: [], dataUrl: null,
+        tags: [{ personId: 'I1', personName: 'João Silva', pixelCoords: { x1: 26, y1: 58, x2: 230, y2: 330 } }],
+        createdAt: NOW, updatedAt: NOW,
+      },
+    };
+    col.individuals['I1'].multimediaRefs = ['M1'];
+    const text = buildGedcomText(col);
+    expect(text).toContain('2 _POSITION 10 20 100 200');
+    expect(text).not.toContain('2 _POSITION 26 58 230 330');
+  });
 });
 
 /* ══════════════════════════════════════════════════════════════════════ */

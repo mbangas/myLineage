@@ -672,6 +672,7 @@
                 const st = await fetch('/api/multimedia/cache-status').then(r => r.json());
                 if (!st.running) {
                   clearInterval(pollInterval);
+                  DB.reload();
                   showImportLog(
                     `Import concluído!\nPessoas: ${result.stats.individuals} · Famílias: ${result.stats.families}\n✅ ${st.cached} fotos guardadas localmente${st.pending > 0 ? ` (${st.pending} falharam)` : ''}.`,
                     'success'

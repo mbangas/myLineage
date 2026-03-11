@@ -1286,13 +1286,6 @@
       /* ── Init ──────────────────────────────────────────────────────────── */
       renderTable();
 
-      // Auto-open from URL param (?edit=id)
-      (function(){
-        const p=new URLSearchParams(window.location.search);
-        const editId=p.get('edit');
-        if(editId) openDrawer('edit',editId);
-      })();
-
     })();
     </script>
     <!-- ── Surname Research Modal ── -->
@@ -1401,6 +1394,14 @@
 
     <script src="photo-lightbox.js"></script>
     <script src="edit-person-drawer.js"></script>
+    <script>
+      // Auto-open from URL param (?edit=id) — must run after edit-person-drawer.js
+      (function(){
+        var p = new URLSearchParams(window.location.search);
+        var editId = p.get('edit');
+        if (editId) window.openDrawer('edit', editId);
+      })();
+    </script>
     <script src="history-logger.js"></script>
   </body>
 </html>

@@ -69433,9 +69433,7 @@
         "prefix": "",
         "suffix": "",
         "nickname": "",
-        "marriedName": "",
-        "aka": "",
-        "type": "BIRTH"
+        "type": "birth"
       }
     ],
     "sex": "M",
@@ -69457,6 +69455,9 @@
         "cause": "",
         "age": "",
         "description": ""
+      },
+      {
+        "type": "DEAT"
       }
     ],
     "attributes": [
@@ -69478,11 +69479,11 @@
     "fams": [
       "F500114"
     ],
-    "notes": [],
+    "notes": "",
     "sourceRefs": [],
     "multimediaRefs": [],
     "createdAt": "2026-03-11T09:53:27.891Z",
-    "updatedAt": "2026-03-11T09:53:27.891Z",
+    "updatedAt": "2026-03-11T11:56:06.619Z",
     "deletedAt": null
   },
   "I500261": {

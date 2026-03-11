@@ -1,5 +1,27 @@
 [
   {
+    "ts": "2026-03-11T11:56:06.575Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500260",
+    "detail": "Dados pessoais actualizados",
+    "category": "pessoas",
+    "subjectName": "Manuel Martins",
+    "actor": "+351931018263"
+  },
+  {
+    "ts": "2026-03-11T11:56:05.063Z",
+    "entity": "Individual",
+    "action": "Actualizar Indivíduo",
+    "actionType": "update",
+    "id": "I500260",
+    "detail": "Marcado/a como falecido/a",
+    "category": "pessoas",
+    "subjectName": "Manuel Martins",
+    "actor": "+351931018263"
+  },
+  {
     "ts": "2026-03-11T11:51:22.914Z",
     "entity": "Individual",
     "action": "Actualizar Indivíduo",

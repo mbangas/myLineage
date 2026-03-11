@@ -96,3 +96,11 @@ test('should calculate total price correctly', () => {
 });
 ```
 
+## Formating Tools
+
+- application use utf-8 encoding
+- date format should be DD-MM-YYYY
+- time format should be HH:mm:ss
+
+
+

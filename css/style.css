@@ -55,7 +55,7 @@
 
   --rail-w:       64px;
   --rail-w-open: 210px;
-  --drawer-w:    420px;
+  --drawer-w:    630px;
 
   /* legacy */
   --border-radius: var(--radius-lg);
@@ -621,7 +621,7 @@ body.page-tree .legend {
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  :root { --drawer-w: 360px; }
+  :root { --drawer-w: 540px; }
   .main-grid { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
 }
 @media (max-width: 600px) {

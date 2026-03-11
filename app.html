@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>myLineage â€” Cadastro</title>
+    <title>myLineage — Cadastro</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
     <style>
@@ -25,16 +25,16 @@
         <nav>
           <a href="app.html" class="active"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
           <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
-          <a href="arvore.html"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Ãrvore</a>
+          <a href="arvore.html"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
           <a href="gedcom.html"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
-          <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Ãlbum</a>
+          <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
           <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
-          <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>ValidaÃ§Ã£o</a>
-          <a href="historico.html"><i class="mdi mdi-history" aria-hidden="true"></i>HistÃ³rico</a>
+          <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
+          <a href="historico.html"><i class="mdi mdi-history" aria-hidden="true"></i>Histórico</a>
         </nav>
         <div class="sidebar-footer">
           <a href="apis.html"><i class="mdi mdi-api" aria-hidden="true"></i>APIs</a>
-          <a href="configuracao.html"><i class="mdi mdi-cog" aria-hidden="true"></i>DefiniÃ§Ãµes</a>
+          <a href="configuracao.html"><i class="mdi mdi-cog" aria-hidden="true"></i>Definições</a>
         </div>
       </aside>
       <main class="content">
@@ -52,7 +52,7 @@
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <div style="position:relative;flex:1;min-width:160px;max-width:320px;">
               <i class="mdi mdi-magnify" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-disabled);font-size:1rem;pointer-events:none;"></i>
-              <input id="nameFilter" type="search" placeholder="Pesquisar por nomeâ€¦" autocomplete="off"
+              <input id="nameFilter" type="search" placeholder="Pesquisar por nome…" autocomplete="off"
                 style="width:100%;padding:7px 12px 7px 34px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-main);font-size:0.85rem;font-family:var(--font-main);outline:none;transition:border-color var(--transition);" />
             </div>
             <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-secondary);cursor:pointer;user-select:none;white-space:nowrap;">
@@ -73,7 +73,7 @@
                   <th>Idade</th>
                   <th>Parentesco</th>
                   <th>Apelido</th>
-                  <th style="text-align:right;">AcÃ§Ãµes</th>
+                  <th style="text-align:right;">Acções</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -88,7 +88,7 @@
               <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(68,147,248,0.25);border:1.5px solid #4493f8;flex-shrink:0;"></span>Linha directa
             </span>
             <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text-secondary);">
-              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(130,100,220,0.25);border:1.5px solid #9b7fe8;flex-shrink:0;"></span>CÃ´njuges &amp; afins
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(130,100,220,0.25);border:1.5px solid #9b7fe8;flex-shrink:0;"></span>Cônjuges &amp; afins
             </span>
             <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text-secondary);">
               <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(255,155,60,0.25);border:1.5px solid #c97c28;flex-shrink:0;"></span>Colaterais
@@ -102,21 +102,21 @@
       </main>
     </div>
 
-    <!-- â”€â”€ Right drawer overlay â”€â”€ -->
+    <!-- ── Right drawer overlay ── -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
 
-    <!-- â”€â”€ Right drawer â”€â”€ -->
+    <!-- ── Right drawer ── -->
     <div class="drawer" id="personDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
       <div class="drawer-header">
         <button class="btn btn-ghost btn-sm" id="drawerBackBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Voltar"><i class="mdi mdi-arrow-left"></i></button>
         <h2 id="drawerTitle" style="flex:1;">Detalhes da Pessoa</h2>
-        <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Ver na Ãrvore"><i class="mdi mdi-sitemap"></i></button>
+        <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Ver na Árvore"><i class="mdi mdi-sitemap"></i></button>
         <button class="drawer-close" id="drawerCloseBtn" aria-label="Fechar painel"><i class="mdi mdi-close"></i></button>
       </div>
       <div class="drawer-person-header" id="drawerPersonHeader">
         <div class="drawer-avatar" id="drawerAvatar"></div>
         <div>
-          <div class="drawer-person-name" id="drawerPersonName">â€”</div>
+          <div class="drawer-person-name" id="drawerPersonName">—</div>
           <div class="drawer-person-sub" id="drawerPersonSub"></div>
         </div>
       </div>
@@ -133,7 +133,7 @@
       'use strict';
       const DB = window.GedcomDB;
 
-      /* â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Helpers ──────────────────────────────────────────────────────── */
       const MONTHS = ['','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
       const MONTHS_MAP = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
       const QUAL_TO_GED = {'Antes de':'BEF','Depois de':'AFT','Cerca de':'ABT'};
@@ -180,7 +180,7 @@
         return d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear();
       }
 
-      /* â”€â”€ Pagination + filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Pagination + filter ──────────────────────────────────────────── */
       let currentPage = 1;
       const PAGE_SIZE = 10;
       let currentFilter = '';
@@ -189,7 +189,7 @@
         const ctrl=document.getElementById('paginationControls');
         if(!ctrl) return;
         if(totalPages<=1){ ctrl.innerHTML=''; return; }
-        ctrl.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button id="prevPage" '+(currentPage<=1?'disabled':'')+' class="icon-btn" aria-label="PÃ¡gina anterior"><i class="mdi mdi-chevron-left"></i></button><span style="font-size:0.82rem;color:var(--text-secondary);">PÃ¡gina '+currentPage+' de '+totalPages+'</span><button id="nextPage" '+(currentPage>=totalPages?'disabled':'')+' class="icon-btn" aria-label="PrÃ³xima pÃ¡gina"><i class="mdi mdi-chevron-right"></i></button></div>';
+        ctrl.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button id="prevPage" '+(currentPage<=1?'disabled':'')+' class="icon-btn" aria-label="Página anterior"><i class="mdi mdi-chevron-left"></i></button><span style="font-size:0.82rem;color:var(--text-secondary);">Página '+currentPage+' de '+totalPages+'</span><button id="nextPage" '+(currentPage>=totalPages?'disabled':'')+' class="icon-btn" aria-label="Próxima página"><i class="mdi mdi-chevron-right"></i></button></div>';
         const prev=document.getElementById('prevPage'), next=document.getElementById('nextPage');
         if(prev) prev.addEventListener('click',function(){ if(currentPage>1){ currentPage--; renderTable(); }});
         if(next) next.addEventListener('click',function(){ if(currentPage<totalPages){ currentPage++; renderTable(); }});
@@ -223,7 +223,7 @@
           if(indi.deletedAt) tr.classList.add('deleted');
           const name=_esc(DB.getDisplayName(indi));
           const avatarBg=indi.sex==='F'?'#e26aa6':indi.sex==='M'?'#4493f8':'#555';
-          const avatarChar=indi.sex==='F'?'â™€':indi.sex==='M'?'â™‚':'?';
+          const avatarChar=indi.sex==='F'?'♀':indi.sex==='M'?'♂':'?';
           const birth=DB.getBirthEvent(indi);
           const death=DB.getDeathEvent(indi);
           const birthParsed=birth&&birth.date?parseGedcomDate(birth.date):null;
@@ -232,18 +232,18 @@
           const age=birthParsed?_calcAge(birthParsed, deathParsed):null;
           const agePillBg=indi.deletedAt?'rgba(248,81,73,0.18)':(death?'rgba(255,255,255,0.07)':avatarBg.replace(')',',0.18)').replace('#e26aa6','rgba(226,106,166,0.18)').replace('#4493f8','rgba(68,147,248,0.18)').replace('#555','rgba(85,85,85,0.18)'));
           const agePillColor=indi.deletedAt?'var(--red)':(death?'var(--text-secondary)':avatarBg);
-          const agePillIcon=death?'âœ':'â™¥';
+          const agePillIcon=death?'✝':'♥';
           const ageHTML=age!=null
             ?`<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:${agePillBg};border:1px solid ${agePillColor}33;">
                 <span style="font-size:0.65rem;color:${agePillColor};">${agePillIcon}</span>
                 <span style="font-size:0.82rem;font-weight:600;color:${agePillColor};font-variant-numeric:tabular-nums;">${age}</span>
                 <span style="font-size:0.7rem;color:${agePillColor};opacity:0.7;">anos</span>
                </div>`
-            :'<span style="color:var(--text-disabled);font-size:0.82rem;">â€”</span>';
-          const relHTML=relMap.has(indi.id)?_relBadgeHtml(relMap.get(indi.id),_focusedId,indi.id):'<span style="color:var(--text-disabled);font-size:0.8rem;">â€”</span>';
+            :'<span style="color:var(--text-disabled);font-size:0.82rem;">—</span>';
+          const relHTML=relMap.has(indi.id)?_relBadgeHtml(relMap.get(indi.id),_focusedId,indi.id):'<span style="color:var(--text-disabled);font-size:0.8rem;">—</span>';
           const surnameRaw=DB.getSurname(indi);
-          const surnameSearchHTML=surnameRaw?`<button class="surname-research-btn icon-btn" data-surname="${_esc(surnameRaw)}" title="Pesquisar histÃ³ria do apelido ${_esc(surnameRaw)}"><i class="mdi mdi-book-search-outline" style="font-size:1.1rem;"></i></button>`:'<span style="color:var(--text-disabled);font-size:0.82rem;">â€”</span>';
-          tr.innerHTML=`<td><div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:${avatarBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;color:#fff;font-weight:600;">${avatarChar}</div><a href="#" class="person-link" data-id="${indi.id}" style="font-weight:500;">${name}</a></div></td><td style="color:var(--text-secondary);font-size:0.82rem;font-variant-numeric:tabular-nums;">${birthYear||'â€”'}</td><td>${ageHTML}</td><td>${relHTML}</td><td style="text-align:center;">${surnameSearchHTML}</td><td style="text-align:right;" class="actions"><button data-id="${indi.id}" class="tree-focus icon-btn" title="Ver na Ãrvore"><i class="mdi mdi-sitemap"></i></button></td>`;
+          const surnameSearchHTML=surnameRaw?`<button class="surname-research-btn icon-btn" data-surname="${_esc(surnameRaw)}" title="Pesquisar história do apelido ${_esc(surnameRaw)}"><i class="mdi mdi-book-search-outline" style="font-size:1.1rem;"></i></button>`:'<span style="color:var(--text-disabled);font-size:0.82rem;">—</span>';
+          tr.innerHTML=`<td><div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:${avatarBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;color:#fff;font-weight:600;">${avatarChar}</div><a href="#" class="person-link" data-id="${indi.id}" style="font-weight:500;">${name}</a></div></td><td style="color:var(--text-secondary);font-size:0.82rem;font-variant-numeric:tabular-nums;">${birthYear||'—'}</td><td>${ageHTML}</td><td>${relHTML}</td><td style="text-align:center;">${surnameSearchHTML}</td><td style="text-align:right;" class="actions"><button data-id="${indi.id}" class="tree-focus icon-btn" title="Ver na Árvore"><i class="mdi mdi-sitemap"></i></button></td>`;
           tbody.appendChild(tr);
         });
         renderPagination(totalPages);
@@ -271,7 +271,7 @@
         return age>=0?age:null;
       }
 
-      /* â”€â”€ Relationship / Kinship calculator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Relationship / Kinship calculator ───────────────────────────── */
       let _relCache = { focusId: '__none__', map: new Map() };
       function computeRelationships(focusId) {
         if (_relCache.focusId === focusId) return _relCache.map;
@@ -345,12 +345,12 @@
               const spIndi = indiMap[spId];
               const sf = (spIndi && spIndi.sex) === 'F', sm = (spIndi && spIndi.sex) === 'M';
               let label = null;
-              if (id === focusId)               label = sf?'Esposa':sm?'Esposo':'CÃ´njuge';
-              else if (v.ups===0&&v.downs===1)  label = sf?'Nora':sm?'Genro':'CÃ´njuge de filho/a';
-              else if (v.ups===1&&v.downs===0)  label = sf?'Madrasta':sm?'Padrasto':'CÃ´njuge do pai/mÃ£e';
+              if (id === focusId)               label = sf?'Esposa':sm?'Esposo':'Cônjuge';
+              else if (v.ups===0&&v.downs===1)  label = sf?'Nora':sm?'Genro':'Cônjuge de filho/a';
+              else if (v.ups===1&&v.downs===0)  label = sf?'Madrasta':sm?'Padrasto':'Cônjuge do pai/mãe';
               else if (v.ups===1&&v.downs===1)  label = sf?'Cunhada':sm?'Cunhado':'Cunhado/a';
-              else if (v.ups===0&&v.downs===2)  label = sf?'CÃ´njuge da neta':sm?'CÃ´njuge do neto':'CÃ´njuge do neto/a';
-              else if (v.ups===2&&v.downs===0)  label = sf?'CÃ´njuge da avÃ³':sm?'CÃ´njuge do avÃ´':'CÃ´njuge avÃ´/avÃ³';
+              else if (v.ups===0&&v.downs===2)  label = sf?'Cônjuge da neta':sm?'Cônjuge do neto':'Cônjuge do neto/a';
+              else if (v.ups===2&&v.downs===0)  label = sf?'Cônjuge da avó':sm?'Cônjuge do avô':'Cônjuge avô/avó';
               if (label) spousesToAdd.push({id:spId, label:label});
             }
           }
@@ -358,8 +358,8 @@
         for (let i = 0; i < spousesToAdd.length; i++) {
           if (!rels.has(spousesToAdd[i].id)) rels.set(spousesToAdd[i].id, spousesToAdd[i].label);
         }
-        // Third pass: bio relatives of the focus person's partner(s) â†’ in-law labels
-        // (sogro/sogra, cunhado/cunhada via cÃ´njuge, enteado/a, primo/a do cÃ´njuge, etc.)
+        // Third pass: bio relatives of the focus person's partner(s) → in-law labels
+        // (sogro/sogra, cunhado/cunhada via cônjuge, enteado/a, primo/a do cônjuge, etc.)
         const primarySpouseIds = [];
         const focusIndi = indiMap[focusId];
         if (focusIndi) {
@@ -427,19 +427,19 @@
             let label = null;
             if (ups===0 && downs===0) return; // the spouse themselves, already labelled
             else if (ups===1 && downs===0) label = f ? 'Sogra' : m ? 'Sogro' : 'Sogro/Sogra';
-            else if (ups===2 && downs===0) label = f ? 'AvÃ³ do cÃ´njuge' : m ? 'AvÃ´ do cÃ´njuge' : 'AvÃ´/Ã³ do cÃ´njuge';
-            else if (ups===3 && downs===0) label = f ? 'BisavÃ³ do cÃ´njuge' : m ? 'BisavÃ´ do cÃ´njuge' : 'BisavÃ´/Ã³ do cÃ´njuge';
+            else if (ups===2 && downs===0) label = f ? 'Avó do cônjuge' : m ? 'Avô do cônjuge' : 'Avô/ó do cônjuge';
+            else if (ups===3 && downs===0) label = f ? 'Bisavó do cônjuge' : m ? 'Bisavô do cônjuge' : 'Bisavô/ó do cônjuge';
             else if (ups===1 && downs===1) label = f ? 'Cunhada' : m ? 'Cunhado' : 'Cunhado/a';
             else if (ups===0 && downs===1) label = f ? 'Enteada' : m ? 'Enteado' : 'Enteado/a';
-            else if (ups===0 && downs===2) label = f ? 'Neta do cÃ´njuge' : m ? 'Neto do cÃ´njuge' : 'Neto/a do cÃ´njuge';
-            else if (ups===1 && downs===2) label = f ? 'Sobrinha do cÃ´njuge' : m ? 'Sobrinho do cÃ´njuge' : 'Sobrinho/a do cÃ´njuge';
-            else if (ups===2 && downs===1) label = f ? 'Tia do cÃ´njuge' : m ? 'Tio do cÃ´njuge' : 'Tio/a do cÃ´njuge';
-            else if (ups===3 && downs===1) label = f ? 'Tia-avÃ³ do cÃ´njuge' : m ? 'Tio-avÃ´ do cÃ´njuge' : 'Tio/a-avÃ´/Ã³ do cÃ´njuge';
-            else if (ups===2 && downs===2) label = f ? 'Prima do cÃ´njuge' : m ? 'Primo do cÃ´njuge' : 'Primo/a do cÃ´njuge';
-            else if (ups===2 && downs===3) label = (f?'Prima':'Primo') + ' do cÃ´njuge 1x afastado/a';
-            else if (ups===3 && downs===2) label = (f?'Prima':'Primo') + ' do cÃ´njuge 1x afastado/a';
-            else if (ups===3 && downs===3) label = f ? '2Âª Prima do cÃ´njuge' : m ? '2Âº Primo do cÃ´njuge' : '2Âº Primo/a do cÃ´njuge';
-            else label = 'Parente do cÃ´njuge';
+            else if (ups===0 && downs===2) label = f ? 'Neta do cônjuge' : m ? 'Neto do cônjuge' : 'Neto/a do cônjuge';
+            else if (ups===1 && downs===2) label = f ? 'Sobrinha do cônjuge' : m ? 'Sobrinho do cônjuge' : 'Sobrinho/a do cônjuge';
+            else if (ups===2 && downs===1) label = f ? 'Tia do cônjuge' : m ? 'Tio do cônjuge' : 'Tio/a do cônjuge';
+            else if (ups===3 && downs===1) label = f ? 'Tia-avó do cônjuge' : m ? 'Tio-avô do cônjuge' : 'Tio/a-avô/ó do cônjuge';
+            else if (ups===2 && downs===2) label = f ? 'Prima do cônjuge' : m ? 'Primo do cônjuge' : 'Primo/a do cônjuge';
+            else if (ups===2 && downs===3) label = (f?'Prima':'Primo') + ' do cônjuge 1x afastado/a';
+            else if (ups===3 && downs===2) label = (f?'Prima':'Primo') + ' do cônjuge 1x afastado/a';
+            else if (ups===3 && downs===3) label = f ? '2ª Prima do cônjuge' : m ? '2º Primo do cônjuge' : '2º Primo/a do cônjuge';
+            else label = 'Parente do cônjuge';
             if (label) inLawsToAdd.push({id:id, label:label});
           });
         }
@@ -452,37 +452,37 @@
 
       function _kinshipLabel(ups, downs, sex) {
         const f = sex==='F', m = sex==='M';
-        if (ups===1&&downs===0) return f?'MÃ£e':m?'Pai':'Pai/MÃ£e';
-        if (ups===2&&downs===0) return f?'AvÃ³':m?'AvÃ´':'AvÃ´/AvÃ³';
-        if (ups===3&&downs===0) return f?'BisavÃ³':m?'BisavÃ´':'BisavÃ´/Ã³';
-        if (ups===4&&downs===0) return f?'TrisavÃ³':m?'TrisavÃ´':'TrisavÃ´/Ã³';
-        if (ups>=5&&downs===0)  return (f?'TetravÃ³ ('+ups+'Âª)':'Tetravo ('+ups+'Âº)');
+        if (ups===1&&downs===0) return f?'Mãe':m?'Pai':'Pai/Mãe';
+        if (ups===2&&downs===0) return f?'Avó':m?'Avô':'Avô/Avó';
+        if (ups===3&&downs===0) return f?'Bisavó':m?'Bisavô':'Bisavô/ó';
+        if (ups===4&&downs===0) return f?'Trisavó':m?'Trisavô':'Trisavô/ó';
+        if (ups>=5&&downs===0)  return (f?'Tetravó ('+ups+'ª)':'Tetravo ('+ups+'º)');
         if (ups===0&&downs===1) return f?'Filha':m?'Filho':'Filho/a';
         if (ups===0&&downs===2) return f?'Neta':m?'Neto':'Neto/a';
         if (ups===0&&downs===3) return f?'Bisneta':m?'Bisneto':'Bisneto/a';
         if (ups===0&&downs===4) return f?'Trineta':m?'Trineto':'Trineto/a';
         if (ups===0&&downs>=5)  return (f?'Descendente ('+downs+'x)':'Descendente ('+downs+'x)');
-        if (ups===1&&downs===1) return f?'IrmÃ£':m?'IrmÃ£o':'IrmÃ£o/Ã£';
+        if (ups===1&&downs===1) return f?'Irmã':m?'Irmão':'Irmão/ã';
         if (ups===1&&downs===2) return f?'Sobrinha':m?'Sobrinho':'Sobrinho/a';
         if (ups===1&&downs===3) return f?'Sobrinha-neta':m?'Sobrinho-neto':'Sobrinho/a-neto';
         if (ups===1&&downs===4) return f?'Sobrinha-bisneta':m?'Sobrinho-bisneto':'Sobrinho/a-bisneto';
         if (ups===2&&downs===1) return f?'Tia':m?'Tio':'Tio/Tia';
-        if (ups===3&&downs===1) return f?'Tia-avÃ³':m?'Tio-avÃ´':'Tio-avÃ´/Ã³';
-        if (ups===4&&downs===1) return f?'Tia-bisavÃ³':m?'Tio-bisavÃ´':'Tio-bisavÃ´/Ã³';
-        if (ups===2&&downs===2) return f?'1Âª Prima':m?'1Âº Primo':'1Âº Primo/a';
-        if (ups===3&&downs===3) return f?'2Âª Prima':m?'2Âº Primo':'2Âº Primo/a';
-        if (ups===4&&downs===4) return f?'3Âª Prima':m?'3Âº Primo':'3Âº Primo/a';
-        if (ups===2&&downs===3) return (f?'1Âª Prima':'1Âº Primo')+' 1x afastado/a';
-        if (ups===3&&downs===2) return (f?'1Âª Prima':'1Âº Primo')+' 1x afastado/a';
-        if (ups===2&&downs===4) return (f?'1Âª Prima':'1Âº Primo')+' 2x afastado/a';
-        if (ups===4&&downs===2) return (f?'1Âª Prima':'1Âº Primo')+' 2x afastado/a';
-        if (ups===3&&downs===4) return (f?'2Âª Prima':'2Âº Primo')+' 1x afastado/a';
-        if (ups===4&&downs===3) return (f?'2Âª Prima':'2Âº Primo')+' 1x afastado/a';
+        if (ups===3&&downs===1) return f?'Tia-avó':m?'Tio-avô':'Tio-avô/ó';
+        if (ups===4&&downs===1) return f?'Tia-bisavó':m?'Tio-bisavô':'Tio-bisavô/ó';
+        if (ups===2&&downs===2) return f?'1ª Prima':m?'1º Primo':'1º Primo/a';
+        if (ups===3&&downs===3) return f?'2ª Prima':m?'2º Primo':'2º Primo/a';
+        if (ups===4&&downs===4) return f?'3ª Prima':m?'3º Primo':'3º Primo/a';
+        if (ups===2&&downs===3) return (f?'1ª Prima':'1º Primo')+' 1x afastado/a';
+        if (ups===3&&downs===2) return (f?'1ª Prima':'1º Primo')+' 1x afastado/a';
+        if (ups===2&&downs===4) return (f?'1ª Prima':'1º Primo')+' 2x afastado/a';
+        if (ups===4&&downs===2) return (f?'1ª Prima':'1º Primo')+' 2x afastado/a';
+        if (ups===3&&downs===4) return (f?'2ª Prima':'2º Primo')+' 1x afastado/a';
+        if (ups===4&&downs===3) return (f?'2ª Prima':'2º Primo')+' 1x afastado/a';
         const minDeg = Math.min(ups, downs);
         const removed = Math.abs(ups - downs);
         if (minDeg >= 2) {
           const deg = minDeg - 1;
-          const label = f ? deg+'Âª Prima' : m ? deg+'Âº Primo' : deg+'Âº Primo/a';
+          const label = f ? deg+'ª Prima' : m ? deg+'º Primo' : deg+'º Primo/a';
           return removed > 0 ? label + ' ' + removed + 'x afastado/a' : label;
         }
         return 'Parente';
@@ -492,7 +492,7 @@
         if (label === null) {
           return '<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.73rem;font-weight:700;background:rgba(255,215,0,0.18);border:1px solid rgba(200,170,0,0.45);color:#b89a00;white-space:nowrap;">&#9733; Em Foco</span>';
         }
-        if (!label) return '<span style="color:var(--text-disabled);font-size:0.8rem;">â€”</span>';
+        if (!label) return '<span style="color:var(--text-disabled);font-size:0.8rem;">—</span>';
         const isDirect = /^(Pai|M\u00e3e|Filho|Filha|Av\u00f4|Av\u00f3|Bisav\u00f4|Bisav\u00f3|Trisav\u00f4|Trisav\u00f3|Trineto|Trineta|Bisneto|Bisneta|Neto|Neta|Tetrav|Descend)/.test(label);
         const isInLaw = /^(Esposo|Esposa|C\u00f4njuge|Genro|Nora|Padrasto|Madrasta|Cunhado|Cunhada|Sogro|Sogra|Enteado|Enteada|Parente)/.test(label) || /c\u00f4njuge/.test(label);
         let bg, bd, col;
@@ -506,13 +506,13 @@
         return badge;
       }
 
-      /* â”€â”€ Search + nova pessoa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Search + nova pessoa ─────────────────────────────────────────── */
       (function(){
         const input=document.getElementById('nameFilter');
         if(input) input.addEventListener('input',function(){ currentFilter=this.value.toLowerCase().trim(); currentPage=1; renderTable(); });
       })();
 
-      /* â”€â”€ Table click handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Table click handlers ──────────────────────────────────────────── */
       document.getElementById('peopleTable').addEventListener('click',function(e){
         if(e.target&&e.target.tagName==='A') e.preventDefault();
         const el=e.target.closest&&e.target.closest('[data-id]');
@@ -536,12 +536,12 @@
         afterDelete: function() { renderTable(); }
       };
 
-      /* â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Init ──────────────────────────────────────────────────────────── */
       renderTable();
 
     })();
     </script>
-    <!-- â”€â”€ Surname Research Modal â”€â”€ -->
+    <!-- ── Surname Research Modal ── -->
     <div id="surnameResearchOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:900;transition:opacity .2s;" onclick="closeSurnameModal()"></div>
     <div id="surnameResearchModal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:92%;max-width:640px;max-height:85vh;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:910;overflow:hidden;flex-direction:column;display:none;">
       <div style="padding:16px 20px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
@@ -554,7 +554,7 @@
     </div>
 
     <script>
-    /* â”€â”€ Surname Research Feature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Surname Research Feature ─────────────────────────────────────── */
     (function(){
       'use strict';
 
@@ -567,7 +567,7 @@
         const body = document.getElementById('surnameModalBody');
 
         title.innerHTML = '<i class="mdi mdi-book-search-outline" style="color:var(--blue);"></i> Apelido: ' + _escSR(surname);
-        body.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-secondary);"><i class="mdi mdi-loading mdi-spin" style="font-size:2rem;"></i><p>A pesquisar informaÃ§Ãµes sobre o apelido <strong>' + _escSR(surname) + '</strong>...</p></div>';
+        body.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-secondary);"><i class="mdi mdi-loading mdi-spin" style="font-size:2rem;"></i><p>A pesquisar informações sobre o apelido <strong>' + _escSR(surname) + '</strong>...</p></div>';
         overlay.style.display = 'block';
         modal.style.display = 'flex';
 
@@ -598,14 +598,14 @@
         if (data.coatOfArmsUrl) {
           html += '<div style="text-align:center;margin-bottom:20px;">';
           html += '<div style="display:inline-block;padding:16px;background:rgba(255,255,255,0.05);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);">';
-          html += '<img src="' + _escSR(data.coatOfArmsUrl) + '" alt="BrasÃ£o â€” ' + _escSR(data.surname) + '" style="max-height:200px;max-width:100%;object-fit:contain;" onerror="this.parentElement.style.display=\'none\'"/>';
-          html += '<div style="margin-top:8px;font-size:0.78rem;color:var(--text-secondary);font-weight:600;">BrasÃ£o de Armas</div>';
+          html += '<img src="' + _escSR(data.coatOfArmsUrl) + '" alt="Brasão — ' + _escSR(data.surname) + '" style="max-height:200px;max-width:100%;object-fit:contain;" onerror="this.parentElement.style.display=\'none\'"/>';
+          html += '<div style="margin-top:8px;font-size:0.78rem;color:var(--text-secondary);font-weight:600;">Brasão de Armas</div>';
           html += '</div></div>';
         }
 
         // History
         html += '<div style="margin-bottom:20px;">';
-        html += '<h3 style="font-size:0.9rem;font-weight:700;color:var(--text-main);margin:0 0 10px;display:flex;align-items:center;gap:6px;"><i class="mdi mdi-history" style="color:var(--blue);"></i> HistÃ³ria GenealÃ³gica</h3>';
+        html += '<h3 style="font-size:0.9rem;font-weight:700;color:var(--text-main);margin:0 0 10px;display:flex;align-items:center;gap:6px;"><i class="mdi mdi-history" style="color:var(--blue);"></i> História Genealógica</h3>';
         html += '<div style="font-size:0.88rem;color:var(--text-secondary);line-height:1.65;text-align:justify;">' + _escSR(data.history) + '</div>';
         html += '</div>';
 
@@ -618,8 +618,8 @@
           data.sources.forEach(function(src) {
             html += '<li style="margin-bottom:4px;">';
             html += '<strong>' + _escSR(src.name) + '</strong>';
-            if (src.article) html += ' â€” <em>' + _escSR(src.article) + '</em>';
-            if (src.url) html += ' â€” <a href="' + _escSR(src.url) + '" target="_blank" rel="noopener noreferrer" style="color:var(--blue);text-decoration:underline;">' + _escSR(src.url) + '</a>';
+            if (src.article) html += ' — <em>' + _escSR(src.article) + '</em>';
+            if (src.url) html += ' — <a href="' + _escSR(src.url) + '" target="_blank" rel="noopener noreferrer" style="color:var(--blue);text-decoration:underline;">' + _escSR(src.url) + '</a>';
             html += '</li>';
           });
           html += '</ol></div>';
@@ -648,7 +648,7 @@
     <script src="photo-lightbox.js"></script>
     <script src="edit-person-drawer.js"></script>
     <script>
-      // Auto-open from URL param (?edit=id) â€” must run after edit-person-drawer.js
+      // Auto-open from URL param (?edit=id) — must run after edit-person-drawer.js
       (function(){
         var p = new URLSearchParams(window.location.search);
         var editId = p.get('edit');

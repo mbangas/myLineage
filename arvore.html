@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>myLineage â€” Ãrvore GenealÃ³gica</title>
+    <title>myLineage — Árvore Genealógica</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
     <style>
@@ -50,23 +50,23 @@
         <nav>
           <a href="app.html"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
           <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
-          <a href="arvore.html" class="active"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Ãrvore</a>
+          <a href="arvore.html" class="active"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
           <a href="gedcom.html"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
-          <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Ãlbum</a>
+          <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
           <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
-          <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>ValidaÃ§Ã£o</a>
-          <a href="historico.html"><i class="mdi mdi-history" aria-hidden="true"></i>HistÃ³rico</a>
+          <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
+          <a href="historico.html"><i class="mdi mdi-history" aria-hidden="true"></i>Histórico</a>
         </nav>
         <div class="sidebar-footer">
           <a href="apis.html"><i class="mdi mdi-api" aria-hidden="true"></i>APIs</a>
-          <a href="configuracao.html"><i class="mdi mdi-cog" aria-hidden="true"></i>DefiniÃ§Ãµes</a>
+          <a href="configuracao.html"><i class="mdi mdi-cog" aria-hidden="true"></i>Definições</a>
         </div>
       </aside>
       <main class="content">
         <div class="topbar">
           <div style="display:flex;align-items:center;gap:10px;">
             <i class="mdi mdi-sitemap" style="color:var(--accent);font-size:1.15rem;"></i>
-            <h1>Ãrvore GenealÃ³gica</h1>
+            <h1>Árvore Genealógica</h1>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <button id="openBookBtn" class="btn btn-sm" title="Abrir Family History Book" style="background:linear-gradient(135deg,#7a4010,#3a1808);border-color:#c8906040;">
@@ -75,7 +75,7 @@
             <button id="resetFocusBtn" class="btn btn-ghost btn-sm" title="Resetar foco para a pessoa configurada">
               <i class="mdi mdi-crosshairs-gps" aria-hidden="true"></i> Reset foco
             </button>
-            <button id="createFirstPersonBtn" class="btn btn-sm" style="display:none;" title="Criar a primeira pessoa da Ã¡rvore genealÃ³gica">
+            <button id="createFirstPersonBtn" class="btn btn-sm" style="display:none;" title="Criar a primeira pessoa da árvore genealógica">
               <i class="mdi mdi-account-plus" aria-hidden="true"></i> Criar primeira pessoa
             </button>
           </div>
@@ -86,8 +86,8 @@
           <div id="emptyStateTree" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:340px;gap:20px;text-align:center;">
             <i class="mdi mdi-file-tree-outline" style="font-size:4.5rem;color:var(--text-disabled);opacity:0.4;line-height:1;"></i>
             <div>
-              <h2 style="margin:0 0 8px;font-size:1.15rem;color:var(--text-secondary);">A sua Ã¡rvore estÃ¡ vazia</h2>
-              <p style="margin:0;color:var(--text-disabled);font-size:0.9rem;">Comece por adicionar a primeira pessoa Ã  sua genealogia.</p>
+              <h2 style="margin:0 0 8px;font-size:1.15rem;color:var(--text-secondary);">A sua árvore está vazia</h2>
+              <p style="margin:0;color:var(--text-disabled);font-size:0.9rem;">Comece por adicionar a primeira pessoa à sua genealogia.</p>
             </div>
           </div>
           <div class="chart-toolbar">
@@ -99,7 +99,7 @@
             </div>
             <label style="font-size:0.85rem;color:var(--text-secondary);margin-left:12px;">Pessoa:</label>
             <div style="position:relative;display:inline-block;" id="focusPersonCombo">
-              <input type="text" id="focusPersonInput" placeholder="Pesquisar pessoaâ€¦" autocomplete="off"
+              <input type="text" id="focusPersonInput" placeholder="Pesquisar pessoa…" autocomplete="off"
                 style="font-size:0.85rem;padding:4px 28px 4px 8px;border-radius:6px;border:1px solid rgba(163,163,255,0.18);background:var(--bg-card);color:var(--text-main);min-width:220px;">
               <i class="mdi mdi-magnify" style="position:absolute;right:7px;top:50%;transform:translateY(-50%);color:var(--text-secondary);pointer-events:none;font-size:1rem;"></i>
               <input type="hidden" id="focusPersonSelect">
@@ -112,7 +112,7 @@
           <div id="pathBanner" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(68,147,248,0.10);border:1px solid rgba(68,147,248,0.28);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;">
             <i class="mdi mdi-transit-connection" style="color:#4493f8;font-size:1.1rem;flex-shrink:0;"></i>
             <span style="font-size:0.88rem;color:var(--text-main);flex:1;">Caminho familiar: <strong id="pathBannerText"></strong></span>
-            <button id="clearPathBtn" class="btn btn-ghost btn-sm" style="font-size:0.82rem;white-space:nowrap;"><i class="mdi mdi-close-circle-outline"></i> Ãrvore completa</button>
+            <button id="clearPathBtn" class="btn btn-ghost btn-sm" style="font-size:0.82rem;white-space:nowrap;"><i class="mdi mdi-close-circle-outline"></i> Árvore completa</button>
           </div>
 
           <div id="topolaWrap">
@@ -121,7 +121,7 @@
               <button class="btn btn-ghost" id="zoomInBtn" title="Zoom +"><i class="mdi mdi-plus"></i></button>
               <button class="btn btn-ghost" id="fitChartBtn" title="Ver tudo"><i class="mdi mdi-fit-to-screen-outline"></i></button>
               <button class="btn btn-ghost" id="centerChartBtn" title="Centrar na pessoa"><i class="mdi mdi-crosshairs"></i></button>
-              <button class="btn btn-ghost" id="zoomOutBtn" title="Zoom âˆ’"><i class="mdi mdi-minus"></i></button>
+              <button class="btn btn-ghost" id="zoomOutBtn" title="Zoom −"><i class="mdi mdi-minus"></i></button>
             </div>
           </div>
           <div id="familyChartWrap" class="f3" style="display:none;width:100%;height:calc(100vh - 220px);min-height:400px;border-radius:10px;overflow:hidden;position:relative;"></div>
@@ -136,21 +136,21 @@
       </main>
     </div>
 
-    <!-- â”€â”€ Right drawer overlay â”€â”€ -->
+    <!-- ── Right drawer overlay ── -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
 
-    <!-- â”€â”€ Right drawer â”€â”€ -->
+    <!-- ── Right drawer ── -->
     <div class="drawer" id="personDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
       <div class="drawer-header">
         <button class="btn btn-ghost btn-sm" id="drawerBackBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Voltar"><i class="mdi mdi-arrow-left"></i></button>
         <h2 id="drawerTitle" style="flex:1;">Detalhes da Pessoa</h2>
-        <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Focar na Ãrvore"><i class="mdi mdi-sitemap"></i></button>
+        <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Focar na Árvore"><i class="mdi mdi-sitemap"></i></button>
         <button class="drawer-close" id="drawerCloseBtn" aria-label="Fechar painel"><i class="mdi mdi-close"></i></button>
       </div>
       <div class="drawer-person-header" id="drawerPersonHeader">
         <div class="drawer-avatar" id="drawerAvatar"></div>
         <div>
-          <div class="drawer-person-name" id="drawerPersonName">â€”</div>
+          <div class="drawer-person-name" id="drawerPersonName">—</div>
           <div class="drawer-person-sub" id="drawerPersonSub"></div>
         </div>
       </div>
@@ -168,7 +168,7 @@
       const DB = window.GedcomDB;
       const T = window.TopolaLib;
 
-      /* â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Helpers ──────────────────────────────────────────────────────── */
       const MONTHS_MAP = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
       const MONTHS = ['','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
       const QUAL_TO_GED = {'Antes de':'BEF','Depois de':'AFT','Cerca de':'ABT'};
@@ -208,7 +208,7 @@
         return {date:{day,month,year}};
       }
 
-      /* â”€â”€ Path / kinship filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Path / kinship filter ────────────────────────────────────── */
       function computePathFilter(fromId, toId) {
         if (!fromId || !toId || fromId === toId) return null;
         // Use only non-deleted records so deleted entities never pollute the path
@@ -287,12 +287,12 @@
           if (!indi) return;
           const famcArr = Array.isArray(indi.famc) ? indi.famc : (indi.famc ? [indi.famc] : []);
           // Only add it if it would be useful to anchor the root (keep tree small)
-          famcArr.forEach(function(fid) { /* intentionally not added â€” keep scope tight */ });
+          famcArr.forEach(function(fid) { /* intentionally not added — keep scope tight */ });
         });
 
         // Now find the startId: the best root for the sub-tree that shows the
         // full connecting path.  Among individuals NOT listed as children in any
-        // path-family (i.e. potential roots), prefer the true common ancestor â€”
+        // path-family (i.e. potential roots), prefer the true common ancestor —
         // the person who is a parent in the family with the MOST path-children.
         // This ensures in-law paths root at the grandparent (branching node)
         // rather than at a "filler spouse" who was only added for completeness.
@@ -328,7 +328,7 @@
         return { indiSet: indiSet, famSet: famSet, startId: startId };
       }
 
-      /* â”€â”€ Build Topola-compatible JSON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Build Topola-compatible JSON ─────────────────────────────────── */
       function buildTopolaJson(){
         const indis=_pathFilter?DB.getIndividuals().filter(function(i){return _pathFilter.indiSet.has(i.id);}):DB.getIndividuals();
         const fams=_pathFilter?DB.getFamilies().filter(function(f){return _pathFilter.famSet.has(f.id);}):DB.getFamilies();
@@ -378,7 +378,7 @@
         return {indis:tIndis,fams:tFams};
       }
 
-      /* â”€â”€ ViewBox pan/zoom state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── ViewBox pan/zoom state ──────────────────────────────────────── */
       let _vb={x:0,y:0,w:800,h:600};
       let _chartSize=[0,0];
       let _focusPt=[0,0];
@@ -394,7 +394,7 @@
         const rect=svgEl.getBoundingClientRect();
         if(cx===undefined) cx=rect.width/2;
         if(cy===undefined) cy=rect.height/2;
-        // convert display coords â†’ viewBox coords
+        // convert display coords → viewBox coords
         const scaleX=_vb.w/rect.width, scaleY=_vb.h/rect.height;
         const vbCx=_vb.x+cx*scaleX, vbCy=_vb.y+cy*scaleY;
         _vb.w*=factor; _vb.h*=factor;
@@ -443,7 +443,7 @@
         },{passive:false});
       })();
 
-      /* â”€â”€ Chart type preference (localStorage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Chart type preference (localStorage) ──────────────────────────── */
       const CHART_TYPE_KEY='myLineage_chartType';
       function getChartType(){
         return localStorage.getItem(CHART_TYPE_KEY)||'donatso';
@@ -465,7 +465,7 @@
       // Init button state
       setChartType(getChartType());
 
-      /* â”€â”€ Chart rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Chart rendering ──────────────────────────────────────────────── */
       let chartHandle=null;
 
       const CHART_TYPES={
@@ -474,7 +474,7 @@
         fancy: T.FancyChart
       };
 
-      /* â”€â”€ Build Donatso family-chart data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Build Donatso family-chart data ──────────────────────────────── */
       function buildFamilyChartData(){
         const indis=_pathFilter?DB.getIndividuals().filter(function(i){return _pathFilter.indiSet.has(i.id);}):DB.getIndividuals();
         const fams=_pathFilter?DB.getFamilies().filter(function(f){return _pathFilter.famSet.has(f.id);}):DB.getFamilies();
@@ -499,7 +499,7 @@
               if(!relsMap[husb].spouses.includes(wife)) relsMap[husb].spouses.push(wife);
               if(!relsMap[wife].spouses.includes(husb)) relsMap[wife].spouses.push(husb);
             }
-            // parents link â†’ children
+            // parents link → children
             chn.forEach(function(cid){
               if(husb&&!relsMap[cid].parents.includes(husb)) relsMap[cid].parents.push(husb);
               if(wife&&!relsMap[cid].parents.includes(wife)) relsMap[cid].parents.push(wife);
@@ -550,7 +550,7 @@
        * current zoom level and pan position exactly.
        *
        * Donatso: calls f3ChartHandle.updateData() + updateTree({tree_position:'inherit'})
-       *   â€” zero DOM destruction, the library diffs and patches the existing SVG.
+       *   — zero DOM destruction, the library diffs and patches the existing SVG.
        * Topola:  snapshots the viewBox first, does a full SVG re-render, then
        *   restores the snapshot so the viewport does not move.
        */
@@ -601,13 +601,13 @@
         if (!DB.getIndividuals().length) { _updateEmptyState(); return; }
         const selectedType=getChartType();
 
-        /* â”€â”€ Donatso Family Chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* ── Donatso Family Chart ──────────────────────────────────────── */
         if(selectedType==='donatso'){
           document.getElementById('topolaWrap').style.display='none';
           const fcWrap=document.getElementById('familyChartWrap');
 
           // Capture the exact DOM transform string of the main <g> BEFORE
-          // destroying the chart â€” most reliable source of truth for the
+          // destroying the chart — most reliable source of truth for the
           // current pan/zoom state regardless of d3-zoom internal state.
           let savedTransform=null;
           if(preserveView){
@@ -647,7 +647,7 @@
               const parentId=focusDatumForSiblings.rels.parents[0];
               const parentDatum=fcData.find(function(d){ return d.id===parentId; });
               if(parentDatum && parentDatum.rels.children.length>1){
-                // Focus person has siblings â†’ root at parent so siblings and
+                // Focus person has siblings → root at parent so siblings and
                 // their descendants all appear in the same tree.
                 renderRoot=parentId;
               }
@@ -656,7 +656,7 @@
             f3ChartHandle=F3.createChart(fcWrap, fcData);
             const card=f3ChartHandle.setCardSvg();
             card.setCardDisplay([
-              function(d){ return [d.data.first_name, d.data.last_name].filter(Boolean).join(' ')||'â€”'; },
+              function(d){ return [d.data.first_name, d.data.last_name].filter(Boolean).join(' ')||'—'; },
               function(d){ return d.data.birthday ? '\u2605 '+d.data.birthday : ''; },
               function(d){ return d.data.deathday ? '\u271D '+d.data.deathday : ''; }
             ]);
@@ -718,7 +718,7 @@
           return;
         }
 
-        /* â”€â”€ Topola charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* ── Topola charts ─────────────────────────────────────────────── */
         document.getElementById('familyChartWrap').style.display='none';
         document.getElementById('topolaWrap').style.display='';
         f3ChartHandle=null;
@@ -773,13 +773,13 @@
         }
       }
 
-      /* â”€â”€ Focus person â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Focus person ─────────────────────────────────────────────────── */
       function getFocusPersonId(){
         const validIds=new Set(DB.getIndividuals().map(i=>i.id));
-        // Check temp setting (from Cadastro "Ver na Ãrvore")
+        // Check temp setting (from Cadastro "Ver na Árvore")
         const temp=DB.getSetting('tempFocusPerson');
         if(temp){ DB.setSetting('tempFocusPerson',null); if(validIds.has(temp)) return temp; }
-        // Check configured focus person â€” stored as {id, name, when} object
+        // Check configured focus person — stored as {id, name, when} object
         const focused=DB.getSetting('focusedPerson');
         const focusedId=focused&&(typeof focused==='object'?focused.id:focused);
         if(focusedId && validIds.has(focusedId)) return focusedId;
@@ -788,14 +788,14 @@
         return indis.length?indis[0].id:null;
       }
 
-      // â”€â”€ Searchable person combo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Searchable person combo ────────────────────────────────────
       let _allPersons=[];
       let _autoFocusId=null; // focus person from settings, used when nothing manually selected
 
       function populateFocusSelect(focusId){
         _allPersons=DB.getIndividuals().map(indi=>({id:indi.id,name:DB.getDisplayName(indi)}));
         _autoFocusId=focusId||null;
-        // Leave input empty â€” search is user-initiated only
+        // Leave input empty — search is user-initiated only
         document.getElementById('focusPersonSelect').value='';
         document.getElementById('focusPersonInput').value='';
         _renderDropdown('');
@@ -860,7 +860,7 @@
 
       function showFocusInfo(){}
 
-      /* â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* ── Init ──────────────────────────────────────────────────────────── */
       const focusId=getFocusPersonId();
       populateFocusSelect(focusId);
 

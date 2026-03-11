@@ -444,6 +444,30 @@
       </main>
     </div><!-- /.app-shell -->
 
+    <!-- ── Edit Person Drawer ─────────────────────────────────────────── -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="personDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-header">
+        <button class="btn btn-ghost btn-sm" id="drawerBackBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Voltar"><i class="mdi mdi-arrow-left"></i></button>
+        <h2 id="drawerTitle" style="flex:1;">Editar Pessoa</h2>
+        <button class="btn btn-ghost btn-sm" id="drawerTreeBtn" style="display:none;padding:2px 6px;margin-right:4px;" title="Ver na Árvore"><i class="mdi mdi-sitemap"></i></button>
+        <button class="drawer-close" id="drawerCloseBtn" aria-label="Fechar painel"><i class="mdi mdi-close"></i></button>
+      </div>
+      <div class="drawer-person-header" id="drawerPersonHeader">
+        <div class="drawer-avatar" id="drawerAvatar"></div>
+        <div>
+          <div class="drawer-person-name" id="drawerPersonName">—</div>
+          <div class="drawer-person-sub" id="drawerPersonSub"></div>
+        </div>
+      </div>
+      <div class="drawer-body" id="drawerBody"></div>
+      <div class="drawer-footer">
+        <button class="btn btn-danger btn-sm" id="drawerDeleteBtn"><i class="mdi mdi-delete-outline"></i> Apagar</button>
+        <button class="btn btn-ghost btn-sm" id="drawerCancelBtn">Cancelar</button>
+        <button class="btn btn-sm" id="drawerSaveBtn"><i class="mdi mdi-content-save-outline"></i> Guardar</button>
+      </div>
+    </div>
+
     <script>
       // ── Data helpers ───────────────────────────────────────────────────
       const DB = window.GedcomDB;
@@ -918,9 +942,13 @@
           function curAge(p)   { const by = birthYear(p); return by ? todayYear - by : null; }
 
           // Render a styled record card
-          function recCard(name, detail, value, valueSub, color){
+          // personId: if supplied the card becomes clickable and opens the Edit Person drawer
+          function recCard(name, detail, value, valueSub, color, personId){
             if(!name) return `<div class="rec-card"><span style="color:#3d4556;font-size:0.75rem;font-style:italic">Sem dados</span></div>`;
-            return `<div class="rec-card">
+            const clickAttr = personId
+              ? ` role="button" tabindex="0" title="Editar pessoa" style="cursor:pointer;" onclick="window.openDrawer('edit','${personId}')" onkeydown="if(event.key==='Enter'||event.key===' ')window.openDrawer('edit','${personId}')"`
+              : '';
+            return `<div class="rec-card"${clickAttr}>
               <div class="rec-avatar" style="background:${color}">${name.charAt(0).toUpperCase()}</div>
               <div style="flex:1;min-width:0">
                 <div class="rec-name">${name}</div>
@@ -939,6 +967,28 @@
             return `${hn} & ${wn}`;
           }
 
+          // Render a record card for a family — each name is a clickable link
+          function recCardFamily(f, detail, value, valueSub, color){
+            const h = f.husb ? personMap[f.husb] : null;
+            const w = f.wife ? personMap[f.wife] : null;
+            const hn = h ? DB.getDisplayName(h) : '?';
+            const wn = w ? DB.getDisplayName(w) : '?';
+            const initial = h ? hn.charAt(0).toUpperCase() : (w ? wn.charAt(0).toUpperCase() : '?');
+            function nameLink(person, name){
+              if(!person) return `<span style="color:#6b7a94">${name}</span>`;
+              return `<span role="button" tabindex="0" title="Editar pessoa" style="cursor:pointer;color:#d0d8e8;" onclick="event.stopPropagation();window.openDrawer('edit','${person.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.stopPropagation();window.openDrawer('edit','${person.id}');}">${name}</span>`;
+            }
+            const nameHtml = `${nameLink(h, hn)} <span style="color:#6b7a94">&amp;</span> ${nameLink(w, wn)}`;
+            return `<div class="rec-card">
+              <div class="rec-avatar" style="background:${color}">${initial}</div>
+              <div style="flex:1;min-width:0">
+                <div class="rec-name">${nameHtml}</div>
+                <div class="rec-detail">${detail}</div>
+              </div>
+              ${value ? `<div><div class="rec-value">${value}</div>${valueSub ? `<div class="rec-value-sub">${valueSub}</div>` : ''}</div>` : ''}
+            </div>`;
+          }
+
           // ── 1 & 2. Oldest / youngest living (by sex) ─────────────────
           const living = pessoas.filter(p => isAlive(p));
           const livingAged = living.map(p => ({ p, age: curAge(p) })).filter(x => x.age !== null);
@@ -950,13 +1000,13 @@
 
           const elVelhos = document.getElementById('rec-mais-velhos');
           if(elVelhos) elVelhos.innerHTML =
-            recCard(oldM ? DB.getDisplayName(oldM.p) : null, 'Homem vivo mais velho', oldM ? oldM.age+' anos' : '', oldM ? 'n. '+birthYear(oldM.p) : '', '#5294e2') +
-            recCard(oldF ? DB.getDisplayName(oldF.p) : null, 'Mulher viva mais velha', oldF ? oldF.age+' anos' : '', oldF ? 'n. '+birthYear(oldF.p) : '', '#ef799e');
+            recCard(oldM ? DB.getDisplayName(oldM.p) : null, 'Homem vivo mais velho', oldM ? oldM.age+' anos' : '', oldM ? 'n. '+birthYear(oldM.p) : '', '#5294e2', oldM ? oldM.p.id : null) +
+            recCard(oldF ? DB.getDisplayName(oldF.p) : null, 'Mulher viva mais velha', oldF ? oldF.age+' anos' : '', oldF ? 'n. '+birthYear(oldF.p) : '', '#ef799e', oldF ? oldF.p.id : null);
 
           const elNovos = document.getElementById('rec-mais-novos');
           if(elNovos) elNovos.innerHTML =
-            recCard(yngM ? DB.getDisplayName(yngM.p) : null, 'Rapaz mais novo (vivo)', yngM ? yngM.age+' anos' : '', yngM ? 'n. '+birthYear(yngM.p) : '', '#5294e2') +
-            recCard(yngF ? DB.getDisplayName(yngF.p) : null, 'Rapariga mais nova (viva)', yngF ? yngF.age+' anos' : '', yngF ? 'n. '+birthYear(yngF.p) : '', '#ef799e');
+            recCard(yngM ? DB.getDisplayName(yngM.p) : null, 'Rapaz mais novo (vivo)', yngM ? yngM.age+' anos' : '', yngM ? 'n. '+birthYear(yngM.p) : '', '#5294e2', yngM ? yngM.p.id : null) +
+            recCard(yngF ? DB.getDisplayName(yngF.p) : null, 'Rapariga mais nova (viva)', yngF ? yngF.age+' anos' : '', yngF ? 'n. '+birthYear(yngF.p) : '', '#ef799e', yngF ? yngF.p.id : null);
 
           // ── 7. Oldest in tree (any status) by earliest birth year ──
           const treeAged = pessoas.map(p => ({ p, by: birthYear(p) })).filter(x => x.by !== null);
@@ -965,8 +1015,8 @@
 
           const elAntigos = document.getElementById('rec-mais-antigos');
           if(elAntigos) elAntigos.innerHTML =
-            recCard(antM ? DB.getDisplayName(antM.p) : null, 'Homem mais antigo na árvore', antM ? antM.by.toString() : '', antM ? (isAlive(antM.p) ? 'vivo' : 'falecido') : '', '#b877d9') +
-            recCard(antF ? DB.getDisplayName(antF.p) : null, 'Mulher mais antiga na árvore', antF ? antF.by.toString() : '', antF ? (isAlive(antF.p) ? 'viva' : 'falecida') : '', '#b877d9');
+            recCard(antM ? DB.getDisplayName(antM.p) : null, 'Homem mais antigo na árvore', antM ? antM.by.toString() : '', antM ? (isAlive(antM.p) ? 'vivo' : 'falecido') : '', '#b877d9', antM ? antM.p.id : null) +
+            recCard(antF ? DB.getDisplayName(antF.p) : null, 'Mulher mais antiga na árvore', antF ? antF.by.toString() : '', antF ? (isAlive(antF.p) ? 'viva' : 'falecida') : '', '#b877d9', antF ? antF.p.id : null);
 
           // ── 3 & 4. Oldest / most recent marriage ─────────────────────
           const marrFams = [];
@@ -980,12 +1030,12 @@
 
           const elOldMarr = document.getElementById('rec-marr-oldest');
           if(elOldMarr) elOldMarr.innerHTML = oldestMarr
-            ? recCard(famDisplayName(oldestMarr.f), 'Casamento registado', oldestMarr.yr.toString(), oldestMarr.f.id, '#f2cc0c')
+            ? recCardFamily(oldestMarr.f, 'Casamento registado', oldestMarr.yr.toString(), oldestMarr.f.id, '#f2cc0c')
             : '<p class="no-data">Sem casamentos com data</p>';
 
           const elNewMarr = document.getElementById('rec-marr-newest');
           if(elNewMarr) elNewMarr.innerHTML = newestMarr
-            ? recCard(famDisplayName(newestMarr.f), 'Casamento registado', newestMarr.yr.toString(), newestMarr.f.id, '#5294e2')
+            ? recCardFamily(newestMarr.f, 'Casamento registado', newestMarr.yr.toString(), newestMarr.f.id, '#5294e2')
             : '<p class="no-data">Sem casamentos com data</p>';
 
           // ── 5. Family with most children ─────────────────────────────
@@ -994,7 +1044,7 @@
           if(elMostChild){
             const cnt = mostChildFam ? (mostChildFam.children||[]).length : 0;
             elMostChild.innerHTML = cnt > 0
-              ? recCard(famDisplayName(mostChildFam), 'Família com mais filhos', cnt+' filhos', mostChildFam.id, '#73bf69')
+              ? recCardFamily(mostChildFam, 'Família com mais filhos', cnt+' filhos', mostChildFam.id, '#73bf69')
               : '<p class="no-data">Sem filhos registados</p>';
           }
 
@@ -1014,14 +1064,25 @@
           const longest = livMarrs[0];
           const elLongest = document.getElementById('rec-longest-marr');
           if(elLongest) elLongest.innerHTML = longest
-            ? recCard(famDisplayName(longest.f), 'Casal vivo — casado desde '+longest.yr, longest.duration+' anos', longest.f.id, '#ff9830')
+            ? recCardFamily(longest.f, 'Casal vivo — casado desde '+longest.yr, longest.duration+' anos', longest.f.id, '#ff9830')
             : '<p class="no-data">Sem casais vivos com data de casamento</p>';
 
         })();
       }
 
+      window.DRAWER_CONFIG = {
+        treeBtnAction: function(personId) {
+          DB.setSetting('tempFocusPerson', personId);
+          window.location.href = 'arvore.html';
+        },
+        afterSave: function() { buildDashboard(); },
+        afterDelete: function() { buildDashboard(); }
+      };
+
       buildDashboard();
     </script>
+    <script src="photo-lightbox.js"></script>
+    <script src="edit-person-drawer.js"></script>
     <script src="history-logger.js"></script>
   </body>
 </html>

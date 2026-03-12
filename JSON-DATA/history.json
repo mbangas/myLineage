@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-03-12T11:06:34.410Z",
+    "entity": "Multimedia",
+    "action": "Actualizar Multimédia",
+    "actionType": "update",
+    "id": "M_I9_0",
+    "detail": "Multimédia M_I9_0",
+    "category": "album",
+    "actor": "+351931018263"
+  },
+  {
     "ts": "2026-03-12T09:16:54.244Z",
     "entity": "Login",
     "action": "Login: +351931018263",

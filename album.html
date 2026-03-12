@@ -616,6 +616,25 @@
         z-index: 5; line-height: 1; padding: 0;
       }
       .album-tag-zone:hover .album-tag-zone-remove-btn { display: flex; }
+      /* ── Zone resize handles ──────────────────────────────────── */
+      .album-tag-zone-handle {
+        position: absolute;
+        width: 10px; height: 10px;
+        background: #3b82f6;
+        border: 2px solid #fff;
+        border-radius: 2px;
+        z-index: 7;
+        opacity: 0;
+        transition: opacity 0.12s;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        pointer-events: auto;
+      }
+      .album-tag-zone:hover .album-tag-zone-handle { opacity: 1; }
+      .album-tag-zone-handle.nw { top:-5px;    left:-5px;  cursor: nwse-resize; }
+      .album-tag-zone-handle.ne { top:-5px;    right:-5px; cursor: nesw-resize; }
+      .album-tag-zone-handle.sw { bottom:-5px; left:-5px;  cursor: nesw-resize; }
+      .album-tag-zone-handle.se { bottom:-5px; right:-5px; cursor: nwse-resize; }
+      .album-tag-zone.zone-dragging { cursor: move !important; user-select: none; opacity: 0.85; }
       #albumBboxPersonPopup {
         position: fixed;
         background: var(--bg-surface);
@@ -1339,14 +1358,33 @@
           lbl.className = 'album-tag-zone-label';
           lbl.textContent = t.personName || t.name || 'Pessoa';
           zone.appendChild(lbl);
-          // Remove button (visible on hover, only for DB records)
+          // Controls visible on hover, only for DB records
           if(!item.fromFs){
+            // Remove button
             const rmBtn = document.createElement('button');
             rmBtn.className = 'album-tag-zone-remove-btn';
             rmBtn.title = 'Remover região';
             rmBtn.innerHTML = '<i class="mdi mdi-close" style="pointer-events:none;font-size:0.65rem;"></i>';
             rmBtn.addEventListener('click', e => { e.stopPropagation(); _albumRemoveBboxTag(idx, item); });
             zone.appendChild(rmBtn);
+            // Corner resize handles
+            ['nw','ne','sw','se'].forEach(corner => {
+              const h = document.createElement('div');
+              h.className = 'album-tag-zone-handle ' + corner;
+              h.addEventListener('mousedown', e => {
+                e.stopPropagation(); e.preventDefault();
+                _albumStartZoneEdit(e, 'resize', corner, item, t, zone);
+              });
+              zone.appendChild(h);
+            });
+            // Drag body to move
+            zone.style.cursor = 'move';
+            zone.addEventListener('mousedown', e => {
+              if(e.target.classList.contains('album-tag-zone-handle')) return;
+              if(e.target.classList.contains('album-tag-zone-remove-btn')) return;
+              e.stopPropagation(); e.preventDefault();
+              _albumStartZoneEdit(e, 'move', null, item, t, zone);
+            });
           }
           overlay.appendChild(zone);
         });
@@ -1644,6 +1682,100 @@
         if(m){ m.tags = item.tags; DB.saveMultimedia(m); }
         renderTagZones(item);
         _albumRenderPeopleSection(item);
+      }
+
+      /**
+       * Drag-resize or drag-move an existing zone.
+       * @param {MouseEvent} e        - initiating mousedown event
+       * @param {'resize'|'move'} mode
+       * @param {string|null} corner  - 'nw'|'ne'|'sw'|'se', null for move
+       * @param {object} item         - album item
+       * @param {object} tag          - the tag object (mutated in place)
+       * @param {HTMLElement} zoneEl  - the zone DOM element
+       */
+      function _albumStartZoneEdit(e, mode, corner, item, tag, zoneEl) {
+        const imgEl   = document.getElementById('modalImg');
+        const overlay = document.getElementById('modalTagOverlay');
+        if(!imgEl || !overlay) return;
+
+        const overlayRect = overlay.getBoundingClientRect();
+        const startMouseX = e.clientX;
+        const startMouseY = e.clientY;
+        const MIN = 0.03; // minimum dimension (3 % of overlay)
+
+        // Snapshot current zone dimensions as fractions of overlay
+        const s = {
+          l: parseFloat(zoneEl.style.left)   / 100,
+          t: parseFloat(zoneEl.style.top)    / 100,
+          w: parseFloat(zoneEl.style.width)  / 100,
+          h: parseFloat(zoneEl.style.height) / 100
+        };
+
+        zoneEl.classList.add('zone-dragging');
+
+        function onMove(mv) {
+          const dx = (mv.clientX - startMouseX) / overlayRect.width;
+          const dy = (mv.clientY - startMouseY) / overlayRect.height;
+          let l = s.l, t = s.t, w = s.w, h = s.h;
+
+          if(mode === 'move') {
+            l = Math.max(0, Math.min(1 - w, l + dx));
+            t = Math.max(0, Math.min(1 - h, t + dy));
+          } else {
+            if(corner === 'se') {
+              w = Math.max(MIN, Math.min(1 - l, w + dx));
+              h = Math.max(MIN, Math.min(1 - t, h + dy));
+            } else if(corner === 'sw') {
+              const nl = Math.max(0, Math.min(l + w - MIN, l + dx));
+              w = l + w - nl; l = nl;
+              h = Math.max(MIN, Math.min(1 - t, h + dy));
+            } else if(corner === 'ne') {
+              w = Math.max(MIN, Math.min(1 - l, w + dx));
+              const nt = Math.max(0, Math.min(t + h - MIN, t + dy));
+              h = t + h - nt; t = nt;
+            } else if(corner === 'nw') {
+              const nl = Math.max(0, Math.min(l + w - MIN, l + dx));
+              w = l + w - nl; l = nl;
+              const nt = Math.max(0, Math.min(t + h - MIN, t + dy));
+              h = t + h - nt; t = nt;
+            }
+          }
+          zoneEl.style.left   = (l * 100) + '%';
+          zoneEl.style.top    = (t * 100) + '%';
+          zoneEl.style.width  = (w * 100) + '%';
+          zoneEl.style.height = (h * 100) + '%';
+        }
+
+        function onUp() {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup',   onUp);
+          zoneEl.classList.remove('zone-dragging');
+
+          // Convert final overlay-% position back to imgRect-relative bbox
+          // (same reference frame used by draw mode / _albumSaveBboxTag)
+          const imgRect = imgEl.getBoundingClientRect();
+          const newL = parseFloat(zoneEl.style.left)   / 100;
+          const newT = parseFloat(zoneEl.style.top)    / 100;
+          const newW = parseFloat(zoneEl.style.width)  / 100;
+          const newH = parseFloat(zoneEl.style.height) / 100;
+
+          const screenX = overlayRect.left + newL * overlayRect.width  - imgRect.left;
+          const screenY = overlayRect.top  + newT * overlayRect.height - imgRect.top;
+
+          tag.bbox = {
+            x: parseFloat(Math.max(0, screenX / imgRect.width ).toFixed(5)),
+            y: parseFloat(Math.max(0, screenY / imgRect.height).toFixed(5)),
+            w: parseFloat((newW * overlayRect.width  / imgRect.width ).toFixed(5)),
+            h: parseFloat((newH * overlayRect.height / imgRect.height).toFixed(5))
+          };
+          delete tag.pixelCoords; // normalise to bbox
+
+          const m = DB.getMultimediaItem(item.id);
+          if(m){ m.tags = item.tags; DB.saveMultimedia(m); }
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onUp);
       }
 
       /**

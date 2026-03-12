@@ -374,7 +374,7 @@
       const region = this._detectRegionForFamily(fam);
       const bucketsToTry = nextRangeKey !== rangeKey ? [rangeKey, nextRangeKey] : [rangeKey];
 
-      // Try the window buckets first (preferring birth-year era)
+      // Step 1: try unused notes in the era window for the detected region
       let note = '';
       for (const bk of bucketsToTry) {
         const bucket = (this._historicalNotes[region] && this._historicalNotes[region][bk]) || [];
@@ -383,27 +383,14 @@
         }
         if (note) break;
       }
-      // Ordered list of all era bucket keys
-      const ERA_ORDER = ['1800-1849','1850-1899','1900-1949','1950-1999','2000-2099'];
-      // Only allow buckets at or after the family's reference era (never show older history)
-      const minBucketIdx = ERA_ORDER.indexOf(rangeKey);
-      const allowedBuckets = ERA_ORDER.slice(minBucketIdx < 0 ? 0 : minBucketIdx);
 
+      // Step 2: try unused notes in the same era window across other regions
+      // (never jump to a different era — a family from 1686 must never get a 1950 note)
       if (!note) {
-        // fallback: try any unused note in region, but only in allowed (≥ refYear) buckets
-        for (const rk of allowedBuckets) {
-          const bucket = (this._historicalNotes[region] && this._historicalNotes[region][rk]) || [];
-          for (const n of bucket) {
-            if (!this._usedHistNotes.has(n)) { note = n; break; }
-          }
-          if (note) break;
-        }
-      }
-      if (!note) {
-        // fallback: any unused global note in allowed buckets
-        for (const reg of Object.keys(this._historicalNotes)) {
-          for (const rk of allowedBuckets) {
-            const bucket = (this._historicalNotes[reg] && this._historicalNotes[reg][rk]) || [];
+        for (const bk of bucketsToTry) {
+          for (const reg of Object.keys(this._historicalNotes)) {
+            if (reg === region) continue;
+            const bucket = (this._historicalNotes[reg] && this._historicalNotes[reg][bk]) || [];
             for (const n of bucket) {
               if (!this._usedHistNotes.has(n)) { note = n; break; }
             }
@@ -412,10 +399,16 @@
           if (note) break;
         }
       }
+
+      // Step 3: last resort — allow repetition within the correct era (same region preferred)
       if (!note) {
-        // last resort: allow repetition within the correct era
         const fallbackBucket = (this._historicalNotes[region] && this._historicalNotes[region][rangeKey]) || [];
         note = (fallbackBucket && fallbackBucket[0]) || '';
+        if (!note) {
+          // region has no notes for this era — try WORLD
+          const worldBucket = (this._historicalNotes['WORLD'] && this._historicalNotes['WORLD'][rangeKey]) || [];
+          note = (worldBucket && worldBucket[0]) || '';
+        }
       }
       if (note) this._usedHistNotes.add(note);
       return note;
@@ -1426,6 +1419,290 @@
       };
     }
 
+    // ── Full genealogical tree spread ─────────────────────────────
+
+    /** Compute layout positions for every person connected to rootId.
+     *  @param {Set} bookPersonIds — explicit set of person IDs to include
+     *  Returns { svgParts, totalW, totalH, G_MAX, genOf, xOf, Y, BOX_W, BOX_H }
+     *  or null when no individuals exist. */
+    _buildFullTreeData(bookPersonIds) {
+      const BOX_W = 80, BOX_H = 22, H_GAP = 6, V_GAP = 48, COUPLE_SEP = 3;
+      const inds = this.individuals;
+      const fams = this.families;
+
+      if (!bookPersonIds || !bookPersonIds.size) return null;
+
+      // ── 1. BFS to assign relative generation (root = 0) ────────────
+      // Only traverse people that are in the book
+      const genOf = {};
+      {
+        const q = [[this.rootId, 0]];
+        const vis = new Set();
+        while (q.length) {
+          const [id, g] = q.shift();
+          if (vis.has(id) || !bookPersonIds.has(id) || !inds[id]) continue;
+          vis.add(id);
+          if (genOf[id] === undefined) genOf[id] = g;
+          const ind = inds[id];
+          const famcId = Array.isArray(ind.famc) ? ind.famc[0] : ind.famc;
+          const pf = famcId ? fams[famcId] : null;
+          if (pf) [pf.husb, pf.wife].forEach(p => { if (p && !vis.has(p) && bookPersonIds.has(p)) q.push([p, g - 1]); });
+          (ind.fams || []).forEach(fid => {
+            const f = fams[fid]; if (!f) return;
+            [f.husb, f.wife].forEach(s => { if (s && s !== id && !vis.has(s) && bookPersonIds.has(s)) q.push([s, g]); });
+            (f.children || []).forEach(c => { if (!vis.has(c) && bookPersonIds.has(c)) q.push([c, g + 1]); });
+          });
+        }
+      }
+      const allIds = Object.keys(genOf);
+      if (!allIds.length) return null;
+
+      // Normalise: min generation = 0
+      const gMin = Math.min(...Object.values(genOf));
+      allIds.forEach(id => { genOf[id] -= gMin; });
+      const G_MAX = Math.max(...Object.values(genOf));
+
+      // ── 2. Group by generation; order by family chain ──────────────
+      const hint = {};
+      this.familyOrder.forEach((fid, fi) => {
+        const f = fams[fid]; if (!f) return;
+        if (f.husb && hint[f.husb] === undefined) hint[f.husb] = fi * 100;
+        if (f.wife && hint[f.wife] === undefined) hint[f.wife] = fi * 100 + 50;
+        (f.children || []).forEach((c, ci) => { if (hint[c] === undefined) hint[c] = fi * 100 + 60 + ci; });
+      });
+      const byGen = {};
+      allIds.forEach(id => { const g = genOf[id]; (byGen[g] = byGen[g] || []).push(id); });
+      Object.keys(byGen).forEach(g => byGen[g].sort((a, b) => (hint[a] ?? 9999) - (hint[b] ?? 9999)));
+
+      // ── 3. Initial packed x positions (left-to-right per row) ──────
+      const xOf = {};
+      const Y = g => g * (BOX_H + V_GAP) + 10;
+      for (let g = 0; g <= G_MAX; g++) {
+        const row = byGen[g] || [];
+        let px = BOX_W / 2 + 10;
+        row.forEach(id => { xOf[id] = px; px += BOX_W + H_GAP; });
+      }
+
+      // ── 4. Iterative refinement (center parents over children + compact) ──
+      for (let pass = 0; pass < 4; pass++) {
+        // Bottom-up: pull each person toward the average x of their children
+        for (let g = G_MAX - 1; g >= 0; g--) {
+          (byGen[g] || []).forEach(id => {
+            const cxs = [];
+            (inds[id]?.fams || []).forEach(fid => {
+              (fams[fid]?.children || []).forEach(cid => { if (xOf[cid] !== undefined) cxs.push(xOf[cid]); });
+            });
+            if (cxs.length) xOf[id] = cxs.reduce((a, b) => a + b, 0) / cxs.length;
+          });
+          // Compact leftward overlaps
+          const sorted = [...(byGen[g] || [])].sort((a, b) => xOf[a] - xOf[b]);
+          let minCx = BOX_W / 2 + 10;
+          sorted.forEach(id => { if (xOf[id] < minCx) xOf[id] = minCx; minCx = xOf[id] + BOX_W + H_GAP; });
+        }
+        // Top-down: nudge children toward their parent midpoint (gentle blend)
+        for (let g = 1; g <= G_MAX; g++) {
+          (byGen[g] || []).forEach(id => {
+            const famcId = Array.isArray(inds[id]?.famc) ? inds[id].famc[0] : inds[id]?.famc;
+            const pf = famcId ? fams[famcId] : null;
+            if (!pf) return;
+            const pxs = [pf.husb, pf.wife].filter(p => p && xOf[p] !== undefined).map(p => xOf[p]);
+            if (pxs.length) xOf[id] = xOf[id] * 0.4 + (pxs.reduce((a, b) => a + b, 0) / pxs.length) * 0.6;
+          });
+          const sorted = [...(byGen[g] || [])].sort((a, b) => xOf[a] - xOf[b]);
+          let minCx = BOX_W / 2 + 10;
+          sorted.forEach(id => { if (xOf[id] < minCx) xOf[id] = minCx; minCx = xOf[id] + BOX_W + H_GAP; });
+        }
+      }
+
+      // ── 5. Couple proximity: keep husb immediately left of wife ────
+      const pairedFams = new Set();
+      this.familyOrder.forEach(fid => {
+        const f = fams[fid];
+        if (!f || !f.husb || !f.wife) return;
+        if (xOf[f.husb] === undefined || xOf[f.wife] === undefined) return;
+        if (genOf[f.husb] !== genOf[f.wife]) return;
+        const key = [f.husb, f.wife].sort().join(':');
+        if (pairedFams.has(key)) return;
+        pairedFams.add(key);
+        const avg = (xOf[f.husb] + xOf[f.wife]) / 2;
+        xOf[f.husb] = avg - (BOX_W + COUPLE_SEP) / 2;
+        xOf[f.wife]  = avg + (BOX_W + COUPLE_SEP) / 2;
+      });
+      // Final compact after couple adjustments
+      for (let g = 0; g <= G_MAX; g++) {
+        const sorted = [...(byGen[g] || [])].sort((a, b) => xOf[a] - xOf[b]);
+        let minCx = BOX_W / 2 + 10;
+        sorted.forEach(id => { if (xOf[id] < minCx) xOf[id] = minCx; minCx = xOf[id] + BOX_W + H_GAP; });
+      }
+
+      let totalW = 0;
+      allIds.forEach(id => { totalW = Math.max(totalW, xOf[id] + BOX_W / 2 + 12); });
+      const totalH = (G_MAX + 1) * (BOX_H + V_GAP) + 12;
+
+      // ── 6. Build SVG parts ─────────────────────────────────────────
+      const parts = [];
+
+      // Connections drawn before boxes so boxes appear on top
+      const drawnCouples = new Set();
+      this.familyOrder.forEach(fid => {
+        const f = fams[fid]; if (!f) return;
+        const hx = f.husb && xOf[f.husb] !== undefined ? xOf[f.husb] : null;
+        const wx = f.wife && xOf[f.wife] !== undefined ? xOf[f.wife] : null;
+        const pg = f.husb ? genOf[f.husb] : (f.wife ? genOf[f.wife] : null);
+        if (pg === undefined || pg === null) return;
+        const rowY = Y(pg);
+        const midY = rowY + BOX_H / 2;
+
+        // Marriage line (horizontal bar between couple boxes)
+        const coupleKey = [f.husb, f.wife].filter(Boolean).sort().join(':');
+        if (hx !== null && wx !== null && !drawnCouples.has(coupleKey)) {
+          drawnCouples.add(coupleKey);
+          const lx = Math.min(hx, wx) + BOX_W / 2;
+          const rx = Math.max(hx, wx) - BOX_W / 2;
+          if (rx > lx) {
+            parts.push(`<line x1="${lx}" y1="${midY}" x2="${rx}" y2="${midY}" stroke="#7a4e18" stroke-width="1.4"/>`);
+          }
+        }
+
+        // Children descent lines
+        const children = (f.children || []).filter(cid => xOf[cid] !== undefined && genOf[cid] === pg + 1);
+        if (!children.length) return;
+        const famCx = hx !== null && wx !== null ? (hx + wx) / 2 : (hx ?? wx);
+        const parBotY = rowY + BOX_H;
+        const childTopY = Y(pg + 1);
+        const midLineY = Math.round(parBotY + (childTopY - parBotY) * 0.45);
+        const cxs = children.map(c => xOf[c]);
+        const barL = Math.min(...cxs), barR = Math.max(...cxs);
+        const barCx = (barL + barR) / 2;
+
+        parts.push(`<line x1="${famCx}" y1="${parBotY}" x2="${famCx}" y2="${midLineY}" stroke="#7a4e18" stroke-width="1"/>`);
+        if (Math.abs(famCx - barCx) > 2) {
+          parts.push(`<line x1="${famCx}" y1="${midLineY}" x2="${barCx}" y2="${midLineY}" stroke="#7a4e18" stroke-width="1"/>`);
+        }
+        if (children.length > 1) {
+          parts.push(`<line x1="${barL}" y1="${midLineY}" x2="${barR}" y2="${midLineY}" stroke="#7a4e18" stroke-width="1"/>`);
+        }
+        children.forEach(cid => {
+          parts.push(`<line x1="${xOf[cid]}" y1="${midLineY}" x2="${xOf[cid]}" y2="${Y(genOf[cid])}" stroke="#7a4e18" stroke-width="1"/>`);
+        });
+      });
+
+      // Person boxes
+      allIds.forEach(id => {
+        const ind = inds[id]; if (!ind) return;
+        const cx = xOf[id], gy = Y(genOf[id]);
+        const bx = cx - BOX_W / 2;
+        const nm  = displayName(ind);
+        const short = nm.length > 15 ? nm.slice(0, 14) + '\u2026' : nm;
+        const bEv = (ind.events || []).find(e => e.type === 'BIRT');
+        const dEv = (ind.events || []).find(e => e.type === 'DEAT');
+        const by = parseYear(bEv && bEv.date);
+        const dy = parseYear(dEv && dEv.date);
+        const yr = by ? (dy ? `${by}\u2013${dy}` : `${by}\u2013`) : (dy ? `\u2013${dy}` : '');
+        const fill = '#f0f0e0';
+        const strk = '#888844';
+        const nameY = yr ? gy + BOX_H / 2 + 2 : gy + BOX_H / 2 + 5;
+        parts.push(`<rect x="${bx}" y="${gy}" width="${BOX_W}" height="${BOX_H}" rx="3" fill="${fill}" stroke="${strk}" stroke-width="1.2"/>`);
+        parts.push(`<text x="${cx}" y="${nameY}" text-anchor="middle" font-size="8" font-weight="500" fill="#2c1810">${esc(short)}</text>`);
+        if (yr) {
+          parts.push(`<text x="${cx}" y="${gy + BOX_H - 3}" text-anchor="middle" font-size="7" fill="#5a3810">${esc(yr)}</text>`);
+        }
+      });
+
+      // ── 7. Decorative generation bands + labels ──────────────────
+      const decoParts = [];
+      for (let g = 0; g <= G_MAX; g++) {
+        const bandY = Y(g) - 4;
+        const bandH = BOX_H + 8;
+        const fill = g % 2 === 0 ? '#f7f2ea' : '#faf6f0';
+        decoParts.push(`<rect x="0" y="${bandY}" width="${totalW}" height="${bandH}" fill="${fill}" rx="0" opacity="0.6"/>`);
+        // Generation label on the left margin
+        const genLabel = g === 0 ? 'Raiz' : g < 0 ? `Anc. ${Math.abs(g)}` : `Ger. ${g}`;
+        decoParts.push(`<text x="4" y="${Y(g) + BOX_H / 2 + 3}" font-size="7" fill="#b09060" opacity="0.7" font-style="italic">${genLabel}</text>`);
+      }
+
+      return { parts, decoParts, totalW, totalH, G_MAX, genOf, xOf, Y, BOX_W, BOX_H, byGen, allIds };
+    }
+
+    /** Render two book pages dedicated to the full genealogical tree spread.
+     *  @param {Set} bookPersonIds — the set of person IDs actually represented in the book */
+    _renderTreePages(bookPersonIds) {
+      const data = this._buildFullTreeData(bookPersonIds);
+      if (!data) return [];
+      const { parts, decoParts, totalW, totalH, G_MAX, byGen, allIds } = data;
+
+      // Build a decorative SVG watermark: a faint tree silhouette behind the genealogy
+      const wmCx = totalW / 2;
+      const wmCy = totalH / 2;
+      const wmScale = Math.min(totalW, totalH) * 0.35;
+      const watermark = `<g opacity="0.04" transform="translate(${wmCx},${wmCy})">`
+        + `<line x1="0" y1="${wmScale * 0.55}" x2="0" y2="${-wmScale * 0.1}" stroke="#5a3a1a" stroke-width="${Math.max(3, wmScale * 0.06)}"/>`
+        + `<circle cx="0" cy="${-wmScale * 0.25}" r="${wmScale * 0.45}" fill="#5a3a1a"/>`
+        + `<circle cx="${-wmScale * 0.28}" cy="${-wmScale * 0.05}" r="${wmScale * 0.3}" fill="#5a3a1a"/>`
+        + `<circle cx="${wmScale * 0.28}" cy="${-wmScale * 0.05}" r="${wmScale * 0.3}" fill="#5a3a1a"/>`
+        + `<circle cx="${-wmScale * 0.15}" cy="${-wmScale * 0.4}" r="${wmScale * 0.28}" fill="#5a3a1a"/>`
+        + `<circle cx="${wmScale * 0.15}" cy="${-wmScale * 0.4}" r="${wmScale * 0.28}" fill="#5a3a1a"/>`
+        + `</g>`;
+
+      // Ornamental top border line
+      const ornTop = `<line x1="0" y1="2" x2="${totalW}" y2="2" stroke="#c8a96e" stroke-width="1.5" opacity="0.3"/>`;
+      const ornBot = `<line x1="0" y1="${totalH - 2}" x2="${totalW}" y2="${totalH - 2}" stroke="#c8a96e" stroke-width="1.5" opacity="0.3"/>`;
+
+      const svgBody = watermark + ornTop + ornBot + decoParts.join('') + parts.join('');
+
+      // Split tree left/right at the midpoint so consecutive pages form a continuous spread
+      const halfW = totalW / 2;
+      const totalPersons = allIds.length;
+      const totalFams   = this.familyOrder.length;
+
+      // Collect per-generation counts for the summary
+      const genCounts = [];
+      for (let g = 0; g <= G_MAX; g++) {
+        genCounts.push((byGen[g] || []).length);
+      }
+
+      const mkSvg = (vbX, vbW) =>
+        `<svg viewBox="${vbX} 0 ${vbW} ${totalH}" xmlns="http://www.w3.org/2000/svg" ` +
+        `font-family="Georgia,serif" preserveAspectRatio="xMidYMid meet" ` +
+        `style="width:100%;height:100%;display:block;">${svgBody}</svg>`;
+
+      // Build generation summary rows
+      const genSummaryHtml = genCounts.map((cnt, g) =>
+        `<span class="ftl-gen-pill"><span class="ftl-gen-num">${g === 0 ? 'Raiz' : g}</span>${cnt}</span>`
+      ).join('');
+
+      const leftPage = {
+        type: 'full-tree-left',
+        title: 'Árvore Genealógica',
+        ref: 'full-tree',
+        html: `<div class="livro-page-inner page-full-tree-inner">
+  <div class="ftree-header">
+    <div class="ftree-ornament">&#x2766;</div>
+    <div class="section-title ftree-title">Árvore Genealógica Completa</div>
+    <div class="ftree-subtitle">${totalPersons} pessoas \u00b7 ${G_MAX + 1} gera\u00e7\u00f5es \u00b7 ${totalFams} fam\u00edlias</div>
+  </div>
+  <div class="full-tree-wrap">${mkSvg(0, halfW)}</div>
+  <div class="full-tree-legend">
+    <span class="ftl-gen-summary">${genSummaryHtml}</span>
+  </div>
+</div>`
+      };
+
+      const rightPage = {
+        type: 'full-tree-right',
+        title: 'Árvore Genealógica',
+        html: `<div class="livro-page-inner page-full-tree-inner page-full-tree-right">
+  <div class="full-tree-wrap" style="flex:1;">${mkSvg(halfW, totalW - halfW)}</div>
+  <div class="ftree-footer">
+    <div class="ftree-ornament">&#x2766;</div>
+    <div class="ftree-footer-note">Árvore gerada automaticamente a partir dos dados genealógicos · myLineage</div>
+  </div>
+</div>`
+      };
+
+      return [leftPage, rightPage];
+    }
+
     resolvePgRefs(pages) {
       // Build map: personId → pageNum (also stored on this.personPageMap for post-build use)
       const map = {};
@@ -1559,6 +1836,9 @@
       pages.push({ ...this._renderBlank(), cssClass: 'page-blank' });
       // 2. Introduction
       pages.push({ ...this._renderIntro(), cssClass: 'page-intro' });
+
+      // 3–4. Tree pages will be inserted here after chapters are compiled
+      const TREE_INSERT_IDX = pages.length;
 
       // Determine which people will be shown as lean mini-bios inside their family's right page,
       // so we can skip their standalone bio pages later.
@@ -1716,7 +1996,14 @@
         }
       });
 
-
+      // ── 3–4. Full genealogical tree spread ─────────────────────
+      // Build the tree using ONLY people who actually got book pages
+      const treePersonIds = new Set([...bioPersonIds, ...mergedPersonIds]);
+      const _treePgs = this._renderTreePages(treePersonIds);
+      // Insert tree pages at position 3–4 (after intro, before chapters)
+      for (let ti = _treePgs.length - 1; ti >= 0; ti--) {
+        pages.splice(TREE_INSERT_IDX, 0, { ..._treePgs[ti], cssClass: 'page-full-tree' });
+      }
 
       // ── Layout pass: assign page numbers ──────────────────────
       pages.forEach((p, i) => {

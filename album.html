@@ -1081,6 +1081,7 @@
       // Draw-mode state
       let _albumDrawMode    = false;
       let _albumPendingBbox = null;  // { x, y, w, h } normalized (0–1)
+      let _albumResizeObserver = null;
       // Dedup state
       let _dedupEnabled     = false;
       let _dedupKept        = [];   // items after deduplication
@@ -1322,7 +1323,33 @@
       }
 
       // ── Modal ────────────────────────────────────────────────────────
+      /**
+       * Position #modalTagOverlay and #albumDrawOverlay to exactly cover the
+       * rendered image (compensates for flex-centering letterbox in the wrap).
+       */
+      function _fitOverlayToImage(){
+        const img  = document.getElementById('modalImg');
+        const wrap = document.getElementById('modalPhotoWrap');
+        if(!img || !wrap) return;
+        const wrapRect = wrap.getBoundingClientRect();
+        const imgRect  = img.getBoundingClientRect();
+        const top    = imgRect.top    - wrapRect.top;
+        const left   = imgRect.left   - wrapRect.left;
+        const width  = imgRect.width;
+        const height = imgRect.height;
+        ['modalTagOverlay', 'albumDrawOverlay'].forEach(id => {
+          const el = document.getElementById(id);
+          if(!el) return;
+          el.style.inset  = 'auto';
+          el.style.top    = top    + 'px';
+          el.style.left   = left   + 'px';
+          el.style.width  = width  + 'px';
+          el.style.height = height + 'px';
+        });
+      }
+
       function renderTagZones(item){
+        _fitOverlayToImage();
         const overlay = document.getElementById('modalTagOverlay');
         overlay.innerHTML = '';
         const img = document.getElementById('modalImg');
@@ -1533,10 +1560,17 @@
           _albumInitPersonPicker(item);
           _albumInitDrawMode(item);
         }
+
+        // Re-fit overlay whenever the wrap is resized (handles maximize / window resize)
+        if(_albumResizeObserver) _albumResizeObserver.disconnect();
+        const _wrap = document.getElementById('modalPhotoWrap');
+        _albumResizeObserver = new ResizeObserver(() => _fitOverlayToImage());
+        _albumResizeObserver.observe(_wrap);
       }
 
       function closeModal(){
         setMaximized(false);
+        if(_albumResizeObserver){ _albumResizeObserver.disconnect(); _albumResizeObserver = null; }
         document.getElementById('albumModal').classList.remove('open');
         const img = document.getElementById('modalImg');
         img.onload = null;
@@ -1905,14 +1939,16 @@
 
         overlay.onmousedown = e => {
           if(!_albumDrawMode) return;
-          const img = document.getElementById('modalImg');
-          if(!img) return;
-          const imgRect = img.getBoundingClientRect();
+          const img  = document.getElementById('modalImg');
+          const wrap = document.getElementById('modalPhotoWrap');
+          if(!img || !wrap) return;
+          const wrapRect = wrap.getBoundingClientRect();
           isDrawing = true;
           startX = e.clientX;
           startY = e.clientY;
-          rectEl.style.left   = (e.clientX - imgRect.left) + 'px';
-          rectEl.style.top    = (e.clientY - imgRect.top)  + 'px';
+          // rectEl is absolute within the wrap → use wrap-relative coords
+          rectEl.style.left   = (e.clientX - wrapRect.left) + 'px';
+          rectEl.style.top    = (e.clientY - wrapRect.top)  + 'px';
           rectEl.style.width  = '0';
           rectEl.style.height = '0';
           rectEl.style.display = 'block';
@@ -1922,15 +1958,22 @@
 
         overlay.onmousemove = e => {
           if(!isDrawing) return;
-          const img = document.getElementById('modalImg');
-          if(!img) return;
-          const imgRect = img.getBoundingClientRect();
+          const img  = document.getElementById('modalImg');
+          const wrap = document.getElementById('modalPhotoWrap');
+          if(!img || !wrap) return;
+          const imgRect  = img.getBoundingClientRect();
+          const wrapRect = wrap.getBoundingClientRect();
+          // image offset within the wrap (letterbox gap)
+          const offL = imgRect.left - wrapRect.left;
+          const offT = imgRect.top  - wrapRect.top;
+          // bbox coords relative to image (for normalization)
           const x1 = Math.min(startX, e.clientX) - imgRect.left;
           const y1 = Math.min(startY, e.clientY) - imgRect.top;
           const x2 = Math.max(startX, e.clientX) - imgRect.left;
           const y2 = Math.max(startY, e.clientY) - imgRect.top;
-          rectEl.style.left   = Math.max(0, x1) + 'px';
-          rectEl.style.top    = Math.max(0, y1) + 'px';
+          // rectEl is positioned within the wrap → add the letterbox offset
+          rectEl.style.left   = (offL + Math.max(0, x1)) + 'px';
+          rectEl.style.top    = (offT + Math.max(0, y1)) + 'px';
           rectEl.style.width  = (x2 - x1) + 'px';
           rectEl.style.height = (y2 - y1) + 'px';
         };

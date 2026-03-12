@@ -3118,12 +3118,6 @@
       {
         "personId": "I8",
         "personName": "Angelina Póvoa",
-        "pixelCoords": {
-          "x1": 194,
-          "y1": 74,
-          "x2": 276,
-          "y2": 183
-        },
         "objeProps": {
           "position": "194 74 276 183",
           "cutout": false,
@@ -3136,11 +3130,17 @@
           "note": "",
           "photoDate": "",
           "photoPlace": ""
+        },
+        "bbox": {
+          "x": 0.55531,
+          "y": 0.15261,
+          "w": 0.28757,
+          "h": 0.18932
         }
       }
     ],
     "createdAt": "2026-03-11T13:32:22.666Z",
-    "updatedAt": "2026-03-11T13:32:22.666Z",
+    "updatedAt": "2026-03-12T11:29:43.485Z",
     "deletedAt": null
   },
   "M_I9_0": {

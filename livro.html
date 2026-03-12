@@ -173,8 +173,10 @@
 
   /** Gather notes text for individual */
   function gatherNotes(DB, ind) {
-    if (!ind || !ind.notes || !ind.notes.length) return '';
-    return ind.notes.map(n => resolveNote(DB, n)).filter(Boolean).join('\n\n');
+    if (!ind || !ind.notes) return '';
+    const notes = Array.isArray(ind.notes) ? ind.notes : [ind.notes];
+    if (!notes.length) return '';
+    return notes.map(n => resolveNote(DB, n)).filter(Boolean).join('\n\n');
   }
 
   /** Get event of given type from individual events array */
@@ -1894,7 +1896,13 @@
       }
 
       populatePersonSelect(DB, rootId);
-      initBook(DB, rootId);
+      try {
+        initBook(DB, rootId);
+      } catch (e) {
+        console.error('[livro] Erro ao compilar o livro:', e);
+        const loadingEl = document.getElementById('livro-loading');
+        loadingEl.querySelector('span').textContent = 'Erro ao compilar: ' + e.message;
+      }
     }, 100);
 
     // ── Toolbar buttons ────────────────────────────────────────

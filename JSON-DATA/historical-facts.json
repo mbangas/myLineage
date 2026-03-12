@@ -8,8 +8,9 @@
     "facto": "O Portugal do século XVII viveu sob a sombra da Restauração de 1640, que encerrou 60 anos de domínio espanhol. As guerras com Espanha prolongaram-se até 1668, esgotando os recursos do reino. O ouro do Brasil começou a chegar em quantidade nos anos 1690, transformando a economia e financiando a construção de palácios e igrejas. D. Pedro II (1683–1706) estabilizou o país e assinou o Tratado de Methuen (1703) com Inglaterra, que trocava vinhos por tecidos. A sociedade era profundamente rural, hierárquica e marcada pelo peso da Igreja e do Santo Ofício.",
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
-    "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "updatedAt": "2026-03-12T20:22:53.049Z",
+    "deletedAt": "2026-03-12T20:22:53.049Z",
+    "titulo": "Restauracao e Ouro do Brasil"
   },
   "H2": {
     "id": "H2",
@@ -21,7 +22,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "D. Joao V e Terramoto de Lisboa"
   },
   "H3": {
     "id": "H3",
@@ -33,7 +35,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "As Invasoes Napoleonicas"
   },
   "H4": {
     "id": "H4",
@@ -45,7 +48,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Familia Real no Brasil e Guerras Liberais"
   },
   "H5": {
     "id": "H5",
@@ -57,7 +61,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Vintismo e Guerra Civil"
   },
   "H6": {
     "id": "H6",
@@ -69,7 +74,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Regeneracao e Emigracao"
   },
   "H7": {
     "id": "H7",
@@ -81,7 +87,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "O Portugal Finissecular"
   },
   "H8": {
     "id": "H8",
@@ -93,7 +100,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Regicidio, Republica e Estado Novo"
   },
   "H9": {
     "id": "H9",
@@ -105,7 +113,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Ditadura e 2a Guerra Mundial"
   },
   "H10": {
     "id": "H10",
@@ -117,7 +126,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Guerra Colonial e Revolucao dos Cravos"
   },
   "H11": {
     "id": "H11",
@@ -129,7 +139,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Emigracao e Consolidacao Democratica"
   },
   "H12": {
     "id": "H12",
@@ -141,7 +152,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Euro, Troika e Pandemia"
   },
   "H13": {
     "id": "H13",
@@ -153,7 +165,8 @@
     "pais": "PT",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Crise Financeira de 2008"
   },
   "H14": {
     "id": "H14",
@@ -165,7 +178,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Guerra da Independencia Espanhola"
   },
   "H15": {
     "id": "H15",
@@ -177,7 +191,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Absolutismo e 1a Guerra Carlista"
   },
   "H16": {
     "id": "H16",
@@ -189,7 +204,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Revolucao Gloriosa e Desastre de 98"
   },
   "H17": {
     "id": "H17",
@@ -201,7 +217,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Sexenio Democratico e Caciquismo"
   },
   "H18": {
     "id": "H18",
@@ -213,7 +230,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "2a Republica e Guerra Civil Espanhola"
   },
   "H19": {
     "id": "H19",
@@ -225,7 +243,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Franquismo e Autarquia"
   },
   "H20": {
     "id": "H20",
@@ -237,7 +256,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Milagre Economico e Transicao"
   },
   "H21": {
     "id": "H21",
@@ -249,7 +269,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Democracia e Jogos Olimpicos de Barcelona"
   },
   "H22": {
     "id": "H22",
@@ -261,7 +282,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Atentado de Madrid e Crise Imobiliaria"
   },
   "H23": {
     "id": "H23",
@@ -273,7 +295,8 @@
     "pais": "ES",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Crise de 2008 e Questao Catala"
   },
   "H24": {
     "id": "H24",
@@ -285,7 +308,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Guerra dos Trinta Anos"
   },
   "H25": {
     "id": "H25",
@@ -297,7 +321,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Holanda e Revolucao Gloriosa"
   },
   "H26": {
     "id": "H26",
@@ -309,7 +334,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Iluminismo e Revolucao Industrial"
   },
   "H27": {
     "id": "H27",
@@ -321,7 +347,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Revolucoes Americana e Francesa"
   },
   "H28": {
     "id": "H28",
@@ -333,7 +360,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Guerras Napoleonicas e Independencias"
   },
   "H29": {
     "id": "H29",
@@ -345,7 +373,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Abolicao do Trafico e Primavera dos Povos"
   },
   "H30": {
     "id": "H30",
@@ -357,7 +386,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Guerra de Secessao e Canal de Suez"
   },
   "H31": {
     "id": "H31",
@@ -369,7 +399,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "2a Revolucao Industrial e Imperialismo"
   },
   "H32": {
     "id": "H32",
@@ -381,7 +412,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "1a Guerra Mundial e Grande Depressao"
   },
   "H33": {
     "id": "H33",
@@ -393,7 +425,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "2a Guerra Mundial e ONU"
   },
   "H34": {
     "id": "H34",
@@ -405,7 +438,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Guerra Fria e Corrida ao Espaco"
   },
   "H35": {
     "id": "H35",
@@ -417,7 +451,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Descolonizacao e Direitos Civis"
   },
   "H36": {
     "id": "H36",
@@ -429,7 +464,8 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "11 de Setembro e Crise de 2008"
   },
   "H37": {
     "id": "H37",
@@ -441,6 +477,7 @@
     "pais": "WORLD",
     "createdAt": "2026-03-12T00:00:00.000Z",
     "updatedAt": "2026-03-12T00:00:00.000Z",
-    "deletedAt": null
+    "deletedAt": null,
+    "titulo": "Pandemia COVID-19 e Crise Climatica"
   }
 }

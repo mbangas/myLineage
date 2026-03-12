@@ -870,6 +870,24 @@
           line-height: 1.25;
         }
 
+        .album-print-page .ap-section-title {
+          font-size: 8px;
+          font-weight: bold;
+          color: #5a2e0e;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          border-bottom: 1px solid #8b5a20;
+          padding-bottom: 2px;
+          margin-bottom: 3px;
+          margin-top: 6px;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        .album-print-page .ap-section-title:first-child {
+          margin-top: 0;
+        }
+
         .album-print-page .ap-pagenum {
           position: absolute;
           bottom: 10mm;
@@ -2608,8 +2626,8 @@
             return `<div class="ap-cell">
   <div class="ap-frame">${imgHtml}</div>
   <div class="ap-caption">
-    ${personList ? `<div class="ap-caption-people">${esc(personList)}</div>` : ''}
-    ${noteText  ? `<div class="ap-caption-note">${esc(noteText)}</div>`   : ''}
+    ${personList ? `<div class="ap-section-title">Na foto</div><div class="ap-caption-people">${esc(personList)}</div>` : ''}
+    ${noteText  ? `<div class="ap-section-title">Notas sobre a foto</div><div class="ap-caption-note">${esc(noteText)}</div>` : ''}
   </div>
 </div>`;
           }).join('');

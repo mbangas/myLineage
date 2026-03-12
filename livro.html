@@ -856,8 +856,9 @@
         if (!mm) return;
         const src = mm.dataUrl || (mm.files && mm.files[0] && mm.files[0].file) || '';
         if (!src) return;
-        const noteText = mm.notes && mm.notes.length
-          ? mm.notes.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
+        const mmNotes0 = Array.isArray(mm.notes) ? mm.notes : (mm.notes ? [mm.notes] : []);
+        const noteText = mmNotes0.length
+          ? mmNotes0.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
         const personTag   = (mm.tags || []).find(t => t.personId === personId);
         const props       = (personTag && personTag.objeProps) || (mm.files && mm.files[0]) || {};
         const taggedCount = (mm.tags || []).filter(t => t.pixelCoords).length;
@@ -1215,8 +1216,9 @@
           if (!src) return;
           seenMids.add(mid);
           const title = (mm.title || mm.files && mm.files[0] && mm.files[0].title) || '';
-          const noteText = mm.notes && mm.notes.length
-            ? mm.notes.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
+          const mmNotes1 = Array.isArray(mm.notes) ? mm.notes : (mm.notes ? [mm.notes] : []);
+          const noteText = mmNotes1.length
+            ? mmNotes1.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
           entries.push({ src, title, noteText, personId: ind.id, personName: displayName(ind) });
         });
       });
@@ -1410,8 +1412,9 @@
             .filter(Boolean);
 
           // Notes text
-          const noteText = mm.notes && mm.notes.length
-            ? mm.notes.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
+          const mmNotes2 = Array.isArray(mm.notes) ? mm.notes : (mm.notes ? [mm.notes] : []);
+          const noteText = mmNotes2.length
+            ? mmNotes2.map(n => resolveNote(DB, n)).filter(Boolean).join(' ') : '';
 
           allPhotos.push({ src, taggedPersonNames, noteText });
         });

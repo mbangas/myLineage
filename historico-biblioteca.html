@@ -186,7 +186,7 @@
         var opts = COUNTRY_LIST.map(function(c) { return '<option value="' + c + '">'; }).join('');
         document.getElementById('fPaisDatalist').innerHTML = opts;
         document.getElementById('filterPaisDatalist').innerHTML = opts;
-        document.getElementById('fPais').value = 'Mundial';
+        document.getElementById('fPais').value = '';
       }
       populateCountrySelects();
 
@@ -362,7 +362,7 @@
 
       function resetForm() {
         editingId = null;
-        document.getElementById('fPais').value = 'Mundial';
+        document.getElementById('fPais').value = '';
         document.getElementById('fDia').value = '';
         document.getElementById('fMes').value = '';
         document.getElementById('fAnoInicio').value = '';
@@ -384,12 +384,12 @@
         const mes = document.getElementById('fMes').value.trim();
         const anoInicio = document.getElementById('fAnoInicio').value.trim();
         const anoFim = document.getElementById('fAnoFim').value.trim();
-        const pais = document.getElementById('fPais').value.trim() || 'Mundial';
+        const pais = document.getElementById('fPais').value.trim();
         const titulo = document.getElementById('fTitulo').value.trim();
         const facto = document.getElementById('fFacto').value.trim();
         const msg = document.getElementById('addMsg');
 
-        if (!COUNTRY_LIST.includes(pais)) { msg.textContent = 'País inválido. Escolha da lista.'; msg.style.color = '#f05252'; return; }
+        if (!pais || !COUNTRY_LIST.includes(pais)) { msg.textContent = 'País inválido. Escolha da lista.'; msg.style.color = '#f05252'; return; }
         if (!anoInicio) { msg.textContent = 'O ano de início é obrigatório.'; msg.style.color = '#f05252'; return; }
         if (!facto) { msg.textContent = 'O texto do facto é obrigatório.'; msg.style.color = '#f05252'; return; }
 

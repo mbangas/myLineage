@@ -867,6 +867,25 @@ body.livro-body {
   max-height: 175px;
   border-radius: 2px;
 }
+.hn-header {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 10px;
+  color: #6b4c30;
+  letter-spacing: 0.3px;
+  margin-bottom: 0;
+}
+.hn-date {
+  font-variant-numeric: tabular-nums;
+}
+.hn-title {
+  font-style: italic;
+}
+.hn-sep {
+  border: none;
+  border-top: 0.5px solid rgba(140, 120, 90, 0.25);
+  margin: 3px 0 4px 0;
+}
 
 /* ---- Index pages --------------------------------------------- */
 .index-cols {

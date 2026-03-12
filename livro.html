@@ -403,9 +403,9 @@
 
       if (note) {
         this._usedHistNotes.add(note);
-        return note.text;
+        return note;
       }
-      return '';
+      return null;
     }
 
     /** Load all individuals and families into local maps */
@@ -767,7 +767,7 @@
   ${marrStr ? `<div class="chapter-years">${esc(marrStr)}</div>` : ''}
   <div class="chapter-divider"></div>
   <div class="tree-svg-wrap" style="flex:1;">${svg}</div>
-  ${histNote ? `<div class="history-note-wrap"><span class="hn-corner hn-tl"></span><span class="hn-corner hn-tr"></span><span class="hn-corner hn-bl"></span><span class="hn-corner hn-br"></span><div class="history-note">${esc(histNote)}</div></div>` : ''}
+  ${histNote ? `<div class="history-note-wrap"><span class="hn-corner hn-tl"></span><span class="hn-corner hn-tr"></span><span class="hn-corner hn-bl"></span><span class="hn-corner hn-br"></span><div class="history-note">${histNote.titulo ? `<div class="hn-header"><span class="hn-date">${histNote.startYear}${histNote.endYear && histNote.endYear !== histNote.startYear ? '–' + histNote.endYear : ''}</span> — <span class="hn-title">${esc(histNote.titulo)}</span></div><hr class="hn-sep">` : ''}${esc(histNote.text)}</div></div>` : ''}
 </div>`
       };
     }
@@ -2287,7 +2287,10 @@
               region: _nameToRegion[n.pais] || n.pais || 'WORLD',
               startYear: +n.anoInicio,
               endYear: +(n.anoFim || n.anoInicio),
-              text: n.facto
+              text: n.facto,
+              titulo: n.titulo || '',
+              dia: n.dia || null,
+              mes: n.mes || null
             }));
           try {
             initBook(DB, rootId, histNotes.length ? histNotes : null);

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Biblioteca Histórica</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+    <script src="remote-storage.js"></script>
+    <script src="auth.js"></script>
+    <style>
+      .hist-table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+      .hist-table th { text-align:left; padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); font-weight:600; }
+      .hist-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:top; }
+      .hist-table tr:hover td { background:rgba(255,255,255,0.02); }
+      .pais-badge { display:inline-block; padding:2px 7px; border-radius:10px; font-size:0.75rem; font-weight:600; background:rgba(68,147,248,0.15); color:#4493f8; }
+      .facto-cell { max-width:420px; }
+      .facto-preview { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
+      .facto-preview.expanded { display:block; -webkit-line-clamp:unset; }
+      .add-form-grid { display:grid; grid-template-columns:80px 80px 110px 110px 1fr; gap:10px; align-items:end; }
+      @media(max-width:700px){ .add-form-grid { grid-template-columns:1fr 1fr; } }
+      .form-field { display:flex; flex-direction:column; gap:4px; }
+      .form-field label { font-size:0.75rem; color:var(--text-secondary); font-weight:600; }
+      .form-field input, .form-field select, .form-field textarea {
+        padding:6px 8px; border:1px solid var(--border); border-radius:4px;
+        background:var(--bg-surface); color:var(--text-main); font-size:0.83rem;
+      }
+      .form-field textarea { resize:vertical; min-height:60px; }
+      .empty-state { text-align:center; padding:40px 16px; color:var(--text-secondary); font-size:0.88rem; }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a href="index.html" class="logo"><i class="mdi mdi-tree" aria-hidden="true"></i><span>myLineage</span></a>
+        <nav>
+          <a href="app.html"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
+          <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
+          <a href="arvore.html"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
+          <a href="gedcom.html"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
+          <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
+          <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
+          <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
+          <a href="historico.html"><i class="mdi mdi-history" aria-hidden="true"></i>Histórico</a>
+        </nav>
+        <div class="sidebar-footer">
+          <a href="apis.html"><i class="mdi mdi-api" aria-hidden="true"></i>APIs</a>
+          <a href="configuracao.html" class="active"><i class="mdi mdi-cog" aria-hidden="true"></i>Definições</a>
+        </div>
+      </aside>
+      <main class="content">
+        <div class="topbar">
+          <div>
+            <a href="configuracao.html" style="font-size:0.8rem;color:var(--text-secondary);text-decoration:none;margin-bottom:4px;display:inline-block;">
+              <i class="mdi mdi-arrow-left"></i> Voltar às Definições
+            </a>
+            <h1>Biblioteca Histórica</h1>
+          </div>
+          <div></div>
+        </div>
+
+        <!-- Add form -->
+        <div class="card centered-panel" style="max-width:900px;width:100%;padding-bottom:20px;">
+          <h2 style="margin:0 0 14px;font-size:1rem;"><i class="mdi mdi-plus-circle-outline" style="color:#4493f8;margin-right:8px;"></i>Adicionar facto histórico</h2>
+          <div class="add-form-grid" id="addFormGrid">
+            <div class="form-field">
+              <label>Dia</label>
+              <input type="number" id="fDia" placeholder="(opt.)" min="1" max="31" />
+            </div>
+            <div class="form-field">
+              <label>Mês</label>
+              <input type="number" id="fMes" placeholder="(opt.)" min="1" max="12" />
+            </div>
+            <div class="form-field">
+              <label>Ano início *</label>
+              <input type="number" id="fAnoInicio" placeholder="ex. 1910" />
+            </div>
+            <div class="form-field">
+              <label>Ano fim</label>
+              <input type="number" id="fAnoFim" placeholder="(opt.)" />
+            </div>
+            <div class="form-field">
+              <label>País *</label>
+              <select id="fPais">
+                <option value="PT">PT — Portugal</option>
+                <option value="ES">ES — Espanha</option>
+                <option value="WORLD" selected>WORLD — Mundial</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field" style="margin-top:10px;">
+            <label>Facto *</label>
+            <textarea id="fFacto" placeholder="Descrição do facto histórico..." rows="3"></textarea>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-ghost btn-sm" id="addBtn"><i class="mdi mdi-check"></i> Adicionar</button>
+            <span id="addMsg" style="font-size:0.78rem;color:var(--text-secondary);"></span>
+          </div>
+        </div>
+
+        <!-- Facts list -->
+        <div class="card centered-panel" style="max-width:900px;width:100%;margin-top:16px;padding-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h2 style="margin:0;font-size:1rem;"><i class="mdi mdi-text-box-multiple-outline" style="color:#4493f8;margin-right:8px;"></i>Factos registados</h2>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="search" id="filterInput" placeholder="Filtrar..." style="padding:5px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--text-main);font-size:0.8rem;width:160px;" />
+              <select id="filterPais" style="padding:5px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--text-main);font-size:0.8rem;">
+                <option value="">Todos os países</option>
+                <option value="PT">PT</option>
+                <option value="ES">ES</option>
+                <option value="WORLD">WORLD</option>
+              </select>
+              <span id="countBadge" style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;"></span>
+            </div>
+          </div>
+          <div id="listArea"><div class="empty-state"><i class="mdi mdi-loading mdi-spin"></i> A carregar...</div></div>
+        </div>
+
+      </main>
+    </div>
+
+    <script>
+    (function () {
+      'use strict';
+
+      let allFacts = [];
+
+      function escHtml(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      function loadFacts() {
+        fetch('/api/historical-facts')
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(data => {
+            allFacts = (data || []).filter(n => !n.deletedAt).sort((a,b) => {
+              const pa = a.pais === 'PT' ? 0 : a.pais === 'ES' ? 1 : 2;
+              const pb = b.pais === 'PT' ? 0 : b.pais === 'ES' ? 1 : 2;
+              if (pa !== pb) return pa - pb;
+              return (+a.anoInicio || 0) - (+b.anoInicio || 0);
+            });
+            renderList();
+          })
+          .catch(err => {
+            document.getElementById('listArea').innerHTML =
+              '<div class="empty-state"><i class="mdi mdi-alert-circle-outline"></i> Erro ao carregar factos: ' + escHtml(err) + '</div>';
+          });
+      }
+
+      function renderList() {
+        const q = (document.getElementById('filterInput').value || '').toLowerCase();
+        const pFilter = document.getElementById('filterPais').value;
+        const filtered = allFacts.filter(n => {
+          if (pFilter && n.pais !== pFilter) return false;
+          if (q && !(n.facto || '').toLowerCase().includes(q)) return false;
+          return true;
+        });
+
+        document.getElementById('countBadge').textContent = filtered.length + ' facto' + (filtered.length !== 1 ? 's' : '');
+
+        if (!filtered.length) {
+          document.getElementById('listArea').innerHTML = '<div class="empty-state"><i class="mdi mdi-emoticon-sad-outline"></i> Nenhum facto encontrado.</div>';
+          return;
+        }
+
+        let html = '<div style="overflow-x:auto;"><table class="hist-table"><thead><tr>' +
+          '<th>País</th><th>Início</th><th>Fim</th><th class="facto-cell">Facto</th><th></th>' +
+          '</tr></thead><tbody>';
+
+        filtered.forEach(n => {
+          html += `<tr data-id="${escHtml(n.id)}">
+            <td><span class="pais-badge">${escHtml(n.pais)}</span></td>
+            <td>${escHtml(n.anoInicio || '—')}</td>
+            <td>${escHtml(n.anoFim || '—')}</td>
+            <td class="facto-cell">
+              <div class="facto-preview" title="Clique para expandir">${escHtml(n.facto)}</div>
+            </td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-ghost btn-sm del-btn" data-id="${escHtml(n.id)}" title="Apagar facto">
+                <i class="mdi mdi-delete-outline"></i>
+              </button>
+            </td>
+          </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        document.getElementById('listArea').innerHTML = html;
+
+        // expand on click
+        document.querySelectorAll('.facto-preview').forEach(el => {
+          el.addEventListener('click', function() { this.classList.toggle('expanded'); });
+        });
+
+        // delete buttons
+        document.querySelectorAll('.del-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            if (!confirm('Apagar este facto histórico?\n\nEsta ação não pode ser desfeita.')) return;
+            fetch('/api/historical-facts/' + encodeURIComponent(id), { method: 'DELETE' })
+              .then(r => r.ok ? r.json() : Promise.reject(r.status))
+              .then(() => {
+                allFacts = allFacts.filter(n => n.id !== id);
+                renderList();
+              })
+              .catch(err => alert('Erro ao apagar: ' + err));
+          });
+        });
+      }
+
+      document.getElementById('filterInput').addEventListener('input', renderList);
+      document.getElementById('filterPais').addEventListener('change', renderList);
+
+      document.getElementById('addBtn').addEventListener('click', function() {
+        const dia = document.getElementById('fDia').value.trim();
+        const mes = document.getElementById('fMes').value.trim();
+        const anoInicio = document.getElementById('fAnoInicio').value.trim();
+        const anoFim = document.getElementById('fAnoFim').value.trim();
+        const pais = document.getElementById('fPais').value;
+        const facto = document.getElementById('fFacto').value.trim();
+        const msg = document.getElementById('addMsg');
+
+        if (!anoInicio) { msg.textContent = 'O ano de início é obrigatório.'; msg.style.color = '#f05252'; return; }
+        if (!facto) { msg.textContent = 'O texto do facto é obrigatório.'; msg.style.color = '#f05252'; return; }
+
+        const body = {
+          dia: dia ? +dia : null,
+          mes: mes ? +mes : null,
+          anoInicio: +anoInicio,
+          anoFim: anoFim ? +anoFim : null,
+          pais,
+          facto
+        };
+
+        msg.textContent = 'A guardar...'; msg.style.color = 'var(--text-secondary)';
+        fetch('/api/historical-facts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        })
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(created => {
+            allFacts.push(created);
+            allFacts.sort((a,b) => {
+              const pa = a.pais === 'PT' ? 0 : a.pais === 'ES' ? 1 : 2;
+              const pb = b.pais === 'PT' ? 0 : b.pais === 'ES' ? 1 : 2;
+              if (pa !== pb) return pa - pb;
+              return (+a.anoInicio || 0) - (+b.anoInicio || 0);
+            });
+            document.getElementById('fDia').value = '';
+            document.getElementById('fMes').value = '';
+            document.getElementById('fAnoInicio').value = '';
+            document.getElementById('fAnoFim').value = '';
+            document.getElementById('fFacto').value = '';
+            msg.textContent = 'Facto adicionado!'; msg.style.color = '#3fb950';
+            setTimeout(() => { msg.textContent = ''; }, 3000);
+            renderList();
+          })
+          .catch(err => { msg.textContent = 'Erro ao guardar: ' + err; msg.style.color = '#f05252'; });
+      });
+
+      loadFacts();
+    })();
+    </script>
+  </body>
+</html>

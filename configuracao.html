@@ -74,6 +74,20 @@
         </div>
 
         <div class="card centered-panel" style="max-width:760px;width:100%;margin-top:16px;padding-bottom:20px;">
+          <h2 style="margin:0 0 8px;"><i class="mdi mdi-book-open-variant" style="color:#4493f8;margin-right:8px;"></i>Biblioteca Histórica</h2>
+          <p style="color:var(--text-secondary);margin:0 0 16px;font-size:0.85rem;">Repositório de factos históricos utilizados na geração do Livro de Família. Cada facto é associado a uma data e a um país, sendo automaticamente atribuído às famílias cujo período de vida coincide com esse intervalo temporal.</p>
+          <div style="display:flex;align-items:flex-start;gap:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:14px 16px;">
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:0.88rem;color:var(--text-main);margin-bottom:4px;"><i class="mdi mdi-text-box-multiple-outline" style="color:#4493f8;margin-right:5px;"></i>Factos históricos</div>
+              <div id="histFactsCount" style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">A carregar...</div>
+            </div>
+            <div style="flex-shrink:0;">
+              <a href="historico-biblioteca.html" class="btn btn-ghost btn-sm"><i class="mdi mdi-pencil-box-multiple-outline"></i> Gerir factos históricos</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card centered-panel" style="max-width:760px;width:100%;margin-top:16px;padding-bottom:20px;">
           <h2 style="margin:0 0 8px;"><i class="mdi mdi-account-star" style="color:#4493f8;margin-right:8px;"></i>Pessoa em Foco</h2>
           <p style="color:var(--text-secondary);margin:0 0 16px;font-size:0.85rem;">Pesquise pessoas e defina uma como foco principal. A seleção será salva nas configurações locais.</p>
           <div style="display:flex;flex-direction:column;gap:14px;">
@@ -367,6 +381,19 @@
         clearFocusBtn.addEventListener('click', function(){ if(!confirm('Remover pessoa em foco?')) return; clearFocus(); alert('Foco removido.'); });
 
         showCurrentFocus();
+
+        // ── Biblioteca Histórica count ──
+        fetch('/api/historical-facts')
+          .then(r => r.ok ? r.json() : [])
+          .then(data => {
+            const active = (data || []).filter(n => !n.deletedAt).length;
+            const el = document.getElementById('histFactsCount');
+            if (el) el.textContent = active + ' facto' + (active !== 1 ? 's' : '') + ' registado' + (active !== 1 ? 's' : '');
+          })
+          .catch(() => {
+            const el = document.getElementById('histFactsCount');
+            if (el) el.textContent = 'Não foi possível carregar.';
+          });
       });
 
       function dangerDeleteAllContent() {

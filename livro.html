@@ -182,7 +182,7 @@
   // ── BookCompiler ───────────────────────────────────────────────
 
   class BookCompiler {
-    constructor(DB, rootId) {
+    constructor(DB, rootId, externalNotes) {
       this.DB = DB;
       this.rootId = rootId;
       this.individuals = {};   // id → individual
@@ -191,113 +191,92 @@
       this.personPageMap = {}; // personId → page index (filled in layout pass)
       this.pages = [];
       this._usedHistNotes = new Set();
-      this._historicalNotes = {
-        PT: {
-          '1800-1849': [
-            // PT-1800-A
-            'Em 1807, a Família Real portuguesa fugiu para o Brasil quando Napoleão invadiu Lisboa, deixando o país sem rei e entregue ao General Junot. Entre 1807 e 1811, três invasões francesas devastaram aldeias, roubaram colheitas e separaram famílias. A moeda de réis desvalorizou e a miséria alastrou. Em 1820, a Revolução Liberal do Porto forçou o regresso de D. João VI do Brasil e originou a primeira constituição portuguesa. A disputa entre D. Pedro IV e D. Miguel pelo trono gerou as Guerras Liberais (1828–1834), que encheram estradas de refugiados e órfãos. Em 1836, o Decreto de Sá da Bandeira proibiu o tráfico de escravos nas colónias, passo simbólico de um país que procurava modernidade entre convulsões.',
-            // PT-1800-B
-            'O início do século XIX foi marcado pela instabilidade política e pela miséria rural. A fuga da Corte para o Brasil em 1807 abriu o comércio atlântico mas deixou Portugal dependente de Inglaterra pelo Tratado de 1810. O movimento do Vintismo (1820) reclamou uma monarquia constitucional, mas os anos seguintes trouxeram golpes e contragolpes. A morte de D. João VI em 1826 desencadeou a guerra civil entre liberais e absolutistas. A vitória liberal de D. Pedro IV, em 1834, aboliu as ordens religiosas e confiscou bens da Igreja, transformando propriedades e comunidades. As famílias rurais sentiam cada revolução como uma nova ameaça à terra e à sobrevivência.'
-          ],
-          '1850-1899': [
-            // PT-1850-A
-            'A Regeneração de 1851, liderada por Fontes Pereira de Melo, apostou nas obras públicas e no progresso. Em 1856 inaugurou-se a primeira linha de caminho de ferro portuguesa, entre Lisboa e o Carregado, encurtando distâncias e transformando o comércio. A moeda réis circulava num país ainda maioritariamente rural e analfabeto. Em 1890, o Ultimatum inglês obrigou Portugal a recuar em África, humilhando a nação e acelerando o declínio da monarquia. A crise financeira de 1891-92 faliu bancos e empobreceu famílias da classe média. Muitos portugueses embarcaram para o Brasil e os Estados Unidos à procura de trabalho, iniciando uma tradição de emigração que duraria gerações.',
-            // PT-1850-B
-            'Em meados do século XIX, Lisboa e Porto cresciam mas grande parte do país vivia em pobreza extrema. A emigração para o Brasil intensificou-se: nos anos 1880, mais de 20 000 portugueses partiam por ano. Em 1876 fundou-se o Partido Progressista, gerando um sistema de rotativismo político que paralisava reformas. Eça de Queirós escrevia sobre a hipocrisia e o atraso — Portugal debatia-se com a sua identidade. A Revolução do Porto de 31 de Janeiro de 1891 tentou implantar a República, mas falhou; os revoltosos pagaram com prisão e degredo. O povo continuava a pagar impostos pesados enquanto os políticos se alternavam no poder.'
-          ],
-          '1900-1949': [
-            // PT-1900-A
-            'A 1 de Fevereiro de 1908, o Rei D. Carlos e o Príncipe Luís Filipe foram assassinados no Terreiro do Paço, em Lisboa — o regicídio chocou a Europa. Em 5 de Outubro de 1910, a monarquia caiu e foi proclamada a República; o Hino A Portuguesa substituiu o hino real. Em 1911, o réis foi substituído pelo escudo como moeda nacional. Portugal entrou na 1.ª Guerra Mundial em 1916, enviando tropas para França e África; milhares morreram nas trincheiras de La Lys. A Gripe Espanhola de 1918 matou mais de 60 000 portugueses. Em 1933, António de Oliveira Salazar impôs o Estado Novo — uma ditadura que controlava a imprensa, proibia partidos e silenciava a oposição durante décadas.',
-            // PT-1900-B
-            'A instável 1.ª República portuguesa (1910–1926) conheceu 45 governos em 16 anos. Em 28 de Maio de 1926, um golpe militar pôs fim à república parlamentar. Salazar tornou-se presidente do Conselho em 1932 e manteve Portugal neutro na 2.ª Guerra Mundial, embora vendesse tungsténio (volfrâmio) a ambos os lados. A PIDE — polícia política — prendia e torturava opositores. O êxodo rural acelerou nos anos 40, enchendo as periferias de Lisboa e Porto de migrantes internos. A fome era frequente no Alentejo e no interior. As famílias guardavam silêncio sobre política por medo de retaliações.'
-          ],
-          '1950-1999': [
-            // PT-1950-A
-            'Em 1961, Portugal iniciou a Guerra Colonial em Angola, Guiné-Bissau e Moçambique — treze anos de conflito que mobilizaram centenas de milhares de jovens e custaram milhares de vidas. A 25 de Abril de 1974, uma revolução de cravos vermelhos derrubou a ditadura; soldados e povo abraçaram-se nas ruas de Lisboa. Salazar tinha caído da cadeira em 1968 e Caetano não conseguira salvar o regime. A descolonização trouxe 500 000 retornados que regressaram sem bens. O escudo sofreu inflação alta nos anos seguintes. Em 1986, Portugal entrou na Comunidade Económica Europeia, abrindo caminho à modernização e aos fundos estruturais.',
-            // PT-1950-B
-            'Nos anos 60, mais de um milhão de portugueses emigraram para França, Alemanha e Luxemburgo, fugindo da guerra colonial e da pobreza. As remessas dos emigrantes sustentaram muitas famílias no interior. Marcelo Caetano, sucessor de Salazar, tentou uma "primavera marcelista" sem sucesso real. Após o 25 de Abril de 1974, o PREC (Processo Revolucionário em Curso) trouxe nacionalizações, ocupações de terras e incerteza económica. Mário Soares liderou a consolidação democrática e foi o primeiro Presidente civil em décadas. Em 1998, Lisboa recebeu a Expo 98 sob o tema "Os Oceanos", sinal de uma Portugal renovado e confiante.'
-          ],
-          '2000-2099': [
-            // PT-2000-A
-            'A 1 de Janeiro de 2002, o escudo foi substituído pelo euro, encerrando séculos de moeda nacional. Em 2011, Portugal pediu resgate financeiro à Troika (FMI, BCE, CE) de 78 mil milhões de euros; seguiram-se anos de austeridade, cortes de salários e pensões, e emigração em massa — mais de 400 000 portugueses partiram entre 2011 e 2015. Os incêndios de Pedrógão Grande (2017) mataram 66 pessoas e devastaram o interior. Em 2020, a pandemia de COVID-19 forçou o Estado de Emergência e afectou gravemente o turismo, pilar da economia. A crise habitacional das décadas de 2010-2020 tornou as rendas inacessíveis pelas novas gerações.',
-            // PT-2000-B
-            'A entrada de Portugal no Euro em 2002 trouxe preços mais altos mas também taxas de juro baixas que alimentaram o crédito fácil. Em 2004, Portugal organizou o Campeonato Europeu de Futebol — Cristiano Ronaldo estreou-se na fase final aos 19 anos. Em 2005, José Sócrates ganhou as eleições com maioria absoluta prometendo modernização. Em 2008, a crise do subprime americano contaminou a Europa; os bancos portugueses ficaram fragilizados. O Banco Espírito Santo colapsou em 2014, no maior resgate bancário da história nacional. O turismo e as startups tecnológicas emergiram como novas esperanças na segunda metade da década.'
-          ]
-        },
-        ES: {
-          '1800-1849': [
-            // ES-1800-A
-            'Em 1808, Napoleão forçou Carlos IV e Fernando VII a abdicar, colocando o seu irmão José Bonaparte no trono de Espanha. O povo espanhol revoltou-se: a Guerra da Independência (1808–1814) foi feroz, com guerrilhas, massacres e cidades destruídas. Em 1812, as Cortes de Cádiz aprovaram a primeira constituição liberal espanhola — "La Pepa" — enquanto o país ardia em guerra. Restaurado no trono em 1814, Fernando VII aboliu imediatamente a constituição e perseguiu os liberais. A moeda corrente eram os reales de vellón; a economia estava arruinada pela guerra. Nas décadas seguintes, as colónias americanas (México, Argentina, Chile, Peru) tornaram-se independentes, encerrando o império continental.',
-            // ES-1800-B
-            'O regresso de Fernando VII em 1814 inaugurou uma época de repressão brutal: liberais eram presos, exilados ou executados. O trágico Triénio Liberal (1820–1823) viu uma constituição reimplantada, mas a intervenção dos Cem Mil Filhos de São Luís, a mando da Santa Aliança, restaurou o absolutismo. Quando Fernando VII morreu em 1833 sem herdeiro masculino, o seu irmão D. Miguel (em Espanha, D. Carlos) recusou a sucessão da filha Isabel II: nasceu a 1.ª Guerra Carlista (1833–1840), que dividiu regiões inteiras, nomeadamente o País Basco e a Catalunha. O clero, os camponeses do norte e os foros regionais alinharam com os carlistas; o exército e a burguesia com os liberais.'
-          ],
-          '1850-1899': [
-            // ES-1850-A
-            'Em 1868, a Revolução Gloriosa derrubou a Rainha Isabel II e introduziu a peseta como moeda nacional unificada. A instável monarquia de Amadeu I (1871–1873) deu lugar à 1.ª República Espanhola, que durou apenas 11 meses e teve quatro presidentes. Em 1874, a Restauração Borbónica trouxe Alfonso XII ao trono, iniciando um período de aparente estabilidade baseado no caciquismo político. Em 1898, o "Desastre del 98" foi uma humilhação nacional: Espanha perdeu Cuba, Porto Rico e as Filipinas para os Estados Unidos no Tratado de Paris, encerrando definitivamente o império colonial. Uma geração de intelectuais — a "Generación del 98" — questionou profundamente a identidade espanhola.',
-            // ES-1850-B
-            'Em meados do século XIX, Espanha vivia o Sexénio Democrático (1868–1874) — um período de liberdade de imprensa, sufrágio universal masculino e abolição da escravatura em Porto Rico. Mas a instabilidade era crónica: a 1.ª República Espanhola enfrentou conflitos cantonalistas onde cidades como Cartagena proclamaram a sua autonomia. O sistema da Restauração baseava-se na "turno pacífico" — conservadores e liberais alternavam-se no poder através de eleições fraudulentas controladas pelos caciques locais. A agricultura era o principal sustento, mas as secas e a concorrência americana empobreciam os jornaleiros andaluzes e extremenhos.'
-          ],
-          '1900-1949': [
-            // ES-1900-A
-            'Em Abril de 1931, Alfonso XIII abandonou Espanha sem abdicar e foi proclamada a 2.ª República. Em 1936, a vitória da Frente Popular nas eleições desencadeou um golpe militar liderado pelo General Francisco Franco; começou a Guerra Civil Espanhola (1936–1939). Em Abril de 1937, a aviação nazi bombardeou Guernica no País Basco, inspirando o celebrado quadro de Picasso. Mais de 500 000 pessoas morreram no conflito; centenas de milhares exilaram-se em França e México. Em 1939, Franco declarou a vitória e instaurou uma ditadura que duraria 36 anos. Os vencidos foram perseguidos, presos ou fuzilados — as cicatrizes dividiriam famílias por gerações.',
-            // ES-1900-B
-            'Os anos da autarquia franquista (1939–1959) foram de fome e chantagem política. A cartilha de racionamento alimentar vigorou até 1952. Espanha foi excluída do Plano Marshall e da ONU até 1955. A peseta estava desvalorizada e o mercado negro era omnipresente. Em 1959, o Plano de Estabilização e os Planos de Desenvolvimento abriram a economia ao exterior, sobretudo ao turismo europeu. A Igreja Católica apoiava o regime em troca de privilégios educativos e morais. Meio milhão de trabalhadores espanhóis emigraram para a França e Alemanha na década de 60, enviando remessas que sustentaram famílias inteiras.'
-          ],
-          '1950-1999': [
-            // ES-1950-A
-            'Os anos 60 foram o "milagre económico" espanhol: com a abertura ao turismo e os investimentos estrangeiros, o PIB cresceu a taxas de 7% ao ano. Frigoríficos, televisões e carros tornaram-se acessíveis à classe média. Mas a ditadura franquista reprimia duramente sindicatos e movimentos regionais; o ETA iniciou a luta armada em 1959. Em 1968, Franco declarou o estado de excepção. A morte de Franco a 20 de Novembro de 1975 abriu a Transição Democrática sob Juan Carlos I. Em 1977 realizaram-se as primeiras eleições livres em 41 anos; em 1978 foi aprovada a Constituição.',
-            // ES-1950-B
-            'Após a morte de Franco, a Espanha viveu os "Pactos de la Moncloa" (1977), acordo entre partidos para estabilizar a economia e a democracia. Em 1981, Adolfo Suárez demitiu-se e o Tenente-Coronel Tejero tentou um golpe de estado no Congresso — o 23-F falhou graças ao discurso firme de Juan Carlos I. Em 1982, o PSOE de Felipe González ganhou por maioria absoluta, modernizando o Estado. Em 1986, a Espanha entrou na Comunidade Europeia e na NATO. Em 1992, Barcelona sediou os Jogos Olímpicos e Sevilha a Expo 92 — ano de ouro da imagem espanhola no mundo. A peseta seria trocada pelo euro a 1 de Janeiro de 2002.'
-          ],
-          '2000-2099': [
-            // ES-2000-A
-            'A 11 de Março de 2004, dez bombas explodiram em comboios de Madrid matando 191 pessoas e ferindo mais de 1800 — o maior atentado terrorista da história europeia até então. O governo conservador de Aznar atribuiu inicialmente o ataque ao ETA, perdendo as eleições três dias depois. José Luis Rodríguez Zapatero venceu e retirou as tropas espanholas do Iraque. Em 2008, a bolha imobiliária rebentou: a Espanha tinha construído mais habitações por ano do que Alemanha, França e Reino Unido juntos. O desemprego disparou de 8% para 27% em cinco anos. O país pediu resgate bancário europeu de 100 mil milhões de euros em 2012.',
-            // ES-2000-B
-            'A crise de 2008 expôs as fragilidades do modelo espanhol: bancos como Bankia colapsaram com créditos imobiliários podres. O movimento dos Indignados (15-M, 2011) ocupou praças em todo o país, reclamando democracia real. O partido Podemos e Ciudadanos emergiram, quebrando o bipartidarismo histórico PP-PSOE. Em 2017, o referendo de independência da Catalunha criou a maior crise constitucional desde o 23-F; o governo aplicou o artigo 155, suspendendo a autonomia catalã. Em 2020, a COVID-19 matou mais de 80 000 espanhóis, dos mais altos rácios per capita da Europa nos primeiros meses.'
-          ]
-        },
-        WORLD: {
-          '1800-1849': [
-            // WORLD-1800-A
-            'As Guerras Napoleónicas (1803–1815) redesenharam os mapas da Europa e custaram a vida a mais de 3 milhões de pessoas. O Congresso de Viena (1815) restaurou fronteiras e monarquias, ignorando os anseios de povos que queriam nações. A Revolução Industrial inglesa mecanizava o trabalho — as crianças trabalhavam 12 horas por dia nas fábricas de Manchester. Entre 1810 e 1825, quase toda a América Latina tornou-se independente: Simón Bolívar e José de San Martín lideraram revoluções que apagaram três séculos de colonialismo ibérico. Em 1825, a locomotiva a vapor de George Stephenson viajou pela primeira vez entre Stockton e Darlington, inaugurando a era dos caminhos de ferro.',
-            // WORLD-1800-B
-            'A abolição do tráfico de escravos pelo Parlamento britânico (1807) foi um marco moral, mas a escravatura continuou nas Américas por décadas. Em 1815, o Vulcão Tambora (Indonésia) entrou em erupção e causou o "Ano sem Verão" de 1816 — colheitas falhadas, fome e epidemias em todo o hemisfério norte. As revoluções de 1830 e 1848 varreram a Europa: Parisian barricadas, repúblicas efémeras e a utopia socialista ganhavam voz. A "Primavera dos Povos" de 1848 viu insurreições simultâneas em Paris, Berlim, Viena, Praga e Budapeste, todas reprimidas. Karl Marx e Friedrich Engels publicaram o Manifesto Comunista em Fevereiro de 1848.'
-          ],
-          '1850-1899': [
-            // WORLD-1850-A
-            'A Guerra da Secessão americana (1861–1865) opôs Norte e Sul numa batalha sobre escravatura e soberania — 620 000 soldados morreram. Abraham Lincoln aboliu a escravatura em 1863 e foi assassinado em 1865. Em 1869, o Canal de Suez abriu uma nova rota marítima entre a Europa e a Ásia, transformando o comércio global. A Unificação da Itália (1861) e da Alemanha (1871) criaram dois novos Estados-nação que alteraram o equilíbrio europeu. Entre 1845 e 1852, a Grande Fome Irlandesa matou um milhão de pessoas e forçou dois milhões a emigrar — maioritariamente para os Estados Unidos.',
-            // WORLD-1850-B
-            'A 2.ª Revolução Industrial (1870–1900) trouxe electricidade, petróleo, automóvel e telefone. Thomas Edison patenteou a lâmpada em 1879; Henry Ford começaria a produção em série de automóveis em 1908. Entre 1880 e 1914, mais de 20 milhões de europeus emigraram para as Américas — italianos, polacos, judeus russos e portugueses encheram as cidades americanas. O imperialismo europeu partilhou África na Conferência de Berlim (1884–85), traçando fronteiras sem respeito pelas etnias e culturas locais. A descoberta do ouro na África do Sul (1886) desencadeou conflitos que culminariam na Guerra dos Bóeres (1899–1902).'
-          ],
-          '1900-1949': [
-            // WORLD-1900-A
-            'A 1.ª Guerra Mundial (1914–1918) matou mais de 20 milhões de pessoas e desintegrou quatro impérios: austro-húngaro, otomano, russo e alemão. A Revolução Russa de 1917 aboliu o Czar e instalou o bolchevismo — nascia a URSS em 1922. A Gripe Espanhola (1918–1919) infectou 500 milhões de pessoas e matou entre 50 e 100 milhões em todo o mundo. O Tratado de Versalhes (1919) humilhou a Alemanha com reparações colossais, alimentando o ressentimento que conduziria ao nazismo. A Grande Depressão de 1929 começou no "Black Tuesday" de Wall Street e espalhou miséria por todos os continentes: bancos fecharam, indústrias pararam, desempregados formaram filas da sopa.',
-            // WORLD-1900-B
-            'Hitler tornou-se Chanceler da Alemanha em Janeiro de 1933 e transformou a república de Weimar numa ditadura em meses. A 2.ª Guerra Mundial (1939–1945) foi o conflito mais mortífero da história: 70 a 85 milhões de mortos, incluindo seis milhões de Judeus no Holocausto. A bomba atómica lançada sobre Hiroshima (6 Agosto 1945) e Nagasaki (9 Agosto 1945) matou 200 000 pessoas e forçou a rendição do Japão. A Organização das Nações Unidas foi fundada em 1945 para evitar futuras guerras. A Declaração Universal dos Direitos Humanos foi adoptada em 1948. O mundo estava esgotado — mas também cheio de esperança numa nova ordem.'
-          ],
-          '1950-1999': [
-            // WORLD-1950-A
-            'A Guerra Fria dividia o mundo em dois blocos: os Estados Unidos e a URSS acumularam arsenais nucleares suficientes para destruir a Terra. A Guerra da Coreia (1950–1953) opôs comunismo e capitalismo numa península ensanguentada. Em 1957, a URSS lançou o Sputnik, o primeiro satélite artificial; em 1961, Yuri Gagarin foi o primeiro humano no espaço. A 20 de Julho de 1969, Neil Armstrong pisou a Lua. A crise do petróleo de 1973 (embargo árabe) quadruplicou o preço do combustível e mergulhou as economias ocidentais em recessão. A Queda do Muro de Berlim a 9 de Novembro de 1989 simbolizou o fim da Guerra Fria; a URSS dissolveu-se em 1991.',
-            // WORLD-1950-B
-            'A descolonização transformou o mundo nas décadas de 50 e 60: dezenas de novos países africanos e asiáticos emergiram. A Guerra do Vietname (1955–1975) matou mais de 3 milhões de vietnamitas e 58 000 soldados americanos. Martin Luther King liderou o movimento pelos direitos civis nos EUA; foi assassinado em 1968. Nelson Mandela foi preso em 1964 e só libertado em 1990 — o Apartheid sul-africano terminou em 1994. A internet nasceu como rede militar nos anos 70 e tornou-se pública nos anos 90. Em 1997, a clonagem da ovelha Dolly marcou uma nova era na biotecnologia. O mundo conectava-se e acelerava.'
-          ],
-          '2000-2099': [
-            // WORLD-2000-A
-            'A 11 de Setembro de 2001, ataques terroristas da Al-Qaeda destruíram as Torres Gémeas em Nova Iorque, matando 2 977 pessoas e desencadeando as Guerras do Afeganistão e do Iraque que durariam décadas. Em 2008, a falência do banco Lehman Brothers despoletou a maior crise financeira global desde 1929: o crédito hipotecário de alto risco americano contaminou bancos de todo o mundo. Em 2010, a Primavera Árabe derrubou ditadores na Tunísia, Egito e Líbia, mas o caos que se seguiu mergulhou a Síria numa guerra civil que deslocou 12 milhões de pessoas. Em 2016, o Brexit e a eleição de Trump sinalizaram a crise da globalização e o ressurgimento do populismo.',
-            // WORLD-2000-B
-            'Em Dezembro de 2019, um novo coronavírus surgiu em Wuhan, China. A pandemia de COVID-19 declarada em Março de 2020 pela OMS matou mais de 7 milhões de pessoas oficialmente registadas, paralisou economias e encerrou fronteiras. As vacinas desenvolvidas em tempo recorde salvaram centenas de milhões de vidas. A crise climática acelerou: os dez anos mais quentes da história registada ocorreram todos entre 2010 e 2024. Incêndios na Austrália (2019–20), inundações na Europa e secas em África empurram populações inteiras. A inteligência artificial generativa, a partir de 2023, começa a transformar o mercado de trabalho de forma imprevisível.'
-          ]
-        }
-      };
-    }
-
-    _yearRangeKey(year) {
-      if (!year) return '1900-1949';
-      if (year < 1850) return '1800-1849';
-      if (year < 1900) return '1850-1899';
-      if (year < 1950) return '1900-1949';
-      if (year < 2000) return '1950-1999';
-      return '2000-2099';
+      // Each note: { region, startYear, endYear, text }
+      // region: 'PT' | 'ES' | 'WORLD'
+      // startYear/endYear: the earliest and latest year mentioned — used for window matching.
+      // A note is eligible for a family whose refYear window [birthYear, birthYear+30]
+      // overlaps with [startYear, endYear].
+      this._historicalNotes = [
+        // ── PORTUGAL ─────────────────────────────────────────────────────
+        { region:'PT', startYear:1640, endYear:1715,
+          text:'O Portugal do século XVII viveu sob a sombra da Restauração de 1640, que encerrou 60 anos de domínio espanhol. As guerras com Espanha prolongaram-se até 1668, esgotando os recursos do reino. O ouro do Brasil começou a chegar em quantidade nos anos 1690, transformando a economia e financiando a construção de palácios e igrejas. D. Pedro II (1683–1706) estabilizou o país e assinou o Tratado de Methuen (1703) com Inglaterra, que trocava vinhos por tecidos. A sociedade era profundamente rural, hierárquica e marcada pelo peso da Igreja e do Santo Ofício.' },
+        { region:'PT', startYear:1680, endYear:1760,
+          text:'O reinado de D. João V (1706–1750) foi o apogeu do barroco português: o ouro do Brasil financiou o Convento de Mafra, os azulejos das igrejas e a grandiosidade da corte. Lisboa era uma das maiores cidades da Europa. O Marquês de Pombal tornou-se o homem forte do reino após o catastrófico Terramoto de 1755, que destruiu a Baixa de Lisboa e matou milhares. Pombal reconstruiu a cidade em estilo iluminista, expulsou os Jesuítas (1759) e modernizou o Estado. As famílias viviam sob rígida hierarquia social — nobreza, clero, povo — com pouca mobilidade.' },
+        { region:'PT', startYear:1750, endYear:1810,
+          text:'O Terramoto de Lisboa de 1 de Novembro de 1755 matou entre 10 000 e 20 000 pessoas e destruiu dois terços da capital. O Marquês de Pombal reconstruiu a Baixa numa grelha iluminista, reorganizou o ensino e expulsou os Jesuítas. O reinado de D. Maria I (1777–1816) reverteu muitas reformas pombalinas. Em 1807, Napoleão invadiu Portugal e a Família Real fugiu para o Brasil, iniciando a mais longa saída de um monarca europeu da sua capital. As três invasões francesas (1807–1811) devastaram aldeias, queimaram colheitas e obrigaram famílias inteiras a refugiar-se.' },
+        { region:'PT', startYear:1800, endYear:1836,
+          text:'Em 1807, a Família Real portuguesa fugiu para o Brasil quando Napoleão invadiu Lisboa, deixando o país sem rei e entregue ao General Junot. Entre 1807 e 1811, três invasões francesas devastaram aldeias, roubaram colheitas e separaram famílias. A moeda de réis desvalorizou e a miséria alastrou. Em 1820, a Revolução Liberal do Porto forçou o regresso de D. João VI do Brasil e originou a primeira constituição portuguesa. A disputa entre D. Pedro IV e D. Miguel pelo trono gerou as Guerras Liberais (1828–1834), que encheram estradas de refugiados e órfãos. Em 1836, o Decreto de Sá da Bandeira proibiu o tráfico de escravos nas colónias, passo simbólico de um país que procurava modernidade entre convulsões.' },
+        { region:'PT', startYear:1820, endYear:1870,
+          text:'O início do século XIX foi marcado pela instabilidade política e pela miséria rural. A fuga da Corte para o Brasil em 1807 abriu o comércio atlântico mas deixou Portugal dependente de Inglaterra pelo Tratado de 1810. O movimento do Vintismo (1820) reclamou uma monarquia constitucional, mas os anos seguintes trouxeram golpes e contragolpes. A morte de D. João VI em 1826 desencadeou a guerra civil entre liberais e absolutistas. A vitória liberal de D. Pedro IV, em 1834, aboliu as ordens religiosas e confiscou bens da Igreja, transformando propriedades e comunidades. As famílias rurais sentiam cada revolução como uma nova ameaça à terra e à sobrevivência.' },
+        { region:'PT', startYear:1851, endYear:1892,
+          text:'A Regeneração de 1851, liderada por Fontes Pereira de Melo, apostou nas obras públicas e no progresso. Em 1856 inaugurou-se a primeira linha de caminho de ferro portuguesa, entre Lisboa e o Carregado, encurtando distâncias e transformando o comércio. A moeda réis circulava num país ainda maioritariamente rural e analfabeto. Em 1890, o Ultimatum inglês obrigou Portugal a recuar em África, humilhando a nação e acelerando o declínio da monarquia. A crise financeira de 1891–92 faliu bancos e empobreceu famílias da classe média. Muitos portugueses embarcaram para o Brasil e os Estados Unidos à procura de trabalho, iniciando uma tradição de emigração que duraria gerações.' },
+        { region:'PT', startYear:1860, endYear:1900,
+          text:'Em meados do século XIX, Lisboa e Porto cresciam mas grande parte do país vivia em pobreza extrema. A emigração para o Brasil intensificou-se: nos anos 1880, mais de 20 000 portugueses partiam por ano. Em 1876 fundou-se o Partido Progressista, gerando um sistema de rotativismo político que paralisava reformas. Eça de Queirós escrevia sobre a hipocrisia e o atraso — Portugal debatia-se com a sua identidade. A Revolução do Porto de 31 de Janeiro de 1891 tentou implantar a República, mas falhou; os revoltosos pagaram com prisão e degredo. O povo continuava a pagar impostos pesados enquanto os políticos se alternavam no poder.' },
+        { region:'PT', startYear:1900, endYear:1933,
+          text:'A 1 de Fevereiro de 1908, o Rei D. Carlos e o Príncipe Luís Filipe foram assassinados no Terreiro do Paço, em Lisboa — o regicídio chocou a Europa. Em 5 de Outubro de 1910, a monarquia caiu e foi proclamada a República; o Hino A Portuguesa substituiu o hino real. Em 1911, o réis foi substituído pelo escudo como moeda nacional. Portugal entrou na 1.ª Guerra Mundial em 1916, enviando tropas para França e África; milhares morreram nas trincheiras de La Lys. A Gripe Espanhola de 1918 matou mais de 60 000 portugueses. Em 1933, António de Oliveira Salazar impôs o Estado Novo — uma ditadura que controlava a imprensa, proibia partidos e silenciava a oposição durante décadas.' },
+        { region:'PT', startYear:1910, endYear:1950,
+          text:'A instável 1.ª República portuguesa (1910–1926) conheceu 45 governos em 16 anos. Em 28 de Maio de 1926, um golpe militar pôs fim à república parlamentar. Salazar tornou-se presidente do Conselho em 1932 e manteve Portugal neutro na 2.ª Guerra Mundial, embora vendesse tungsténio (volfrâmio) a ambos os lados. A PIDE — polícia política — prendia e torturava opositores. O êxodo rural acelerou nos anos 40, enchendo as periferias de Lisboa e Porto de migrantes internos. A fome era frequente no Alentejo e no interior. As famílias guardavam silêncio sobre política por medo de retaliações.' },
+        { region:'PT', startYear:1961, endYear:1986,
+          text:'Em 1961, Portugal iniciou a Guerra Colonial em Angola, Guiné-Bissau e Moçambique — treze anos de conflito que mobilizaram centenas de milhares de jovens e custaram milhares de vidas. A 25 de Abril de 1974, uma revolução de cravos vermelhos derrubou a ditadura; soldados e povo abraçaram-se nas ruas de Lisboa. Salazar tinha caído da cadeira em 1968 e Caetano não conseguira salvar o regime. A descolonização trouxe 500 000 retornados que regressaram sem bens. O escudo sofreu inflação alta nos anos seguintes. Em 1986, Portugal entrou na Comunidade Económica Europeia, abrindo caminho à modernização e aos fundos estruturais.' },
+        { region:'PT', startYear:1960, endYear:1998,
+          text:'Nos anos 60, mais de um milhão de portugueses emigraram para França, Alemanha e Luxemburgo, fugindo da guerra colonial e da pobreza. As remessas dos emigrantes sustentaram muitas famílias no interior. Marcelo Caetano, sucessor de Salazar, tentou uma "primavera marcelista" sem sucesso real. Após o 25 de Abril de 1974, o PREC (Processo Revolucionário em Curso) trouxe nacionalizações, ocupações de terras e incerteza económica. Mário Soares liderou a consolidação democrática e foi o primeiro Presidente civil em décadas. Em 1998, Lisboa recebeu a Expo 98 sob o tema "Os Oceanos", sinal de uma Portugal renovado e confiante.' },
+        { region:'PT', startYear:2002, endYear:2020,
+          text:'A 1 de Janeiro de 2002, o escudo foi substituído pelo euro, encerrando séculos de moeda nacional. Em 2011, Portugal pediu resgate financeiro à Troika (FMI, BCE, CE) de 78 mil milhões de euros; seguiram-se anos de austeridade, cortes de salários e pensões, e emigração em massa — mais de 400 000 portugueses partiram entre 2011 e 2015. Os incêndios de Pedrógão Grande (2017) mataram 66 pessoas e devastaram o interior. Em 2020, a pandemia de COVID-19 forçou o Estado de Emergência e afectou gravemente o turismo, pilar da economia. A crise habitacional das décadas de 2010–2020 tornou as rendas inacessíveis pelas novas gerações.' },
+        { region:'PT', startYear:2002, endYear:2015,
+          text:'A entrada de Portugal no Euro em 2002 trouxe preços mais altos mas também taxas de juro baixas que alimentaram o crédito fácil. Em 2004, Portugal organizou o Campeonato Europeu de Futebol — Cristiano Ronaldo estreou-se na fase final aos 19 anos. Em 2005, José Sócrates ganhou as eleições com maioria absoluta prometendo modernização. Em 2008, a crise do subprime americano contaminou a Europa; os bancos portugueses ficaram fragilizados. O Banco Espírito Santo colapsou em 2014, no maior resgate bancário da história nacional. O turismo e as startups tecnológicas emergiram como novas esperanças na segunda metade da década.' },
+        // ── ESPANHA ──────────────────────────────────────────────────────
+        { region:'ES', startYear:1808, endYear:1840,
+          text:'Em 1808, Napoleão forçou Carlos IV e Fernando VII a abdicar, colocando o seu irmão José Bonaparte no trono de Espanha. O povo espanhol revoltou-se: a Guerra da Independência (1808–1814) foi feroz, com guerrilhas, massacres e cidades destruídas. Em 1812, as Cortes de Cádiz aprovaram a primeira constituição liberal espanhola — "La Pepa" — enquanto o país ardia em guerra. Restaurado no trono em 1814, Fernando VII aboliu imediatamente a constituição e perseguiu os liberais. A moeda corrente eram os reales de vellón; a economia estava arruinada pela guerra. Nas décadas seguintes, as colónias americanas (México, Argentina, Chile, Peru) tornaram-se independentes, encerrando o império continental.' },
+        { region:'ES', startYear:1814, endYear:1850,
+          text:'O regresso de Fernando VII em 1814 inaugurou uma época de repressão brutal: liberais eram presos, exilados ou executados. O trágico Triénio Liberal (1820–1823) viu uma constituição reimplantada, mas a intervenção dos Cem Mil Filhos de São Luís, a mando da Santa Aliança, restaurou o absolutismo. Quando Fernando VII morreu em 1833 sem herdeiro masculino, o seu irmão D. Miguel (em Espanha, D. Carlos) recusou a sucessão da filha Isabel II: nasceu a 1.ª Guerra Carlista (1833–1840), que dividiu regiões inteiras, nomeadamente o País Basco e a Catalunha. O clero, os camponeses do norte e os foros regionais alinharam com os carlistas; o exército e a burguesia com os liberais.' },
+        { region:'ES', startYear:1868, endYear:1898,
+          text:'Em 1868, a Revolução Gloriosa derrubou a Rainha Isabel II e introduziu a peseta como moeda nacional unificada. A instável monarquia de Amadeu I (1871–1873) deu lugar à 1.ª República Espanhola, que durou apenas 11 meses e teve quatro presidentes. Em 1874, a Restauração Borbónica trouxe Alfonso XII ao trono, iniciando um período de aparente estabilidade baseado no caciquismo político. Em 1898, o "Desastre del 98" foi uma humilhação nacional: Espanha perdeu Cuba, Porto Rico e as Filipinas para os Estados Unidos no Tratado de Paris, encerrando definitivamente o império colonial. Uma geração de intelectuais — a "Generación del 98" — questionou profundamente a identidade espanhola.' },
+        { region:'ES', startYear:1868, endYear:1900,
+          text:'Em meados do século XIX, Espanha vivia o Sexénio Democrático (1868–1874) — um período de liberdade de imprensa, sufrágio universal masculino e abolição da escravatura em Porto Rico. Mas a instabilidade era crónica: a 1.ª República Espanhola enfrentou conflitos cantonalistas onde cidades como Cartagena proclamaram a sua autonomia. O sistema da Restauração baseava-se na "turno pacífico" — conservadores e liberais alternavam-se no poder através de eleições fraudulentas controladas pelos caciques locais. A agricultura era o principal sustento, mas as secas e a concorrência americana empobreciam os jornaleiros andaluzes e extremenhos.' },
+        { region:'ES', startYear:1931, endYear:1939,
+          text:'Em Abril de 1931, Alfonso XIII abandonou Espanha sem abdicar e foi proclamada a 2.ª República. Em 1936, a vitória da Frente Popular nas eleições desencadeou um golpe militar liderado pelo General Francisco Franco; começou a Guerra Civil Espanhola (1936–1939). Em Abril de 1937, a aviação nazi bombardeou Guernica no País Basco, inspirando o celebrado quadro de Picasso. Mais de 500 000 pessoas morreram no conflito; centenas de milhares exilaram-se em França e México. Em 1939, Franco declarou a vitória e instaurou uma ditadura que duraria 36 anos. Os vencidos foram perseguidos, presos ou fuzilados — as cicatrizes dividiriam famílias por gerações.' },
+        { region:'ES', startYear:1939, endYear:1970,
+          text:'Os anos da autarquia franquista (1939–1959) foram de fome e chantagem política. A cartilha de racionamento alimentar vigorou até 1952. Espanha foi excluída do Plano Marshall e da ONU até 1955. A peseta estava desvalorizada e o mercado negro era omnipresente. Em 1959, o Plano de Estabilização e os Planos de Desenvolvimento abriram a economia ao exterior, sobretudo ao turismo europeu. A Igreja Católica apoiava o regime em troca de privilégios educativos e morais. Meio milhão de trabalhadores espanhóis emigraram para a França e Alemanha na década de 60, enviando remessas que sustentaram famílias inteiras.' },
+        { region:'ES', startYear:1959, endYear:1978,
+          text:'Os anos 60 foram o "milagre económico" espanhol: com a abertura ao turismo e os investimentos estrangeiros, o PIB cresceu a taxas de 7% ao ano. Frigoríficos, televisões e carros tornaram-se acessíveis à classe média. Mas a ditadura franquista reprimia duramente sindicatos e movimentos regionais; o ETA iniciou a luta armada em 1959. Em 1968, Franco declarou o estado de excepção. A morte de Franco a 20 de Novembro de 1975 abriu a Transição Democrática sob Juan Carlos I. Em 1977 realizaram-se as primeiras eleições livres em 41 anos; em 1978 foi aprovada a Constituição.' },
+        { region:'ES', startYear:1977, endYear:1992,
+          text:'Após a morte de Franco, a Espanha viveu os "Pactos de la Moncloa" (1977), acordo entre partidos para estabilizar a economia e a democracia. Em 1981, Adolfo Suárez demitiu-se e o Tenente-Coronel Tejero tentou um golpe de estado no Congresso — o 23-F falhou graças ao discurso firme de Juan Carlos I. Em 1982, o PSOE de Felipe González ganhou por maioria absoluta, modernizando o Estado. Em 1986, a Espanha entrou na Comunidade Europeia e na NATO. Em 1992, Barcelona sediou os Jogos Olímpicos e Sevilha a Expo 92 — ano de ouro da imagem espanhola no mundo. A peseta seria trocada pelo euro a 1 de Janeiro de 2002.' },
+        { region:'ES', startYear:2004, endYear:2012,
+          text:'A 11 de Março de 2004, dez bombas explodiram em comboios de Madrid matando 191 pessoas e ferindo mais de 1800 — o maior atentado terrorista da história europeia até então. O governo conservador de Aznar atribuiu inicialmente o ataque ao ETA, perdendo as eleições três dias depois. José Luis Rodríguez Zapatero venceu e retirou as tropas espanholas do Iraque. Em 2008, a bolha imobiliária rebentou: a Espanha tinha construído mais habitações por ano do que Alemanha, França e Reino Unido juntos. O desemprego disparou de 8% para 27% em cinco anos. O país pediu resgate bancário europeu de 100 mil milhões de euros em 2012.' },
+        { region:'ES', startYear:2008, endYear:2020,
+          text:'A crise de 2008 expôs as fragilidades do modelo espanhol: bancos como Bankia colapsaram com créditos imobiliários podres. O movimento dos Indignados (15-M, 2011) ocupou praças em todo o país, reclamando democracia real. O partido Podemos e Ciudadanos emergiram, quebrando o bipartidarismo histórico PP-PSOE. Em 2017, o referendo de independência da Catalunha criou a maior crise constitucional desde o 23-F; o governo aplicou o artigo 155, suspendendo a autonomia catalã. Em 2020, a COVID-19 matou mais de 80 000 espanhóis, dos mais altos rácios per capita da Europa nos primeiros meses.' },
+        // ── MUNDO ────────────────────────────────────────────────────────
+        { region:'WORLD', startYear:1580, endYear:1650,
+          text:'O século XVII arrancou com a Europa dividida entre a Reforma Protestante e a Contra-Reforma Católica. A Guerra dos Trinta Anos (1618–1648) devastou a Europa Central, matando um terço da população da Alemanha. O florescimento do comércio atlântico ligou a Europa, África e América: cana de açúcar, tabaco, prata e escravos circulavam em quantidades sem precedente. Inglaterra, Holanda e França disputavam o domínio marítimo com Portugal e Espanha. A invenção da imprensa espalhava ideias; Galileu confirmava que a Terra girava à volta do Sol, desafiando a Igreja. Era uma época de descobertas e violência em simultâneo.' },
+        { region:'WORLD', startYear:1640, endYear:1700,
+          text:'A segunda metade do século XVII viu a ascensão da Holanda como grande potência comercial — a Companhia das Índias Orientais dominava o comércio asiático. Inglaterra passou pela Revolução Gloriosa de 1688, firmando os direitos do Parlamento face à monarquia. Na América, as colónias inglesas cresciam; o tráfico de escravos africanos atingia centenas de milhares por ano. Na China, a dinastia Qing consolidava o seu poder. A filosofia iluminista começava a germinar: Locke, Descartes e Spinoza questionavam a autoridade da tradição. O papel da razão no governo das sociedades começava a ser debatido.' },
+        { region:'WORLD', startYear:1700, endYear:1760,
+          text:'O século XVIII foi marcado pelo Iluminismo: Voltaire, Rousseau e Montesquieu questionaram a autoridade religiosa e defenderam a razão, a liberdade e a igualdade. A Grã-Bretanha tornou-se a potência dominante graças à Revolução Industrial que começava em meados do século. Nas Américas, as colónias inglesas e espanholas cresciam em riqueza e identidade própria. O tráfico de escravos atlântico atingiu o seu pico entre 1700 e 1800. O arroz, o algodão e o açúcar produzidos por mão-de-obra escravizada enriqueciam as metrópoles europeias enquanto destruíam famílias africanas.' },
+        { region:'WORLD', startYear:1750, endYear:1800,
+          text:'A Revolução Americana (1776) proclamou pela primeira vez que todos os homens são criados iguais, inspirando movimentos de libertação em todo o mundo. A Revolução Francesa de 1789 derrubou a monarquia, aboliu os privilégios feudais e acabou com o Antigo Regime. O lema "Liberdade, Igualdade, Fraternidade" ecoou por décadas. James Watt aperfeiçoou a máquina a vapor em 1769, iniciando a Revolução Industrial britânica. O mundo ocidental acelerava: cidades cresciam, fábricas expulsavam artesãos e o trabalho assalariado substituía as formas tradicionais de produção.' },
+        { region:'WORLD', startYear:1800, endYear:1830,
+          text:'As Guerras Napoleónicas (1803–1815) redesenharam os mapas da Europa e custaram a vida a mais de 3 milhões de pessoas. O Congresso de Viena (1815) restaurou fronteiras e monarquias, ignorando os anseios de povos que queriam nações. A Revolução Industrial inglesa mecanizava o trabalho — as crianças trabalhavam 12 horas por dia nas fábricas de Manchester. Entre 1810 e 1825, quase toda a América Latina tornou-se independente: Simón Bolívar e José de San Martín lideraram revoluções que apagaram três séculos de colonialismo ibérico. Em 1825, a locomotiva a vapor de George Stephenson viajou pela primeira vez entre Stockton e Darlington, inaugurando a era dos caminhos de ferro.' },
+        { region:'WORLD', startYear:1807, endYear:1848,
+          text:'A abolição do tráfico de escravos pelo Parlamento britânico (1807) foi um marco moral, mas a escravatura continuou nas Américas por décadas. Em 1815, o Vulcão Tambora (Indonésia) entrou em erupção e causou o "Ano sem Verão" de 1816 — colheitas falhadas, fome e epidemias em todo o hemisfério norte. As revoluções de 1830 e 1848 varreram a Europa: barricadas em Paris, repúblicas efémeras e a utopia socialista ganhavam voz. A "Primavera dos Povos" de 1848 viu insurreições simultâneas em Paris, Berlim, Viena, Praga e Budapeste, todas reprimidas. Karl Marx e Friedrich Engels publicaram o Manifesto Comunista em Fevereiro de 1848.' },
+        { region:'WORLD', startYear:1861, endYear:1890,
+          text:'A Guerra da Secessão americana (1861–1865) opôs Norte e Sul numa batalha sobre escravatura e soberania — 620 000 soldados morreram. Abraham Lincoln aboliu a escravatura em 1863 e foi assassinado em 1865. Em 1869, o Canal de Suez abriu uma nova rota marítima entre a Europa e a Ásia, transformando o comércio global. A Unificação da Itália (1861) e da Alemanha (1871) criaram dois novos Estados-nação que alteraram o equilíbrio europeu. Entre 1845 e 1852, a Grande Fome Irlandesa matou um milhão de pessoas e forçou dois milhões a emigrar — maioritariamente para os Estados Unidos.' },
+        { region:'WORLD', startYear:1870, endYear:1910,
+          text:'A 2.ª Revolução Industrial (1870–1900) trouxe electricidade, petróleo, automóvel e telefone. Thomas Edison patenteou a lâmpada em 1879; Henry Ford iniciou a produção em série de automóveis em 1908. Entre 1880 e 1914, mais de 20 milhões de europeus emigraram para as Américas — italianos, polacos, judeus russos e portugueses encheram as cidades americanas. O imperialismo europeu partilhou África na Conferência de Berlim (1884–85), traçando fronteiras sem respeito pelas etnias e culturas locais. A descoberta do ouro na África do Sul (1886) desencadeou conflitos que culminariam na Guerra dos Bóeres (1899–1902).' },
+        { region:'WORLD', startYear:1914, endYear:1929,
+          text:'A 1.ª Guerra Mundial (1914–1918) matou mais de 20 milhões de pessoas e desintegrou quatro impérios: austro-húngaro, otomano, russo e alemão. A Revolução Russa de 1917 aboliu o Czar e instalou o bolchevismo — nascia a URSS em 1922. A Gripe Espanhola (1918–1919) infectou 500 milhões de pessoas e matou entre 50 e 100 milhões em todo o mundo. O Tratado de Versalhes (1919) humilhou a Alemanha com reparações colossais, alimentando o ressentimento que conduziria ao nazismo. A Grande Depressão de 1929 começou no "Black Tuesday" de Wall Street e espalhou miséria por todos os continentes.' },
+        { region:'WORLD', startYear:1933, endYear:1948,
+          text:'Hitler tornou-se Chanceler da Alemanha em Janeiro de 1933 e transformou a república de Weimar numa ditadura em meses. A 2.ª Guerra Mundial (1939–1945) foi o conflito mais mortífero da história: 70 a 85 milhões de mortos, incluindo seis milhões de Judeus no Holocausto. A bomba atómica lançada sobre Hiroshima (6 Agosto 1945) e Nagasaki (9 Agosto 1945) matou 200 000 pessoas e forçou a rendição do Japão. A Organização das Nações Unidas foi fundada em 1945 para evitar futuras guerras. A Declaração Universal dos Direitos Humanos foi adoptada em 1948. O mundo estava esgotado — mas também cheio de esperança numa nova ordem.' },
+        { region:'WORLD', startYear:1950, endYear:1973,
+          text:'A Guerra Fria dividia o mundo em dois blocos: os Estados Unidos e a URSS acumularam arsenais nucleares suficientes para destruir a Terra. A Guerra da Coreia (1950–1953) opôs comunismo e capitalismo numa península ensanguentada. Em 1957, a URSS lançou o Sputnik, o primeiro satélite artificial; em 1961, Yuri Gagarin foi o primeiro humano no espaço. A 20 de Julho de 1969, Neil Armstrong pisou a Lua. A crise do petróleo de 1973 (embargo árabe) quadruplicou o preço do combustível e mergulhou as economias ocidentais em recessão. A Queda do Muro de Berlim a 9 de Novembro de 1989 simbolizou o fim da Guerra Fria; a URSS dissolveu-se em 1991.' },
+        { region:'WORLD', startYear:1955, endYear:1994,
+          text:'A descolonização transformou o mundo nas décadas de 50 e 60: dezenas de novos países africanos e asiáticos emergiram. A Guerra do Vietname (1955–1975) matou mais de 3 milhões de vietnamitas e 58 000 soldados americanos. Martin Luther King liderou o movimento pelos direitos civis nos EUA; foi assassinado em 1968. Nelson Mandela foi preso em 1964 e só libertado em 1990 — o Apartheid sul-africano terminou em 1994. A internet nasceu como rede militar nos anos 70 e tornou-se pública nos anos 90. Em 1997, a clonagem da ovelha Dolly marcou uma nova era na biotecnologia. O mundo conectava-se e acelerava.' },
+        { region:'WORLD', startYear:2001, endYear:2016,
+          text:'A 11 de Setembro de 2001, ataques terroristas da Al-Qaeda destruíram as Torres Gémeas em Nova Iorque, matando 2 977 pessoas e desencadeando as Guerras do Afeganistão e do Iraque que durariam décadas. Em 2008, a falência do banco Lehman Brothers despoletou a maior crise financeira global desde 1929: o crédito hipotecário de alto risco americano contaminou bancos de todo o mundo. Em 2010, a Primavera Árabe derrubou ditadores na Tunísia, Egito e Líbia, mas o caos que se seguiu mergulhou a Síria numa guerra civil que deslocou 12 milhões de pessoas. Em 2016, o Brexit e a eleição de Trump sinalizaram a crise da globalização e o ressurgimento do populismo.' },
+        { region:'WORLD', startYear:2019, endYear:2024,
+          text:'Em Dezembro de 2019, um novo coronavírus surgiu em Wuhan, China. A pandemia de COVID-19 declarada em Março de 2020 pela OMS matou mais de 7 milhões de pessoas oficialmente registadas, paralisou economias e encerrou fronteiras. As vacinas desenvolvidas em tempo recorde salvaram centenas de milhões de vidas. A crise climática acelerou: os dez anos mais quentes da história registada ocorreram todos entre 2010 e 2024. Incêndios na Austrália (2019–20), inundações na Europa e secas em África empurram populações inteiras. A inteligência artificial generativa, a partir de 2023, começa a transformar o mercado de trabalho de forma imprevisível.' },
+      ];
+      // If historical notes were fetched from /api/historical-facts, use them instead
+      if (externalNotes && externalNotes.length) this._historicalNotes = externalNotes;
     }
 
     _detectRegionForFamily(fam) {
@@ -320,37 +299,42 @@
       const fam = this.families[famId];
       if (!fam) return '';
 
-      // ── Determine reference year (birth year of husb/wife, within 30-year window) ──
+      // ── Determine reference year (earliest birth year of husb or wife) ──
       let refYear = null;
 
-      // 1. Primary: birth year of husband, then wife
+      // 1. Primary: birth year of husband or wife (take the earliest known)
+      const birthYears = [];
       for (const k of ['husb', 'wife']) {
         const ind = this.individuals[fam[k]];
         if (!ind || !ind.events) continue;
         const birt = ind.events.find(e => e.type === 'BIRT');
-        if (birt) { refYear = parseYear(birt.date); if (refYear) break; }
+        const y = parseYear(birt && birt.date);
+        if (y) birthYears.push(y);
       }
-      // 2. Fallback: any event date from husb or wife
+      if (birthYears.length) refYear = Math.min(...birthYears);
+
+      // 2. Fallback: earliest event date from husb or wife
       if (!refYear) {
+        const evYears = [];
         for (const k of ['husb', 'wife']) {
           const ind = this.individuals[fam[k]];
           if (!ind || !ind.events) continue;
-          for (const e of ind.events) {
-            refYear = parseYear(e.date);
-            if (refYear) break;
-          }
-          if (refYear) break;
+          ind.events.forEach(e => { const y = parseYear(e.date); if (y) evYears.push(y); });
         }
+        if (evYears.length) refYear = Math.min(...evYears);
       }
+
       // 3. Fallback: birth year of first child
       if (!refYear) {
         for (const cid of (fam.children || [])) {
           const ind = this.individuals[cid];
           if (!ind || !ind.events) continue;
           const birt = ind.events.find(e => e.type === 'BIRT');
-          if (birt) { refYear = parseYear(birt.date); if (refYear) break; }
+          const y = parseYear(birt && birt.date);
+          if (y) { refYear = y; break; }
         }
       }
+
       // 4. Fallback: any date from any family member (earliest available)
       if (!refYear) {
         const allYears = [];
@@ -362,56 +346,58 @@
           const ind = this.individuals[cid];
           if (ind && ind.events) ind.events.forEach(e => { const y = parseYear(e.date); if (y) allYears.push(y); });
         });
-        allYears.sort((a, b) => a - b);
-        refYear = allYears[0] || null;
+        if (allYears.length) refYear = Math.min(...allYears);
       }
 
-      // The historical window is [refYear, refYear+30]; pick notes whose era overlaps this window.
-      // Since buckets are 50-year spans, include the bucket for refYear and, if the window
-      // extends into the next bucket, include that too.
-      const rangeKey = this._yearRangeKey(refYear);
-      const nextRangeKey = refYear ? this._yearRangeKey(refYear + 30) : rangeKey;
+      if (!refYear) return '';
+
+      // ── Window: [refYear, refYear + 30] ────────────────────────────────
+      // A note is eligible if its [startYear, endYear] overlaps this window.
+      // Overlap condition: note.startYear <= refYear+30  AND  note.endYear >= refYear
+      const winEnd = refYear + 30;
       const region = this._detectRegionForFamily(fam);
-      const bucketsToTry = nextRangeKey !== rangeKey ? [rangeKey, nextRangeKey] : [rangeKey];
 
-      // Step 1: try unused notes in the era window for the detected region
-      let note = '';
-      for (const bk of bucketsToTry) {
-        const bucket = (this._historicalNotes[region] && this._historicalNotes[region][bk]) || [];
-        for (const n of bucket) {
-          if (!this._usedHistNotes.has(n)) { note = n; break; }
-        }
-        if (note) break;
-      }
+      // Priority order: same region first, then WORLD, then any other region
+      const regionPriority = [region, 'WORLD', ...Object.keys(
+        Object.fromEntries(this._historicalNotes.map(n => [n.region, 1]))
+      ).filter(r => r !== region && r !== 'WORLD')];
 
-      // Step 2: try unused notes in the same era window across other regions
-      // (never jump to a different era — a family from 1686 must never get a 1950 note)
+      const eligible = this._historicalNotes.filter(n =>
+        !this._usedHistNotes.has(n) &&
+        n.startYear <= winEnd &&
+        n.endYear   >= refYear
+      );
+
+      // Pick best: prefer same region, then WORLD, then others; among ties prefer closest startYear to refYear
+      eligible.sort((a, b) => {
+        const ra = regionPriority.indexOf(a.region) === -1 ? 99 : regionPriority.indexOf(a.region);
+        const rb = regionPriority.indexOf(b.region) === -1 ? 99 : regionPriority.indexOf(b.region);
+        if (ra !== rb) return ra - rb;
+        // Prefer the note whose startYear is closest to refYear (most contextually relevant)
+        return Math.abs(a.startYear - refYear) - Math.abs(b.startYear - refYear);
+      });
+
+      let note = eligible.length ? eligible[0] : null;
+
+      // If no unused note fits the window, allow repetition (pick best match ignoring used set)
       if (!note) {
-        for (const bk of bucketsToTry) {
-          for (const reg of Object.keys(this._historicalNotes)) {
-            if (reg === region) continue;
-            const bucket = (this._historicalNotes[reg] && this._historicalNotes[reg][bk]) || [];
-            for (const n of bucket) {
-              if (!this._usedHistNotes.has(n)) { note = n; break; }
-            }
-            if (note) break;
-          }
-          if (note) break;
-        }
+        const anyMatch = this._historicalNotes.filter(n =>
+          n.startYear <= winEnd && n.endYear >= refYear
+        );
+        anyMatch.sort((a, b) => {
+          const ra = regionPriority.indexOf(a.region) === -1 ? 99 : regionPriority.indexOf(a.region);
+          const rb = regionPriority.indexOf(b.region) === -1 ? 99 : regionPriority.indexOf(b.region);
+          if (ra !== rb) return ra - rb;
+          return Math.abs(a.startYear - refYear) - Math.abs(b.startYear - refYear);
+        });
+        note = anyMatch.length ? anyMatch[0] : null;
       }
 
-      // Step 3: last resort — allow repetition within the correct era (same region preferred)
-      if (!note) {
-        const fallbackBucket = (this._historicalNotes[region] && this._historicalNotes[region][rangeKey]) || [];
-        note = (fallbackBucket && fallbackBucket[0]) || '';
-        if (!note) {
-          // region has no notes for this era — try WORLD
-          const worldBucket = (this._historicalNotes['WORLD'] && this._historicalNotes['WORLD'][rangeKey]) || [];
-          note = (worldBucket && worldBucket[0]) || '';
-        }
+      if (note) {
+        this._usedHistNotes.add(note);
+        return note.text;
       }
-      if (note) this._usedHistNotes.add(note);
-      return note;
+      return '';
     }
 
     /** Load all individuals and families into local maps */
@@ -2094,8 +2080,8 @@
     img.style.objectPosition = cx + '% ' + cy + '%';
   };
 
-  function initBook(DB, rootId) {
-    const compiler = new BookCompiler(DB, rootId);
+  function initBook(DB, rootId, historicalNotes) {
+    const compiler = new BookCompiler(DB, rootId, historicalNotes);
     const pages = compiler.buildPages();
     allPages = pages;
 
@@ -2270,13 +2256,26 @@
         return;
       }
 
-      try {
-        initBook(DB, rootId);
-      } catch (e) {
-        console.error('[livro] Erro ao compilar o livro:', e);
-        const loadingEl = document.getElementById('livro-loading');
-        loadingEl.querySelector('span').textContent = 'Erro ao compilar: ' + e.message;
-      }
+      fetch('/api/historical-facts')
+        .then(r => r.ok ? r.json() : [])
+        .catch(() => [])
+        .then(apiData => {
+          const histNotes = (apiData || [])
+            .filter(n => !n.deletedAt)
+            .map(n => ({
+              region: n.pais,
+              startYear: +n.anoInicio,
+              endYear: +(n.anoFim || n.anoInicio),
+              text: n.facto
+            }));
+          try {
+            initBook(DB, rootId, histNotes.length ? histNotes : null);
+          } catch (e) {
+            console.error('[livro] Erro ao compilar o livro:', e);
+            const loadingEl = document.getElementById('livro-loading');
+            loadingEl.querySelector('span').textContent = 'Erro ao compilar: ' + e.message;
+          }
+        });
     }, 100);
 
     // ── Toolbar buttons ────────────────────────────────────────

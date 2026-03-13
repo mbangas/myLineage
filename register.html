@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>myLineage — Registar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg-main);
+      padding: 16px;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px 32px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    }
+    .login-logo {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; font-size: 1.5rem; font-weight: 700;
+      color: var(--text-main); margin-bottom: 32px;
+    }
+    .login-logo i { font-size: 2rem; color: #4493f8; }
+    .step-title { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+    .step-sub { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.52; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+    .field input {
+      width: 100%; padding: 10px 14px;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-main);
+      font-size: 0.95rem; font-family: var(--font-main); outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: #4493f8; }
+    .btn-primary {
+      width: 100%; padding: 11px 16px; margin-top: 10px;
+      background: #4493f8; color: #fff; border: none;
+      border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 7px; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #2d7de0; }
+    .btn-primary:disabled { background: #2a4060; cursor: not-allowed; color: #6890b8; }
+    .err { color: #e06060; font-size: 0.8rem; margin-top: 8px; min-height: 18px; }
+    .login-link { text-align: center; margin-top: 16px; font-size: 0.8rem; color: var(--text-secondary); }
+    .login-link a { color: #4493f8; cursor: pointer; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-logo"><i class="mdi mdi-tree"></i>myLineage</div>
+
+  <div class="step-title">Criar conta</div>
+  <div class="step-sub">Preencha os dados abaixo para se registar.</div>
+
+  <div class="field">
+    <label>Nome</label>
+    <input id="inName" type="text" placeholder="Nome completo" autocomplete="name"/>
+  </div>
+  <div class="field">
+    <label>Email</label>
+    <input id="inEmail" type="email" placeholder="nome@exemplo.com" autocomplete="email"/>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input id="inPassword" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password"/>
+  </div>
+  <div class="field">
+    <label>Confirmar password</label>
+    <input id="inConfirm" type="password" placeholder="Repetir password" autocomplete="new-password"/>
+  </div>
+  <div class="err" id="errReg"></div>
+  <button class="btn-primary" id="btnRegister">
+    <i class="mdi mdi-account-plus"></i> Registar
+  </button>
+  <div class="login-link">Já tem conta? <a href="login.html">Entrar</a></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var Auth = window.MLAuth;
+  if (Auth && Auth.getSession()) {
+    window.location.replace('index.html');
+    return;
+  }
+
+  var inName     = document.getElementById('inName');
+  var inEmail    = document.getElementById('inEmail');
+  var inPassword = document.getElementById('inPassword');
+  var inConfirm  = document.getElementById('inConfirm');
+  var errEl      = document.getElementById('errReg');
+  var btn        = document.getElementById('btnRegister');
+  inName.focus();
+
+  function doRegister() {
+    var name     = inName.value.trim();
+    var email    = inEmail.value.trim();
+    var password = inPassword.value;
+    var confirm  = inConfirm.value;
+    errEl.textContent = '';
+
+    if (!name || !email || !password) { errEl.textContent = 'Preencha todos os campos.'; return; }
+    if (password.length < 8) { errEl.textContent = 'A password deve ter pelo menos 8 caracteres.'; return; }
+    if (password !== confirm) { errEl.textContent = 'As passwords não coincidem.'; return; }
+
+    btn.disabled = true;
+    fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, password: password }),
+    }).then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+    .then(function(resp) {
+      btn.disabled = false;
+      if (!resp.ok) { errEl.textContent = resp.body.error || 'Erro ao registar.'; return; }
+      var data = resp.body;
+      if (Auth) {
+        Auth.setTokens(data.accessToken, data.refreshToken);
+        Auth.setUser(data.user);
+      }
+      window.location.replace('index.html');
+    }).catch(function(e) {
+      btn.disabled = false;
+      errEl.textContent = 'Erro de rede: ' + (e.message || e);
+    });
+  }
+
+  inName.addEventListener('keydown', function(e) { if (e.key === 'Enter') inEmail.focus(); });
+  inEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') inPassword.focus(); });
+  inPassword.addEventListener('keydown', function(e) { if (e.key === 'Enter') inConfirm.focus(); });
+  inConfirm.addEventListener('keydown', function(e) { if (e.key === 'Enter') doRegister(); });
+  btn.addEventListener('click', doRegister);
+})();
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

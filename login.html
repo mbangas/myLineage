@@ -8,8 +8,6 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
   <script src="qrcode-bundle.js"></script>
-  <script src="remote-storage.js"></script>
-  <script src="auth.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body {
@@ -83,41 +81,56 @@
     .qr-wrap { text-align: center; margin: 16px 0; }
     .qr-wrap img { width:180px; height:180px; border-radius:8px; border:3px solid #4493f8; background:#fff; }
     .qr-secret { font-family: monospace; font-size: 0.75rem; color: #888; word-break: break-all; margin-top: 6px; }
-    /* Success / info box */
-    .info-box {
-      background: rgba(68,147,248,0.08); border: 1px solid rgba(68,147,248,0.22);
-      border-radius: var(--radius-sm); padding: 14px 16px;
-      font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55;
-      margin-bottom: 16px;
-    }
-    .info-box i { color: #4493f8; }
-    .big-icon { text-align: center; font-size: 3rem; margin-bottom: 12px; }
   </style>
 </head>
 <body>
 <div class="login-card">
   <div class="login-logo"><i class="mdi mdi-tree"></i>myLineage</div>
 
-  <!-- ── STEP 1: Phone ── -->
-  <div class="step active" id="stepPhone">
+  <!-- ── STEP 1: Email + Password ── -->
+  <div class="step active" id="stepLogin">
     <div class="step-title">Bem-vindo</div>
-    <div class="step-sub">Introduza o seu número de telemóvel para continuar.</div>
+    <div class="step-sub">Introduza o seu email e password para continuar.</div>
     <div class="field">
-      <label>Telemóvel</label>
-      <input id="inPhone" type="tel" placeholder="+351 910 000 000" autocomplete="tel"/>
+      <label>Email</label>
+      <input id="inEmail" type="email" placeholder="nome@exemplo.com" autocomplete="email"/>
     </div>
-    <div class="err" id="errPhone"></div>
-    <button class="btn-primary" id="btnPhone">
-      <i class="mdi mdi-arrow-right"></i> Continuar
+    <div class="field">
+      <label>Password</label>
+      <input id="inPassword" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <div class="err" id="errLogin"></div>
+    <button class="btn-primary" id="btnLogin">
+      <i class="mdi mdi-login"></i> Entrar
     </button>
-    <div class="login-link">Número não registado? <a id="linkRequest">Pedir acesso</a></div>
+    <div class="login-link">Ainda não tem conta? <a href="register.html">Registar</a></div>
   </div>
 
-  <!-- ── STEP 2: QR Setup (first login for this phone) ── -->
-  <div class="step" id="stepQR">
+  <!-- ── STEP 2: TOTP verification ── -->
+  <div class="step" id="stepTOTP">
+    <div class="step-title">Código do Authenticator</div>
+    <div class="step-sub">
+      Abra a app <strong>Microsoft Authenticator</strong>
+      e introduza o código de 6 dígitos da conta <em>myLineage</em>.
+    </div>
+    <div class="otp-row" id="otpTOTP">
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+      <input type="tel" maxlength="1"/>
+    </div>
+    <div class="err" id="errTOTP"></div>
+    <button class="btn-primary" id="btnTOTP"><i class="mdi mdi-shield-check"></i> Verificar</button>
+    <div class="login-link"><a id="backTOTP">← Voltar</a></div>
+  </div>
+
+  <!-- ── STEP 3: TOTP Setup (admin first login) ── -->
+  <div class="step" id="stepTOTPSetup">
     <div class="step-title">Configurar Microsoft Authenticator</div>
     <div class="step-sub">
-      é a primeira vez que entra com este número.<br>
+      Como administrador, precisa configurar autenticação de dois fatores.<br>
       Abra o <strong>Microsoft Authenticator</strong>, toque em <strong>"+"</strong>
       → <strong>"Outra conta"</strong> e leia o QR Code:
     </div>
@@ -126,7 +139,7 @@
       <div class="qr-secret" id="qrSecret"></div>
     </div>
     <div class="step-sub" style="margin-bottom:6px;">Depois, introduza o código de 6 dígitos:</div>
-    <div class="otp-row" id="otpQR">
+    <div class="otp-row" id="otpSetup">
       <input type="tel" maxlength="1"/>
       <input type="tel" maxlength="1"/>
       <input type="tel" maxlength="1"/>
@@ -134,80 +147,24 @@
       <input type="tel" maxlength="1"/>
       <input type="tel" maxlength="1"/>
     </div>
-    <div class="err" id="errQR"></div>
-    <button class="btn-primary" id="btnQR"><i class="mdi mdi-shield-check"></i> Verificar e Entrar</button>
-    <div class="login-link"><a id="backQR">← Voltar</a></div>
-  </div>
-
-  <!-- ── STEP 3: TOTP (returning user) ── -->
-  <div class="step" id="stepOTP">
-    <div class="step-title">Código do Authenticator</div>
-    <div class="step-sub">
-      Abra a app <strong>Microsoft Authenticator</strong>
-      e introduza o código de 6 dígitos da conta <em>myLineage</em>.
-    </div>
-    <div class="otp-row" id="otpOTP">
-      <input type="tel" maxlength="1"/>
-      <input type="tel" maxlength="1"/>
-      <input type="tel" maxlength="1"/>
-      <input type="tel" maxlength="1"/>
-      <input type="tel" maxlength="1"/>
-      <input type="tel" maxlength="1"/>
-    </div>
-    <div class="err" id="errOTP"></div>
-    <button class="btn-primary" id="btnOTP"><i class="mdi mdi-login"></i> Entrar</button>
-    <div class="login-link"><a id="backOTP">← Voltar</a> &nbsp;·&nbsp; <a id="showQRFromOTP">Ver QR Code</a></div>
-  </div>
-
-  <!-- ── STEP 4: Access Request ── -->
-  <div class="step" id="stepRequest">
-    <div class="step-title">Pedir acesso</div>
-    <div class="step-sub">
-      O seu número não está registado.<br>
-      Preencha os dados e aguarde aprovação do administrador.
-    </div>
-    <div class="field"><label>O seu nome</label><input id="reqName" type="text" placeholder="Nome completo"/></div>
-    <div class="field"><label>Telemóvel</label><input id="reqPhone" type="tel" placeholder="+351 910 000 000"/></div>
-    <div class="err" id="errReq"></div>
-    <button class="btn-primary" id="btnRequest"><i class="mdi mdi-send"></i> Enviar Pedido</button>
-    <div class="login-link"><a id="backRequest">← Voltar</a></div>
-  </div>
-
-  <!-- ── STEP 5: Pending ── -->
-  <div class="step" id="stepPending">
-    <div class="big-icon"><i class="mdi mdi-clock-check-outline" style="color:#4493f8;"></i></div>
-    <div class="step-title" style="text-align:center;">Pedido pendente</div>
-    <div class="step-sub" style="text-align:center;">
-      O seu pedido de acesso está pendente. Aguarde a aprovação do administrador.
-      Quando aprovado, pode entrar com o seu número de telemóvel.
-    </div>
-    <button class="btn-primary" id="btnPendingBack"><i class="mdi mdi-arrow-left"></i> Voltar</button>
-  </div>
-
-  <!-- ── STEP 6: Rejected ── -->
-  <div class="step" id="stepRejected">
-    <div class="big-icon"><i class="mdi mdi-cancel" style="color:#e06060;"></i></div>
-    <div class="step-title" style="text-align:center;">Acesso negado</div>
-    <div class="step-sub" style="text-align:center;">
-      O seu pedido foi rejeitado.<br>Contacte o administrador da família para mais informações.
-    </div>
-    <button class="btn-primary" id="btnRejectedBack"><i class="mdi mdi-arrow-left"></i> Voltar</button>
+    <div class="err" id="errSetup"></div>
+    <button class="btn-primary" id="btnSetup"><i class="mdi mdi-shield-check"></i> Verificar e Entrar</button>
+    <div class="login-link"><a id="backSetup">← Voltar</a></div>
   </div>
 </div>
 
 <script>
 (function () {
   'use strict';
-  const Auth = window.MLAuth;
-  const DB   = window.GedcomDB;
 
   // If already logged in → go to app
-  if (Auth.getSession()) {
+  var Auth = window.MLAuth;
+  if (Auth && Auth.getSession()) {
     window.location.replace('index.html');
     return;
   }
 
-  let _phone = '';
+  var _userId = null; // set after login when 2FA is required
 
   /* ── helpers ── */
   function show(id) {
@@ -215,25 +172,10 @@
     document.getElementById(id).classList.add('active');
   }
 
-  function norm(p){ return Auth.normalizePhone(p); }
-
-  function getPendingRequests() {
-    return (DB.getSetting('accessRequests') || []);
-  }
-
-  function renderQR(uri, imgEl) {
-    try {
-      QRCode.toDataURL(uri, { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
-        .then(function(url){ imgEl.src = url; })
-        .catch(function(){ imgEl.alt = 'Use a chave manual abaixo.'; });
-    } catch(e) { imgEl.alt = 'Use a chave manual abaixo.'; }
-  }
-
-  /* ── OTP digit helpers ── */
   function wireDigits(rowId, onFull) {
-    const row = document.getElementById(rowId);
+    var row = document.getElementById(rowId);
     if (!row) return;
-    const inputs = row.querySelectorAll('input');
+    var inputs = row.querySelectorAll('input');
     inputs.forEach(function(inp, i) {
       inp.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '').slice(-1);
@@ -271,190 +213,148 @@
     return Array.from(row.querySelectorAll('input')).map(function(x){ return x.value; }).join('');
   }
 
-  function showQR(phone, secret) {
-    var uri = Auth.otpAuthUri(phone, secret);
-    document.getElementById('qrSecret').textContent = 'Chave manual: ' + secret;
-    clearDigits('otpQR');
-    show('stepQR');                              // switch step BEFORE async QR render
-    renderQR(uri, document.getElementById('qrImg'));
-  }
-
-  /* ── STEP 1: Phone ── */
-  var inPhone = document.getElementById('inPhone');
-  inPhone.focus();
-  inPhone.addEventListener('keydown', function(e){ if (e.key === 'Enter') goPhone(); });
-  document.getElementById('btnPhone').addEventListener('click', goPhone);
-
-  function goPhone() {
-    var raw   = inPhone.value.trim();
-    var phone = norm(raw);
-    var err   = document.getElementById('errPhone');
-    if (!phone || phone.length < 6) { err.textContent = 'Introduza um número válido.'; return; }
-    err.textContent = '';
-    _phone = phone;
-
-    // Check access-request state
-    var reqs = getPendingRequests();
-    var myReq = reqs.find(function(r){ return norm(r.phone) === phone; });
-    if (myReq) {
-      if (myReq.status === 'rejected') { show('stepRejected'); return; }
-      if (myReq.status === 'pending')  { show('stepPending');  return; }
-      // approved → fall through to normal login
-    }
-
-    // Phone must exist as admin or in a person's contacts
-    var isAdmin = Auth.isAdminPhone(phone);
-    var person  = Auth.findPersonByPhone(phone);
-
-    if (!isAdmin && !person) {
-      document.getElementById('reqPhone').value = raw;
-      show('stepRequest');
-      return;
-    }
-
-    // Check TOTP secret
-    var stored = Auth.getTotpSecret(phone) || '';
-    if (!stored) {
-      // First login – generate QR
-      var newSecret = Auth.generateSecret();
-      Auth.saveTotpSecret(phone, newSecret + '|unverified');
-      showQR(phone, newSecret);
-    } else if (stored.indexOf('|unverified') !== -1) {
-      // QR was shown before but never confirmed — show the same QR again
-      var existingSecret = stored.replace('|unverified', '');
-      showQR(phone, existingSecret);
-    } else {
-      // Returning user — secret already verified
-      clearDigits('otpOTP');
-      show('stepOTP');
-    }
-  }
-
-  /* ── STEP 2: QR Setup ── */
-  wireDigits('otpQR', function(code){ verifyQR(code); });
-  document.getElementById('btnQR').addEventListener('click', function(){ verifyQR(getDigits('otpQR')); });
-  document.getElementById('backQR').addEventListener('click', function(){ show('stepPhone'); });
-
-  function verifyQR(code) {
-    var err = document.getElementById('errQR');
-    if (code.length < 6) { err.textContent = 'Introduza os 6 dígitos.'; return; }
-    err.textContent = '';
-    document.getElementById('btnQR').disabled = true;
-
-    // Secret stored as "SECRET|unverified" until first verify
-    var stored = Auth.getTotpSecret(_phone) || '';
-    var secret = stored.replace('|unverified', '');
-
-    Auth.verifyTOTP(secret, code).then(function(ok) {
-      document.getElementById('btnQR').disabled = false;
-      if (!ok) {
-        err.textContent = 'Código inválido. Verifique a app e tente novamente.';
-        clearDigits('otpQR');
-        return;
-      }
-      // Mark as verified (remove |unverified flag)
-      Auth.saveTotpSecret(_phone, secret);
-      doLogin();
-    }).catch(function(e) {
-      document.getElementById('btnQR').disabled = false;
-      err.textContent = 'Erro ao verificar código: ' + (e && e.message ? e.message : String(e));
-      console.error('verifyTOTP error:', e);
-    });
-  }
-
-  /* ── STEP 3: TOTP ── */
-  wireDigits('otpOTP', function(code){ verifyOTP(code); });
-  document.getElementById('btnOTP').addEventListener('click', function(){ verifyOTP(getDigits('otpOTP')); });
-  document.getElementById('backOTP').addEventListener('click', function(){ show('stepPhone'); });
-  document.getElementById('showQRFromOTP').addEventListener('click', function(){
-    var stored = Auth.getTotpSecret(_phone) || '';
-    var secret = stored.replace('|unverified', '');
-    if (!secret) { show('stepPhone'); return; }
-    showQR(_phone, secret);
-  });
-
-  function verifyOTP(code) {
-    var err = document.getElementById('errOTP');
-    if (code.length < 6) { err.textContent = 'Introduza os 6 dígitos.'; return; }
-    err.textContent = '';
-    document.getElementById('btnOTP').disabled = true;
-
-    var stored = Auth.getTotpSecret(_phone) || '';
-    // If still marked unverified (edge case), strip the flag
-    var secret = stored.replace('|unverified', '');
-
-    Auth.verifyTOTP(secret, code).then(function(ok) {
-      document.getElementById('btnOTP').disabled = false;
-      if (!ok) {
-        err.textContent = 'Código inválido. Verifique a app e tente novamente.';
-        clearDigits('otpOTP');
-        return;
-      }
-      doLogin();
-    }).catch(function(e) {
-      document.getElementById('btnOTP').disabled = false;
-      err.textContent = 'Erro ao verificar código: ' + (e && e.message ? e.message : String(e));
-      console.error('verifyTOTP error:', e);
-    });
-  }
-
-  function doLogin() {
-    var isAdmin = Auth.isAdminPhone(_phone);
-    var person  = Auth.findPersonByPhone(_phone);
-    var name    = person ? DB.getDisplayName(person) : _phone;
-    Auth.setSession({ phone: _phone, name: name, isAdmin: isAdmin, personId: person ? person.id : null });
-
-    // Registar login no histórico
+  function renderQR(uri, imgEl) {
     try {
-      var detail = _phone;
-      if (isAdmin) detail += ' · Administrador';
-      DB.addHistory({
-        ts:       new Date().toISOString(),
-        entity:   'Login',
-        action:   'Login: ' + name,
-        id:       _phone,
-        detail:   detail,
-        category: 'login'
-      });
-    } catch (e) { /* silent */ }
+      QRCode.toDataURL(uri, { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
+        .then(function(url){ imgEl.src = url; })
+        .catch(function(){ imgEl.alt = 'Use a chave manual abaixo.'; });
+    } catch(e) { imgEl.alt = 'Use a chave manual abaixo.'; }
+  }
 
-    var params  = new URLSearchParams(window.location.search);
-    var from    = params.get('from');
+  function finishLogin(data) {
+    // Use window.MLAuth at call-time (auth.js has loaded by now)
+    var auth = window.MLAuth;
+    if (auth) {
+      auth.setTokens(data.accessToken, data.refreshToken);
+      auth.setUser(data.user);
+    } else {
+      // Fallback: store directly if auth.js somehow hasn't loaded
+      localStorage.setItem('ml_access', data.accessToken);
+      localStorage.setItem('ml_refresh', data.refreshToken);
+      localStorage.setItem('ml_user', JSON.stringify(data.user));
+    }
+    var params = new URLSearchParams(window.location.search);
+    var from = params.get('from');
     window.location.replace(from || 'index.html');
   }
 
-  /* ── STEP 4: Access Request ── */
-  document.getElementById('linkRequest').addEventListener('click', function(){ show('stepRequest'); });
-  document.getElementById('backRequest').addEventListener('click', function(){ show('stepPhone'); });
-  document.getElementById('btnRequest').addEventListener('click', function() {
-    var name  = document.getElementById('reqName').value.trim();
-    var phone = norm(document.getElementById('reqPhone').value.trim());
-    var err   = document.getElementById('errReq');
-    if (!name)  { err.textContent = 'Introduza o seu nome.'; return; }
-    if (!phone) { err.textContent = 'Introduza o seu número de telemóvel.'; return; }
+  /* ── STEP 1: Email + Password ── */
+  var inEmail    = document.getElementById('inEmail');
+  var inPassword = document.getElementById('inPassword');
+  inEmail.focus();
+
+  function goLogin() {
+    var email    = inEmail.value.trim();
+    var password = inPassword.value;
+    var err      = document.getElementById('errLogin');
+
+    if (!email || !password) { err.textContent = 'Preencha todos os campos.'; return; }
     err.textContent = '';
+    document.getElementById('btnLogin').disabled = true;
 
-    var reqs = DB.getSetting('accessRequests') || [];
-    var already = reqs.find(function(r){ return norm(r.phone) === phone && r.status === 'pending'; });
-    if (!already) {
-      reqs.push({
-        id: 'req_' + Date.now(),
-        name: name,
-        phone: phone,
-        requestedAt: new Date().toISOString(),
-        status: 'pending',
-        linkedPersonId: null
-      });
-      DB.setSetting('accessRequests', reqs);
-    }
-    show('stepPending');
-  });
+    // Use the original fetch (not the auth-wrapped one) since we don't have a token yet
+    var origFetch = window.MLAuth && window.MLAuth._origFetch ? window.MLAuth._origFetch : window.fetch;
+    origFetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password }),
+    }).then(function(res) { return res.json().then(function(body) { return { ok: res.ok, status: res.status, body: body }; }); })
+    .then(function(resp) {
+      document.getElementById('btnLogin').disabled = false;
+      if (!resp.ok) { err.textContent = resp.body.error || 'Erro no login.'; return; }
+      var data = resp.body;
 
-  /* ── STEP 5/6 backs ── */
-  document.getElementById('btnPendingBack').addEventListener('click',  function(){ show('stepPhone'); });
-  document.getElementById('btnRejectedBack').addEventListener('click', function(){ show('stepPhone'); });
+      if (data.requires2FA && data.totpPending) {
+        _userId = data.userId;
+        clearDigits('otpTOTP');
+        show('stepTOTP');
+        return;
+      }
+
+      if (data.requires2FA && data.totpSetupRequired) {
+        _userId = data.userId;
+        // Request TOTP setup
+        origFetch('/api/auth/totp/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: _userId }),
+        }).then(function(r){ return r.json(); })
+        .then(function(setup) {
+          document.getElementById('qrSecret').textContent = 'Chave manual: ' + setup.secret;
+          renderQR(setup.uri, document.getElementById('qrImg'));
+          clearDigits('otpSetup');
+          show('stepTOTPSetup');
+        }).catch(function(){ err.textContent = 'Erro ao configurar 2FA.'; });
+        return;
+      }
+
+      // Direct login (no 2FA)
+      finishLogin(data);
+    }).catch(function(e) {
+      document.getElementById('btnLogin').disabled = false;
+      err.textContent = 'Erro de rede: ' + (e.message || e);
+    });
+  }
+
+  inEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') inPassword.focus(); });
+  inPassword.addEventListener('keydown', function(e) { if (e.key === 'Enter') goLogin(); });
+  document.getElementById('btnLogin').addEventListener('click', goLogin);
+
+  /* ── STEP 2: TOTP Verification ── */
+  wireDigits('otpTOTP', function(code){ verifyTOTP(code); });
+  document.getElementById('btnTOTP').addEventListener('click', function(){ verifyTOTP(getDigits('otpTOTP')); });
+  document.getElementById('backTOTP').addEventListener('click', function(){ show('stepLogin'); });
+
+  function verifyTOTP(code) {
+    var err = document.getElementById('errTOTP');
+    if (code.length < 6) { err.textContent = 'Introduza os 6 dígitos.'; return; }
+    err.textContent = '';
+    document.getElementById('btnTOTP').disabled = true;
+
+    fetch('/api/auth/login/totp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: _userId, code: code }),
+    }).then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+    .then(function(resp) {
+      document.getElementById('btnTOTP').disabled = false;
+      if (!resp.ok) { err.textContent = resp.body.error || 'Código inválido.'; clearDigits('otpTOTP'); return; }
+      finishLogin(resp.body);
+    }).catch(function(e) {
+      document.getElementById('btnTOTP').disabled = false;
+      err.textContent = 'Erro de rede.';
+    });
+  }
+
+  /* ── STEP 3: TOTP Setup (admin first login) ── */
+  wireDigits('otpSetup', function(code){ verifySetup(code); });
+  document.getElementById('btnSetup').addEventListener('click', function(){ verifySetup(getDigits('otpSetup')); });
+  document.getElementById('backSetup').addEventListener('click', function(){ show('stepLogin'); });
+
+  function verifySetup(code) {
+    var err = document.getElementById('errSetup');
+    if (code.length < 6) { err.textContent = 'Introduza os 6 dígitos.'; return; }
+    err.textContent = '';
+    document.getElementById('btnSetup').disabled = true;
+
+    fetch('/api/auth/totp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: _userId, code: code }),
+    }).then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+    .then(function(resp) {
+      document.getElementById('btnSetup').disabled = false;
+      if (!resp.ok) { err.textContent = resp.body.error || 'Código inválido.'; clearDigits('otpSetup'); return; }
+      finishLogin(resp.body);
+    }).catch(function(e) {
+      document.getElementById('btnSetup').disabled = false;
+      err.textContent = 'Erro de rede.';
+    });
+  }
 
 })();
 </script>
+<!-- auth.js loaded AFTER login script so it doesn't redirect prematurely -->
+<script src="auth.js"></script>
 </body>
 </html>

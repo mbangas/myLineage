@@ -12,6 +12,8 @@ const http  = require('http');
 const { readCollection, writeCollection, nextId, nowISO, ensureDataDir, getDataDir } = require('./lib/crud-helpers');
 const { parseGedcomToJson } = require('./lib/gedcom-parser');
 const { buildGedcomText }   = require('./lib/gedcom-builder');
+const { authMiddleware }    = require('./lib/auth-middleware');
+const authRoutes            = require('./routes/auth');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -101,6 +103,12 @@ function defaultNote() {
 function defaultSubmitter() {
   return { id:'',type:'SUBM', name:'', address:{addr:'',city:'',state:'',postal:'',country:''}, phone:'', email:'', web:'', language:'', notes:[], createdAt:'', updatedAt:'', deletedAt:null };
 }
+
+/* ── Auth routes (public — no authMiddleware) ────────────────────────── */
+app.use('/api/auth', authRoutes);
+
+/* ── Protect all other /api/* routes ─────────────────────────────────── */
+app.use('/api', authMiddleware);
 
 /* ── Cache status (must be before /api/multimedia entity router) ─────── */
 app.get('/api/multimedia/cache-status', async (req, res) => {
@@ -442,19 +450,24 @@ app.get('/api/topola-json', async (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
-/* ── Seed adminPhone from environment variable ───────────────────────── */
-if (process.env.ADMIN_PHONE) {
+/* ── Seed admin user from environment variables ─────────────────────── */
+async function seedAdminUser() {
+  if (!process.env.DATABASE_URL || !process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) return;
   try {
-    ensureDataDir();
-    const fp = path.join(getDataDir(), 'settings.json');
-    let settings = {};
-    if (fs.existsSync(fp)) settings = JSON.parse(fs.readFileSync(fp, 'utf8'));
-    if (!settings.adminPhone) {
-      settings.adminPhone = process.env.ADMIN_PHONE;
-      fs.writeFileSync(fp, JSON.stringify(settings, null, 2), 'utf8');
-      console.log(`adminPhone configurado a partir de ADMIN_PHONE env var: ${process.env.ADMIN_PHONE}`);
-    }
-  } catch (e) { console.error('Aviso: não foi possível inicializar adminPhone:', e.message); }
+    const { query } = require('./lib/db');
+    const { hashPassword } = require('./lib/auth-middleware');
+    const email = process.env.ADMIN_EMAIL.toLowerCase().trim();
+    const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rows.length) return; // already seeded
+    const hash = await hashPassword(process.env.ADMIN_PASSWORD);
+    await query(
+      `INSERT INTO users (email, password_hash, name, is_admin)
+       VALUES ($1, $2, $3, TRUE)
+       ON CONFLICT (email) DO NOTHING`,
+      [email, hash, 'Admin'],
+    );
+    console.log(`[auth] Admin user seeded: ${email}`);
+  } catch (e) { console.error('Aviso: não foi possível criar admin:', e.message); }
 }
 
 /* ── Surname genealogical research (Wikipedia + Wikidata) ────────────── */
@@ -594,6 +607,7 @@ if (require.main === module) {
       const pool = getPool();
       await up(pool);
       console.log('[db] PostgreSQL ready');
+      await seedAdminUser();
 
       // Graceful shutdown
       const shutdown = async () => {

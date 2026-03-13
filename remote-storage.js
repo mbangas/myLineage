@@ -8,11 +8,18 @@
   'use strict';
   const API = '/api';
 
+  /* ── Auth token helper ────────────────────────────────────────────────── */
+  function _authToken() {
+    return localStorage.getItem('ml_access') || '';
+  }
+
   /* ── Sync XHR ────────────────────────────────────────────────────────── */
   function syncGet(url) {
     try {
       const x = new XMLHttpRequest();
       x.open('GET', url, false);
+      const tk = _authToken();
+      if (tk) x.setRequestHeader('Authorization', 'Bearer ' + tk);
       x.send(null);
       if (x.status >= 200 && x.status < 300) return JSON.parse(x.responseText);
     } catch(e) {}
@@ -21,9 +28,12 @@
 
   /* ── Async helpers ───────────────────────────────────────────────────── */
   function asyncJson(method, url, body) {
+    const hdrs = { 'Content-Type': 'application/json' };
+    const tk = _authToken();
+    if (tk) hdrs['Authorization'] = 'Bearer ' + tk;
     return fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: hdrs,
       body: body !== undefined ? JSON.stringify(body) : undefined
     }).catch(() => {});
   }

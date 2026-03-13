@@ -35,6 +35,7 @@ COPY --from=builder /app/*.html ./
 COPY --from=builder /app/*.svg ./
 COPY --from=builder /app/css ./css
 COPY --from=builder /app/lib ./lib
+COPY --from=builder /app/routes ./routes
 COPY --from=builder /app/migrations ./migrations
 
 # Criar diretórios de dados e uploads

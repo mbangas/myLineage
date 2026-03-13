@@ -1149,6 +1149,8 @@
         }
         _nfClose();
         openDrawerSection(_nfPersonId, 'fotos');
+        var cfg = window.DRAWER_CONFIG || {};
+        if (typeof cfg.afterPhotoChange === 'function') cfg.afterPhotoChange(_nfPersonId);
       } catch (err) { alert('Erro no upload: ' + err); }
     });
 
@@ -1304,6 +1306,8 @@
             }
             _nfClose();
             openDrawerSection(_nfPersonId, 'fotos');
+            var cfg = window.DRAWER_CONFIG || {};
+            if (typeof cfg.afterPhotoChange === 'function') cfg.afterPhotoChange(_nfPersonId);
           } catch (err) { alert('Erro no upload: ' + err); }
         }, 'image/png');
       };
@@ -1440,6 +1444,8 @@
       DB.saveIndividual(indi);
     }
     openDrawerSection(personId, 'fotos');
+    var cfg = window.DRAWER_CONFIG || {};
+    if (typeof cfg.afterPhotoChange === 'function') cfg.afterPhotoChange(personId);
   };
 
   window._drawerViewPhoto = function (mediaId, personId) {

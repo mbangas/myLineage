@@ -78,6 +78,54 @@
       .ts-inv-status.declined { background: var(--red-soft); color: var(--red); }
       .ts-inv-status.expired { background: rgba(255,255,255,0.06); color: var(--text-disabled); }
 
+      /* GEDCOM import / export */
+      .ts-gedcom .tab-bar {
+        display: flex; gap: 4px;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 18px;
+      }
+      .ts-gedcom .tab-btn {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 9px 18px; border: none; background: transparent;
+        color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;
+        cursor: pointer; border-bottom: 2px solid transparent;
+        margin-bottom: -1px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        transition: color 0.15s, border-color 0.15s, background 0.15s;
+      }
+      .ts-gedcom .tab-btn:hover { color: var(--text-main); background: rgba(163,163,255,0.06); }
+      .ts-gedcom .tab-btn.active { color: var(--text-main); border-bottom-color: var(--accent); font-weight: 600; }
+      .ts-gedcom .tab-panel { display: none; }
+      .ts-gedcom .tab-panel.active { display: block; }
+      .ts-gedcom .file-picker { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+      .ts-gedcom .file-picker input[type="file"] { display:none; }
+      .ts-gedcom .file-picker .pick-btn {
+        display:inline-flex; align-items:center; gap:6px;
+        background:var(--bg-surface-2); color:var(--text-main);
+        border:1px solid var(--border); border-radius:var(--radius-sm);
+        padding:7px 16px; font-size:0.875rem; font-weight:500;
+        cursor:pointer; transition:background .15s, border-color .15s;
+      }
+      .ts-gedcom .file-picker .pick-btn:hover { background:var(--accent-soft); border-color:var(--accent); }
+      .ts-gedcom .file-picker .file-name {
+        color:var(--text-secondary); font-size:0.875rem;
+        max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      }
+      .ts-gedcom .file-picker .file-name.has-file { color:var(--green); }
+      .ts-gedcom .import-log { margin-top:16px; padding:12px 16px; border-radius:var(--radius-sm);
+        font-size:0.9rem; white-space:pre-wrap; line-height:1.6; display:none; }
+      .ts-gedcom .import-log.visible { display:block; }
+      .ts-gedcom .import-log.info    { background:var(--accent-soft); color:var(--accent); border:1px solid rgba(68,147,248,.2); }
+      .ts-gedcom .import-log.success { background:var(--green-soft);  color:var(--green);  border:1px solid rgba(63,185,80,.2); }
+      .ts-gedcom .import-log.error   { background:var(--red-soft);    color:var(--red);    border:1px solid rgba(248,81,73,.2); }
+      .ts-gedcom .confirm-bar {
+        display:none; gap:10px; align-items:center; margin-top:14px; padding:12px 16px;
+        background:var(--amber-soft); border:1px solid rgba(210,153,34,.25);
+        border-radius:var(--radius-sm); font-size:0.875rem; color:var(--amber);
+      }
+      .ts-gedcom .confirm-bar.visible { display:flex; }
+      .ts-gedcom .confirm-bar .btn { font-size:.8rem; padding:5px 14px; }
+      .ts-gedcom .confirm-bar .btn-cancel { background:transparent; color:var(--text-secondary); border:1px solid var(--border); }
+
       /* Danger zone */
       .ts-danger {
         border-color: rgba(248,81,73,0.25);
@@ -118,7 +166,6 @@
           <a href="app.html"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
           <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
           <a href="arvore.html"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
-          <a href="gedcom.html"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
           <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
           <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
           <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
@@ -187,6 +234,58 @@
             </div>
             <div class="ts-msg" id="inviteMsg"></div>
             <div id="invListWrap"></div>
+          </div>
+
+          <!-- GEDCOM import / export -->
+          <div class="ts-card ts-gedcom" id="gedcomCard">
+            <h2><i class="mdi mdi-dna" style="color:var(--accent);"></i>GEDCOM — Importar / Exportar</h2>
+            <p>Importe um ficheiro GEDCOM (.ged) para substituir os dados desta árvore, ou exporte os dados atuais.</p>
+
+            <div class="tab-bar">
+              <button class="tab-btn active" data-tab="import" onclick="switchGedcomTab('import')">
+                <i class="mdi mdi-file-import"></i> Importar
+              </button>
+              <button class="tab-btn" data-tab="export" onclick="switchGedcomTab('export')">
+                <i class="mdi mdi-file-export"></i> Exportar
+              </button>
+            </div>
+
+            <!-- Import panel -->
+            <div id="gedcom-tab-import" class="tab-panel active">
+              <p style="color:var(--text-secondary);margin:0 0 16px 0;font-size:0.82rem;">
+                A importação irá substituir todos os dados atuais (Pessoas, Eventos e Relações). Faça um export antes se quiser preservar os dados.
+              </p>
+              <div class="file-picker">
+                <input type="file" id="gedcomFile" accept=".ged,.gedcom,text/plain" />
+                <button type="button" class="pick-btn" id="pickFileBtn">
+                  <i class="mdi mdi-file-upload-outline"></i> Escolher ficheiro
+                </button>
+                <span class="file-name" id="fileName">Nenhum ficheiro selecionado</span>
+                <button class="btn btn-sm" id="importBtn" disabled>Importar GEDCOM</button>
+              </div>
+              <div class="confirm-bar" id="confirmBar">
+                <i class="mdi mdi-alert-circle-outline"></i>
+                <span style="flex:1">Todos os dados existentes serão substituídos. Continuar?</span>
+                <button class="btn btn-sm" id="confirmYes">Sim, importar</button>
+                <button class="btn btn-sm btn-cancel" id="confirmNo">Cancelar</button>
+              </div>
+              <div class="import-log" id="importLog"></div>
+              <div id="importHistoryContainer" style="margin-top:24px;">
+                <h3 style="margin:0 0 12px;font-size:0.8rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;">Histórico de importações (últimos 5)</h3>
+                <div class="table-panel" id="importHistory"></div>
+              </div>
+            </div>
+
+            <!-- Export panel -->
+            <div id="gedcom-tab-export" class="tab-panel">
+              <p style="color:var(--text-secondary);margin:0 0 16px 0;font-size:0.82rem;">
+                Exporta os dados atuais para um ficheiro GEDCOM (.ged) compatível com outras ferramentas de genealogia.
+              </p>
+              <div style="display:flex;gap:12px;align-items:center;">
+                <button class="btn btn-sm" id="exportBtn">Exportar GEDCOM</button>
+              </div>
+              <div id="exportLog" style="margin-top:16px;color:var(--text-secondary);font-size:0.88rem;white-space:pre-wrap;"></div>
+            </div>
           </div>
 
           <!-- Danger zone -->
@@ -463,6 +562,198 @@
       loadInvitations();
       applyPermissions();
 
+    })();
+    </script>
+
+    <!-- GEDCOM import / export logic -->
+    <script>
+    (function() {
+      'use strict';
+      var DB = window.GedcomDB;
+
+      /* ── Tab switching ─────────────────── */
+      window.switchGedcomTab = function(name) {
+        document.querySelectorAll('#gedcomCard .tab-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === name); });
+        document.querySelectorAll('#gedcomCard .tab-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'gedcom-tab-' + name); });
+      };
+
+      /* ── Import ─────────────────────────── */
+      var $file      = document.getElementById('gedcomFile');
+      var $fileName  = document.getElementById('fileName');
+      var $importBtn = document.getElementById('importBtn');
+      var $logEl     = document.getElementById('importLog');
+      var $confirm   = document.getElementById('confirmBar');
+
+      document.getElementById('pickFileBtn').addEventListener('click', function() { $file.click(); });
+      $file.addEventListener('change', function() {
+        var f = $file.files[0];
+        if (f) {
+          $fileName.textContent = f.name;
+          $fileName.classList.add('has-file');
+          $importBtn.disabled = false;
+        } else {
+          $fileName.textContent = 'Nenhum ficheiro selecionado';
+          $fileName.classList.remove('has-file');
+          $importBtn.disabled = true;
+        }
+        hideConfirm();
+      });
+
+      function showImportLog(msg, type) {
+        $logEl.textContent = msg;
+        $logEl.className = 'import-log visible ' + (type || 'info');
+      }
+      function hideImportLog() { $logEl.className = 'import-log'; }
+      function hideConfirm() { $confirm.classList.remove('visible'); }
+
+      function renderImportHistory() {
+        var container = document.getElementById('importHistory');
+        var hist = (DB.getSetting('importHistory') || []);
+        if (!hist.length) {
+          container.innerHTML = '<div style="font-style:italic;color:var(--text-secondary);font-size:0.82rem;">Sem importações anteriores.</div>';
+          return;
+        }
+        function fmtWhen(iso) {
+          try {
+            var d = new Date(iso);
+            var pad = function(n) { return String(n).padStart(2, '0'); };
+            return pad(d.getDate()) + '-' + pad(d.getMonth()+1) + '-' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+          } catch(e) { return iso || ''; }
+        }
+        var html = '<table><thead><tr><th>Quando</th><th>Ficheiro</th><th style="text-align:right;">Pessoas</th><th style="text-align:right;">Famílias</th></tr></thead><tbody>';
+        hist.forEach(function(row) {
+          html += '<tr><td>' + fmtWhen(row.when) + '</td><td>' + (row.fileName || '') + '</td><td style="text-align:right;">' + (row.individuals || 0) + '</td><td style="text-align:right;">' + (row.families || 0) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      renderImportHistory();
+
+      $importBtn.addEventListener('click', function() {
+        $confirm.classList.add('visible');
+        hideImportLog();
+      });
+
+      document.getElementById('confirmNo').addEventListener('click', hideConfirm);
+
+      document.getElementById('confirmYes').addEventListener('click', async function() {
+        hideConfirm();
+        var f = $file.files[0];
+        if (!f) return;
+
+        $importBtn.disabled = true;
+        showImportLog('A importar \u00ab' + f.name + '\u00bb\u2026', 'info');
+
+        try {
+          var text = await f.text();
+          var resp = await fetch('/api/gedcom/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+            body: text
+          });
+          if (!resp.ok) {
+            var errBody = await resp.text();
+            throw new Error('Server ' + resp.status + ': ' + errBody);
+          }
+          var result = await resp.json();
+
+          DB.reload();
+
+          var hist = (DB.getSetting('importHistory') || []);
+          hist.unshift({
+            when: new Date().toISOString(),
+            fileName: f.name || '',
+            individuals: result.stats.individuals,
+            families: result.stats.families
+          });
+          DB.setSetting('importHistory', hist.slice(0, 5));
+          renderImportHistory();
+
+          var _totalRecs = (result.stats.individuals || 0) + (result.stats.families || 0)
+            + (result.stats.sources || 0) + (result.stats.multimedia || 0)
+            + (result.stats.notes || 0) + (result.stats.repositories || 0);
+          DB.addHistory([{
+            ts: new Date().toISOString(),
+            action: 'GEDCOM importado \u2014 ' + _totalRecs + ' registo' + (_totalRecs !== 1 ? 's' : ''),
+            detail: f.name + ': ' + result.stats.individuals + ' pessoas, ' + result.stats.families + ' fam\u00edlias',
+            category: 'gedcom'
+          }]);
+
+          var summary = 'Import conclu\u00eddo com sucesso!\nPessoas: ' + result.stats.individuals + '\nFam\u00edlias: ' + result.stats.families;
+          if (result.pendingImages > 0) {
+            summary += '\n\n\ud83d\udce5 ' + result.pendingImages + ' fotos a descarregar em segundo plano.\nO \u00e1lbum ser\u00e1 preenchido progressivamente \u2014 aguarde alguns minutos.';
+            var pollInterval = setInterval(async function() {
+              try {
+                var st = await fetch('/api/multimedia/cache-status').then(function(r) { return r.json(); });
+                if (!st.running) {
+                  clearInterval(pollInterval);
+                  DB.reload();
+                  showImportLog(
+                    'Import conclu\u00eddo!\nPessoas: ' + result.stats.individuals + ' \u00b7 Fam\u00edlias: ' + result.stats.families + '\n\u2705 ' + st.cached + ' fotos guardadas localmente' + (st.pending > 0 ? ' (' + st.pending + ' falharam)' : '') + '.',
+                    'success'
+                  );
+                } else {
+                  showImportLog(
+                    'Import conclu\u00eddo!\nPessoas: ' + result.stats.individuals + ' \u00b7 Fam\u00edlias: ' + result.stats.families + '\n\ud83d\udce5 A descarregar fotos... ' + st.cached + '/' + st.total + ' guardadas.',
+                    'info'
+                  );
+                }
+              } catch(e) { clearInterval(pollInterval); }
+            }, 5000);
+          }
+          if (result.warnings && result.warnings.length) {
+            summary += '\n\nAvisos:';
+            result.warnings.forEach(function(w) { summary += '\n\u2022 ' + (w.id || '') + ': ' + w.reason; });
+          }
+          showImportLog(summary, result.pendingImages > 0 ? 'info' : 'success');
+        } catch(err) {
+          console.error(err);
+          showImportLog('Erro ao importar: ' + (err.message || err), 'error');
+        } finally {
+          $importBtn.disabled = false;
+        }
+      });
+
+      /* ── Export ─────────────────────────── */
+      function showExportLog(msg) { document.getElementById('exportLog').textContent = msg; }
+
+      function download(filename, text) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      }
+
+      document.getElementById('exportBtn').addEventListener('click', async function() {
+        showExportLog('A exportar\u2026');
+        try {
+          var resp = await fetch('/api/gedcom/export');
+          if (!resp.ok) throw new Error('Server error: ' + resp.status);
+          var ged = await resp.text();
+          var name = 'myLineage_export_' + new Date().toISOString().slice(0, 10) + '.ged';
+          download(name, ged);
+
+          DB.addHistory([{
+            ts: new Date().toISOString(),
+            action: 'GEDCOM exportado',
+            detail: name + ' (' + ged.length + ' bytes)',
+            category: 'gedcom'
+          }]);
+
+          showExportLog('GEDCOM gerado: ' + name + '\nTamanho: ' + ged.length + ' bytes');
+        } catch(err) {
+          console.error(err);
+          showExportLog('Erro ao exportar: ' + (err.message || err));
+        }
+      });
+
+      /* Visibility based on role */
+      var role = DB ? DB.getTreeRole() : 'reader';
+      var canEdit = (role === 'owner' || role === 'admin' || role === 'writer');
+      document.getElementById('gedcomCard').style.display = canEdit ? '' : 'none';
     })();
     </script>
     <script src="back-to-top.js"></script>

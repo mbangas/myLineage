@@ -12,68 +12,6 @@
     <script src="notifications.js"></script>
     <script src="tree-switcher.js"></script>
     <style>
-      .tab-bar {
-        display: flex;
-        gap: 4px;
-        border-bottom: 1px solid var(--border-subtle);
-        margin-bottom: 24px;
-      }
-      .tab-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 9px 18px;
-        border: none;
-        background: transparent;
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        border-bottom: 2px solid transparent;
-        margin-bottom: -1px;
-        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-        transition: color 0.15s, border-color 0.15s, background 0.15s;
-      }
-      .tab-btn:hover { color: var(--text-main); background: rgba(163,163,255,0.06); }
-      .tab-btn.active { color: var(--text-main); border-bottom-color: var(--accent); font-weight: 600; }
-      .tab-panel { display: none; }
-      .tab-panel.active { display: block; }
-
-      /* ── Custom file picker ────────────────────── */
-      .file-picker { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-      .file-picker input[type="file"] { display:none; }
-      .file-picker .pick-btn {
-        display:inline-flex; align-items:center; gap:6px;
-        background:var(--bg-surface-2); color:var(--text-main);
-        border:1px solid var(--border); border-radius:var(--radius-sm);
-        padding:7px 16px; font-size:0.875rem; font-weight:500;
-        cursor:pointer; transition:background .15s, border-color .15s;
-      }
-      .file-picker .pick-btn:hover { background:var(--accent-soft); border-color:var(--accent); }
-      .file-picker .file-name {
-        color:var(--text-secondary); font-size:0.875rem;
-        max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-      }
-      .file-picker .file-name.has-file { color:var(--green); }
-
-      /* ── Import log styling ─────────────────────── */
-      .import-log { margin-top:16px; padding:12px 16px; border-radius:var(--radius-sm);
-        font-size:0.9rem; white-space:pre-wrap; line-height:1.6; display:none; }
-      .import-log.visible { display:block; }
-      .import-log.info    { background:var(--accent-soft); color:var(--accent); border:1px solid rgba(68,147,248,.2); }
-      .import-log.success { background:var(--green-soft);  color:var(--green);  border:1px solid rgba(63,185,80,.2); }
-      .import-log.error   { background:var(--red-soft);    color:var(--red);    border:1px solid rgba(248,81,73,.2); }
-
-      /* ── Inline confirm bar ─────────────────────── */
-      .confirm-bar {
-        display:none; gap:10px; align-items:center; margin-top:14px; padding:12px 16px;
-        background:var(--amber-soft); border:1px solid rgba(210,153,34,.25);
-        border-radius:var(--radius-sm); font-size:0.875rem; color:var(--amber);
-      }
-      .confirm-bar.visible { display:flex; }
-      .confirm-bar .btn { font-size:.8rem; padding:5px 14px; }
-      .confirm-bar .btn-cancel { background:transparent; color:var(--text-secondary); border:1px solid var(--border); }
-
       /* ── GEDCOM info section ─────────────────────────────────── */
       .gedcom-info { max-width:760px; margin: 28px auto 0; }
 
@@ -182,7 +120,6 @@
           <a href="app.html"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
           <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
           <a href="arvore.html"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
-          <a href="gedcom.html" class="active"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
           <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
           <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
           <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
@@ -197,69 +134,25 @@
 
       <main class="content">
         <div class="topbar">
-          <div><h1>GEDCOM</h1></div>
+          <div style="display:flex;align-items:center;gap:12px"><h1>GEDCOM</h1></div>
           <div></div>
-        </div>
-
-        <div class="card centered-panel" style="max-width:760px;">
-
-          <!-- Tab bar -->
-          <div class="tab-bar">
-            <button class="tab-btn active" data-tab="import" onclick="switchTab('import')">
-              <i class="mdi mdi-file-import"></i> Importar
-            </button>
-            <button class="tab-btn" data-tab="export" onclick="switchTab('export')">
-              <i class="mdi mdi-file-export"></i> Exportar
-            </button>
-          </div>
-
-          <!-- ── Import panel ────────────────────────────────────────── -->
-          <div id="tab-import" class="tab-panel active">
-            <p style="color:var(--text-secondary);margin:0 0 16px 0;">
-              Carregue um ficheiro GEDCOM (.ged). A importação irá substituir todos os dados atuais (Pessoas, Eventos e Relações). Faça um export antes se quiser preservar os dados atuais.
-            </p>
-
-            <div class="file-picker">
-              <input type="file" id="gedcomFile" accept=".ged,.gedcom,text/plain" />
-              <button type="button" class="pick-btn" id="pickFileBtn">
-                <i class="mdi mdi-file-upload-outline"></i> Escolher ficheiro
-              </button>
-              <span class="file-name" id="fileName">Nenhum ficheiro selecionado</span>
-              <button class="btn" id="importBtn" disabled>Importar GEDCOM</button>
-            </div>
-
-            <div class="confirm-bar" id="confirmBar">
-              <i class="mdi mdi-alert-circle-outline"></i>
-              <span style="flex:1">Todos os dados existentes serão substituídos. Continuar?</span>
-              <button class="btn" id="confirmYes">Sim, importar</button>
-              <button class="btn btn-cancel" id="confirmNo">Cancelar</button>
-            </div>
-
-            <div class="import-log" id="importLog"></div>
-
-            <div id="importHistoryContainer" style="margin-top:24px;">
-              <h3 style="margin:0 0 12px;font-size:0.875rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;">Histórico de importações (últimos 5)</h3>
-              <div class="table-panel" id="importHistory"></div>
-            </div>
-          </div>
-
-          <!-- ── Export panel ────────────────────────────────────────── -->
-          <div id="tab-export" class="tab-panel">
-            <p style="color:var(--text-secondary);margin:0 0 16px 0;">
-              Exporta os dados atuais (Pessoas, Eventos e Relações) para um ficheiro GEDCOM (.ged). O ficheiro gerado é compatível com ferramentas básicas de genealogia; apenas campos principais e eventos de nascimento/óbito são incluídos.
-            </p>
-
-            <div style="display:flex;gap:12px;align-items:center;">
-              <button class="btn" id="exportBtn">Exportar GEDCOM</button>
-            </div>
-
-            <div id="exportLog" style="margin-top:16px;color:var(--text-secondary);font-size:0.95rem;white-space:pre-wrap;"></div>
-          </div>
-
         </div>
 
         <!-- ── GEDCOM informational section ─────────────────────────── -->
         <section class="gedcom-info">
+
+          <div class="card" style="margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:14px;padding:4px 0;">
+              <div style="width:42px;height:42px;border-radius:var(--radius-sm);background:var(--accent-soft);border:1px solid var(--border-accent);display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:var(--accent);flex-shrink:0;">
+                <i class="mdi mdi-file-import"></i>
+              </div>
+              <div style="flex:1;">
+                <strong style="font-size:0.875rem;color:var(--text-main);">Importar / Exportar GEDCOM</strong>
+                <p style="margin:2px 0 0;font-size:0.82rem;color:var(--text-secondary);">A importação e exportação de GEDCOM é feita nas definições da árvore.</p>
+              </div>
+              <a href="tree-settings.html" class="btn btn-ghost btn-sm" style="white-space:nowrap;"><i class="mdi mdi-cog-transfer-outline"></i> Definições da Árvore</a>
+            </div>
+          </div>
 
           <div class="gedcom-info-header">
             <div class="header-icon"><i class="mdi mdi-information-outline"></i></div>
@@ -544,198 +437,6 @@
       </main>
     </div>
 
-    <script>
-      /* ── Tab switching ─────────────────────────────────────────────── */
-      function switchTab(name) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
-      }
-
-      /* Open export tab directly if URL has #export */
-      if (location.hash === '#export') switchTab('export');
-
-      const DB = window.GedcomDB;
-
-      /* ── Import ────────────────────────────────────────────────────── */
-      const $file      = document.getElementById('gedcomFile');
-      const $fileName  = document.getElementById('fileName');
-      const $importBtn = document.getElementById('importBtn');
-      const $logEl     = document.getElementById('importLog');
-      const $confirm   = document.getElementById('confirmBar');
-
-      /* Custom file picker */
-      document.getElementById('pickFileBtn').addEventListener('click', () => $file.click());
-      $file.addEventListener('change', () => {
-        const f = $file.files[0];
-        if (f) {
-          $fileName.textContent = f.name;
-          $fileName.classList.add('has-file');
-          $importBtn.disabled = false;
-        } else {
-          $fileName.textContent = 'Nenhum ficheiro selecionado';
-          $fileName.classList.remove('has-file');
-          $importBtn.disabled = true;
-        }
-        hideConfirm();
-      });
-
-      function showImportLog(msg, type) {
-        $logEl.textContent = msg;
-        $logEl.className = 'import-log visible ' + (type || 'info');
-      }
-      function hideImportLog() { $logEl.className = 'import-log'; }
-      function hideConfirm() { $confirm.classList.remove('visible'); }
-
-      function renderImportHistory() {
-        const container = document.getElementById('importHistory');
-        const hist = (DB.getSetting('importHistory') || []);
-        if (!hist.length) {
-          container.innerHTML = '<div style="font-style:italic;color:var(--text-secondary);">Sem importações anteriores.</div>';
-          return;
-        }
-        function fmtWhen(iso) {
-          try {
-            const d = new Date(iso);
-            const pad = n => String(n).padStart(2, '0');
-            return `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-          } catch(e) { return iso || ''; }
-        }
-        let html = '<table><thead><tr><th>Quando</th><th>Ficheiro</th><th style="text-align:right;">Pessoas</th><th style="text-align:right;">Famílias</th></tr></thead><tbody>';
-        hist.forEach(row => {
-          html += `<tr><td>${fmtWhen(row.when)}</td><td>${row.fileName || ''}</td><td style="text-align:right;">${row.individuals || 0}</td><td style="text-align:right;">${row.families || 0}</td></tr>`;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-      }
-
-      renderImportHistory();
-
-      /* Import button → show inline confirm */
-      $importBtn.addEventListener('click', () => {
-        $confirm.classList.add('visible');
-        hideImportLog();
-      });
-
-      document.getElementById('confirmNo').addEventListener('click', hideConfirm);
-
-      /* Confirmed import */
-      document.getElementById('confirmYes').addEventListener('click', async function() {
-        hideConfirm();
-        const f = $file.files[0];
-        if (!f) return;
-
-        $importBtn.disabled = true;
-        showImportLog('A importar «' + f.name + '»…', 'info');
-
-        try {
-          const text = await f.text();
-          const resp = await fetch('/api/gedcom/import', {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-            body: text
-          });
-          if (!resp.ok) {
-            const errBody = await resp.text();
-            throw new Error('Server ' + resp.status + ': ' + errBody);
-          }
-          const result = await resp.json();
-
-          // Reload in-memory cache
-          DB.reload();
-
-          // Save import history
-          const hist = (DB.getSetting('importHistory') || []);
-          hist.unshift({
-            when: new Date().toISOString(),
-            fileName: f.name || '',
-            individuals: result.stats.individuals,
-            families: result.stats.families
-          });
-          DB.setSetting('importHistory', hist.slice(0, 5));
-          renderImportHistory();
-
-          // Log to history
-          const _totalRecs = (result.stats.individuals || 0) + (result.stats.families || 0)
-            + (result.stats.sources || 0) + (result.stats.multimedia || 0)
-            + (result.stats.notes || 0) + (result.stats.repositories || 0);
-          DB.addHistory([{
-            ts: new Date().toISOString(),
-            action: `GEDCOM importado — ${_totalRecs} registo${_totalRecs !== 1 ? 's' : ''}`,
-            detail: `${f.name}: ${result.stats.individuals} pessoas, ${result.stats.families} famílias`,
-            category: 'gedcom'
-          }]);
-
-          let summary = `Import concluído com sucesso!\nPessoas: ${result.stats.individuals}\nFamílias: ${result.stats.families}`;
-          if (result.pendingImages > 0) {
-            summary += `\n\n📥 ${result.pendingImages} fotos a descarregar em segundo plano.\nO álbum será preenchido progressivamente — aguarde alguns minutos.`;
-            // Poll until download complete
-            const pollInterval = setInterval(async () => {
-              try {
-                const st = await fetch('/api/multimedia/cache-status').then(r => r.json());
-                if (!st.running) {
-                  clearInterval(pollInterval);
-                  DB.reload();
-                  showImportLog(
-                    `Import concluído!\nPessoas: ${result.stats.individuals} · Famílias: ${result.stats.families}\n✅ ${st.cached} fotos guardadas localmente${st.pending > 0 ? ` (${st.pending} falharam)` : ''}.`,
-                    'success'
-                  );
-                } else {
-                  showImportLog(
-                    `Import concluído!\nPessoas: ${result.stats.individuals} · Famílias: ${result.stats.families}\n📥 A descarregar fotos... ${st.cached}/${st.total} guardadas.`,
-                    'info'
-                  );
-                }
-              } catch(e) { clearInterval(pollInterval); }
-            }, 5000);
-          }
-          if (result.warnings && result.warnings.length) {
-            summary += '\n\nAvisos:';
-            result.warnings.forEach(w => summary += `\n• ${w.id || ''}: ${w.reason}`);
-          }
-          showImportLog(summary, result.pendingImages > 0 ? 'info' : 'success');
-        } catch(err) {
-          console.error(err);
-          showImportLog('Erro ao importar: ' + (err.message || err), 'error');
-        } finally {
-          $importBtn.disabled = false;
-        }
-      });
-
-      /* ── Export ────────────────────────────────────────────────────── */
-      function showExportLog(msg) { document.getElementById('exportLog').textContent = msg; }
-
-      function download(filename, text) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-      }
-
-      document.getElementById('exportBtn').addEventListener('click', async function() {
-        showExportLog('A exportar…');
-        try {
-          const resp = await fetch('/api/gedcom/export');
-          if (!resp.ok) throw new Error('Server error: ' + resp.status);
-          const ged = await resp.text();
-          const name = 'myLineage_export_' + new Date().toISOString().slice(0, 10) + '.ged';
-          download(name, ged);
-
-          DB.addHistory([{
-            ts: new Date().toISOString(),
-            action: 'GEDCOM exportado',
-            detail: name + ' (' + ged.length + ' bytes)',
-            category: 'gedcom'
-          }]);
-
-          showExportLog('GEDCOM gerado: ' + name + '\nTamanho: ' + ged.length + ' bytes');
-        } catch(err) {
-          console.error(err);
-          showExportLog('Erro ao exportar: ' + (err.message || err));
-        }
-      });
-    </script>
     <script src="history-logger.js"></script>
     <script src="back-to-top.js"></script>
   </body>

@@ -54,7 +54,6 @@
           <a href="app.html"><i class="mdi mdi-account-multiple" aria-hidden="true"></i>Cadastro</a>
           <a href="indicadores.html"><i class="mdi mdi-chart-bar" aria-hidden="true"></i>Indicadores</a>
           <a href="arvore.html" class="active"><i class="mdi mdi-sitemap" aria-hidden="true"></i>Árvore</a>
-          <a href="gedcom.html"><i class="mdi mdi-dna" aria-hidden="true"></i>GEDCOM</a>
           <a href="album.html"><i class="mdi mdi-image-multiple" aria-hidden="true"></i>Álbum</a>
           <a href="documentos.html"><i class="mdi mdi-folder-open" aria-hidden="true"></i>Documentos</a>
           <a href="validacao.html"><i class="mdi mdi-shield-check" aria-hidden="true"></i>Validação</a>
@@ -631,25 +630,13 @@
         var pastPairs=_buildPastRelationshipPairs(famMap, validIndiIds);
         var relOrderMap=_buildRelOrderMap(famMap, validIndiIds);
 
-        // Build set of children from past-relationship families
-        var pastChildIds=new Set();
-        if(pastPairs.size){
-          Object.values(famMap).forEach(function(fam){
-            var husb=fam.husb, wife=fam.wife;
-            if(!husb||!wife) return;
-            var key=[husb,wife].sort().join('|');
-            if(pastPairs.has(key)){
-              (fam.children||[]).forEach(function(cid){ pastChildIds.add(cid); });
-            }
-          });
-        }
-
         var svgEl=fcWrap.querySelector('svg.main_svg')||fcWrap.querySelector('svg');
         if(!svgEl) return;
         var linksView=svgEl.querySelector('.links_view');
         if(!linksView) return;
 
-        // ── Style past-relationship links ──
+        // ── Style past-relationship spouse links (dashed, no transparency) ──
+        // Child-to-parent links are always kept solid.
         svgEl.querySelectorAll('path.link').forEach(function(pathEl){
           var d=pathEl.__data__;
           if(!d) return;
@@ -658,6 +645,7 @@
           pathEl.removeAttribute('transform');
           pathEl.style.removeProperty('stroke-opacity');
 
+          // Only dash the spouse-to-spouse horizontal link for past relationships
           if(d.spouse && pastPairs.size){
             var srcId=d.source&&d.source.data?d.source.data.id:null;
             var tgtId=d.target&&d.target.data?d.target.data.id:null;
@@ -665,23 +653,6 @@
               var key=[srcId,tgtId].sort().join('|');
               if(pastPairs.has(key)){
                 pathEl.setAttribute('stroke-dasharray','6 4');
-                pathEl.style.strokeOpacity='0.35';
-              }
-            }
-          } else if(d.curve&&!d.is_ancestry&&d.target && pastPairs.size){
-            var childId=d.target&&d.target.data?d.target.data.id:null;
-            if(childId&&pastChildIds.has(childId)){
-              var parents=d.source;
-              if(Array.isArray(parents)&&parents.length===2){
-                var p1=parents[0]&&parents[0].data?parents[0].data.id:null;
-                var p2=parents[1]&&parents[1].data?parents[1].data.id:null;
-                if(p1&&p2){
-                  var pkey=[p1,p2].sort().join('|');
-                  if(pastPairs.has(pkey)){
-                    pathEl.setAttribute('stroke-dasharray','6 4');
-                    pathEl.style.strokeOpacity='0.35';
-                  }
-                }
               }
             }
           }

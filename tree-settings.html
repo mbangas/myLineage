@@ -181,7 +181,6 @@
         <div class="sidebar-footer">
           <a href="tree-settings.html" class="active"><i class="mdi mdi-cog-transfer-outline" aria-hidden="true"></i>Árvore</a>
           <button class="sidebar-help-btn" id="sidebarHelpBtn"><i class="mdi mdi-help-circle-outline" aria-hidden="true"></i>Ajuda</button>
-          <a href="configuracao.html"><i class="mdi mdi-cog" aria-hidden="true"></i>Definições</a>
         </div>
       </aside>
 
@@ -277,6 +276,7 @@
                 <button class="btn btn-sm btn-cancel" id="confirmNo">Cancelar</button>
               </div>
               <div class="import-log" id="importLog"></div>
+              <button class="btn btn-sm" id="retryPhotosBtn" style="display:none;margin-top:8px;"><i class="mdi mdi-refresh"></i> Re-tentar download de fotos</button>
               <div id="importHistoryContainer" style="margin-top:24px;">
                 <h3 style="margin:0 0 12px;font-size:0.8rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;">Histórico de importações (últimos 5)</h3>
                 <div class="table-panel" id="importHistory"></div>
@@ -759,6 +759,30 @@
       var $fileName  = document.getElementById('fileName');
       var $importBtn = document.getElementById('importBtn');
       var $logEl     = document.getElementById('importLog');
+      var $retryBtn  = document.getElementById('retryPhotosBtn');
+
+      $retryBtn.addEventListener('click', async function() {
+        $retryBtn.disabled = true;
+        showImportLog('A re-tentar o download das fotos em fundo…', 'info');
+        try {
+          var r = await fetch('/api/trees/' + treeId + '/multimedia/cache-retry', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(function(x) { return x.json(); });
+          if (!r.ok) { showImportLog(r.message || 'Erro.', 'error'); $retryBtn.disabled = false; return; }
+          var pollInterval = setInterval(async function() {
+            try {
+              var st = await fetch('/api/trees/' + treeId + '/multimedia/cache-status').then(function(x) { return x.json(); });
+              if (!st.running) {
+                clearInterval(pollInterval);
+                DB.reload();
+                showImportLog('✅ ' + st.cached + ' fotos guardadas localmente' + (st.pending > 0 ? ' (' + st.pending + ' falharam)' : '.'), 'success');
+                $retryBtn.style.display = st.pending > 0 ? '' : 'none';
+                $retryBtn.disabled = false;
+              } else {
+                showImportLog('📥 A descarregar fotos... ' + st.cached + '/' + st.total + ' guardadas.', 'info');
+              }
+            } catch(e) { clearInterval(pollInterval); $retryBtn.disabled = false; }
+          }, 3000);
+        } catch(e) { showImportLog('Erro: ' + e.message, 'error'); $retryBtn.disabled = false; }
+      });
       var $confirm   = document.getElementById('confirmBar');
 
       document.getElementById('pickFileBtn').addEventListener('click', function() { $file.click(); });
@@ -866,10 +890,12 @@
                 if (!st.running) {
                   clearInterval(pollInterval);
                   DB.reload();
+                  var hadFail = st.pending > 0;
                   showImportLog(
-                    'Import conclu\u00eddo!\nPessoas: ' + result.stats.individuals + ' \u00b7 Fam\u00edlias: ' + result.stats.families + '\n\u2705 ' + st.cached + ' fotos guardadas localmente' + (st.pending > 0 ? ' (' + st.pending + ' falharam)' : '') + '.',
+                    'Import concluído!\nPessoas: ' + result.stats.individuals + ' · Famílias: ' + result.stats.families + '\n✅ ' + st.cached + ' fotos guardadas localmente' + (hadFail ? ' (' + st.pending + ' falharam)' : '') + '.',
                     'success'
                   );
+                  $retryBtn.style.display = hadFail ? '' : 'none';
                 } else {
                   showImportLog(
                     'Import conclu\u00eddo!\nPessoas: ' + result.stats.individuals + ' \u00b7 Fam\u00edlias: ' + result.stats.families + '\n\ud83d\udce5 A descarregar fotos... ' + st.cached + '/' + st.total + ' guardadas.',

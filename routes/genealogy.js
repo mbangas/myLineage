@@ -126,11 +126,24 @@ function defaultHistoricalFact() {
 /* ── External image cache helpers ─────────────────────────────────────── */
 let _cacheRunning = false;
 
-function _fetchBuf(url) {
+function _fetchBuf(url, _redirects) {
+  if ((_redirects || 0) > 5) return Promise.resolve(null);
   return new Promise(resolve => {
     try {
       const mod = url.startsWith('https') ? https : http;
-      const req = mod.get(url, { timeout: 15000 }, res => {
+      const opts = {
+        timeout: 15000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; myLineage/1.0; +https://github.com/mbangas/myLineage)' },
+      };
+      const req = mod.get(url, opts, res => {
+        if (res.statusCode >= 301 && res.statusCode <= 308 && res.headers.location) {
+          res.resume();
+          const next = res.headers.location.startsWith('http')
+            ? res.headers.location
+            : new URL(res.headers.location, url).href;
+          resolve(_fetchBuf(next, (_redirects || 0) + 1));
+          return;
+        }
         if (res.statusCode !== 200) { res.resume(); resolve(null); return; }
         const chunks = [];
         res.on('data', c => chunks.push(c));
@@ -221,6 +234,20 @@ async function cacheExternalImages(treeId, multimedia) {
     console.log(`[media] Concluído: ${done}/${pending.length} fotos guardadas (tree=${treeId}).`);
   } finally { _cacheRunning = false; }
 }
+
+/* ── Cache retry (re-download all still-external images) ────────────── */
+router.post('/multimedia/cache-retry', requireTreeRole('owner', 'writer'), async (req, res) => {
+  try {
+    const mm = await resolve(readCollection(req.treeId, 'multimedia'));
+    const pending = Object.values(mm).filter(m =>
+      !m.deletedAt && m.files && m.files[0] && /^https?:\/\//i.test(m.files[0].file)
+    ).length;
+    if (pending === 0) return res.json({ ok: true, message: 'Nenhuma foto pendente.' });
+    if (_cacheRunning) return res.json({ ok: false, message: 'Download já em curso.' });
+    cacheExternalImages(req.treeId, mm).catch(e => console.error('[media] Retry erro:', e));
+    res.json({ ok: true, pending, message: `A re-tentar download de ${pending} fotos...` });
+  } catch(e) { res.status(500).json({ error: String(e) }); }
+});
 
 /* ── Cache status ────────────────────────────────────────────────────── */
 router.get('/multimedia/cache-status', async (req, res) => {

@@ -172,7 +172,7 @@ LEGACY_COLLECTIONS.forEach(col => {
 // Other legacy endpoints
 ['bulk-replace', 'header', 'settings', 'history', 'stats',
  'gedcom/export', 'gedcom/import', 'topola-json',
- 'multimedia/cache-status', 'multimedia/refresh-zones'].forEach(ep => {
+ 'multimedia/cache-status', 'multimedia/refresh-zones', 'multimedia/cache-retry'].forEach(ep => {
   app.all('/api/' + ep, (req, res) => {
     req.url = '/' + ep + (req._parsedUrl.search || '');
     req.treeId   = LEGACY_TREE_ID;

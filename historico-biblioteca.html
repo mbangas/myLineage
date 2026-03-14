@@ -165,6 +165,17 @@
     (function () {
       'use strict';
 
+      var TREE_KEY = 'ml_current_tree';
+      var LEGACY_TREE_ID = '00000000-0000-0000-0000-000000000000';
+      var treeId = localStorage.getItem(TREE_KEY) || LEGACY_TREE_ID;
+      function authHeaders(extra) {
+        var tk = localStorage.getItem('ml_access') || '';
+        var h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
+        if (tk) h['Authorization'] = 'Bearer ' + tk;
+        return h;
+      }
+      function apiUrl(suffix) { return '/api/trees/' + treeId + '/historical-facts' + (suffix || ''); }
+
       let allFacts = [];
       let editingId = null;
 
@@ -207,7 +218,7 @@
       }
 
       function loadFacts() {
-        fetch('/api/historical-facts')
+        fetch(apiUrl(), { headers: authHeaders({}) })
           .then(r => r.ok ? r.json() : Promise.reject(r.status))
           .then(data => {
             allFacts = (data || []).filter(n => !n.deletedAt);
@@ -302,7 +313,7 @@
           btn.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
             if (!confirm('Apagar este facto histórico?\n\nEsta ação não pode ser desfeita.')) return;
-            fetch('/api/historical-facts/' + encodeURIComponent(id), { method: 'DELETE' })
+            fetch(apiUrl('/' + encodeURIComponent(id)), { method: 'DELETE', headers: authHeaders({}) })
               .then(r => r.ok ? r.json() : Promise.reject(r.status))
               .then(() => {
                 allFacts = allFacts.filter(n => n.id !== id);
@@ -343,7 +354,7 @@
           elDone.textContent = done; elErrs.textContent = errs;
         }
         Promise.all(ids.map(id =>
-          fetch('/api/historical-facts/' + encodeURIComponent(id), { method: 'DELETE' })
+          fetch(apiUrl('/' + encodeURIComponent(id)), { method: 'DELETE', headers: authHeaders({}) })
             .then(r => { if (r.ok) done++; else errs++; updateProgress(); })
             .catch(() => { errs++; updateProgress(); })
         )).then(() => {
@@ -409,9 +420,9 @@
 
         if (editingId) {
           // ── UPDATE existing fact via PUT ──
-          fetch('/api/historical-facts/' + encodeURIComponent(editingId), {
+          fetch(apiUrl('/' + encodeURIComponent(editingId)), {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify(body)
           })
             .then(r => r.ok ? r.json() : Promise.reject(r.status))
@@ -429,9 +440,9 @@
         }
 
         // ── CREATE new fact via POST ──
-        fetch('/api/historical-facts', {
+        fetch(apiUrl(), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify(body)
         })
           .then(r => r.ok ? r.json() : Promise.reject(r.status))
@@ -525,14 +536,59 @@
               elErrs.textContent = errs;
             }
 
-            const promises = dataRows.map(row => {
-              const pais = String(row[C.pais]||'WORLD').trim().toUpperCase();
-              const anoInicioRaw = row[C.anoInicio];
-              const anoInicio = String(anoInicioRaw).trim() !== '' ? +anoInicioRaw : null;
-              const facto = String(row[C.facto]||'').trim();
-              if (!facto || !anoInicio) { errs++; updateProgress(); return Promise.resolve(); }
-              const body = {
-                pais: ['PT','ES','WORLD'].includes(pais) ? pais : 'WORLD',
+            /* Resolve raw country string to a known COUNTRY_LIST entry */
+            function resolvePais(raw) {
+              var v = String(raw || '').trim();
+              /* exact match */
+              if (COUNTRY_LIST.includes(v)) return v;
+              /* case-insensitive match */
+              var lower = v.toLowerCase();
+              var found = COUNTRY_LIST.find(function(c) { return c.toLowerCase() === lower; });
+              if (found) return found;
+              /* legacy 2-letter codes */
+              var legacyMap = { 'PT': 'Portugal', 'ES': 'Espanha', 'BR': 'Brasil',
+                'AO': 'Angola', 'MZ': 'Moçambique', 'CV': 'Cabo Verde', 'GW': 'Guiné-Bissau',
+                'ST': 'São Tomé e Príncipe', 'TL': 'Timor-Leste', 'US': 'Estados Unidos',
+                'GB': 'Reino Unido', 'FR': 'França', 'DE': 'Alemanha', 'IT': 'Itália',
+                'WORLD': 'Mundial', 'WLD': 'Mundial' };
+              var upper = v.toUpperCase();
+              if (legacyMap[upper]) return legacyMap[upper];
+              /* partial/normalised match */
+              var normStr = lower.replace(/[áàâã]/g,'a').replace(/[éèê]/g,'e')
+                .replace(/[íìî]/g,'i').replace(/[óòôõ]/g,'o')
+                .replace(/[úùû]/g,'u').replace(/ç/g,'c').replace(/ñ/g,'n');
+              found = COUNTRY_LIST.find(function(c) {
+                var cn = c.toLowerCase().replace(/[áàâã]/g,'a').replace(/[éèê]/g,'e')
+                  .replace(/[íìî]/g,'i').replace(/[óòôõ]/g,'o')
+                  .replace(/[úùû]/g,'u').replace(/ç/g,'c').replace(/ñ/g,'n');
+                return cn === normStr;
+              });
+              return found || 'Mundial';
+            }
+
+            /* Sequential import — avoids concurrent ID collisions on the server */
+            var rowQueue = dataRows.slice();
+            function importNext() {
+              if (!rowQueue.length) {
+                sortFactsDesc(allFacts);
+                fill.style.width = '100%';
+                if (errs && !done) {
+                  elStatus.innerHTML = '<i class="mdi mdi-alert-circle" style="color:#f05252"></i> Nenhum registo importado.';
+                } else {
+                  elStatus.innerHTML = '<i class="mdi mdi-check-circle" style="color:#3fb950"></i> Importação concluída!';
+                }
+                elClose.classList.add('show');
+                document.getElementById('importFile').value = '';
+                renderList();
+                return;
+              }
+              var row = rowQueue.shift();
+              var anoInicioRaw = row[C.anoInicio];
+              var anoInicio = String(anoInicioRaw).trim() !== '' ? +anoInicioRaw : null;
+              var facto = String(row[C.facto]||'').trim();
+              if (!facto || !anoInicio) { errs++; updateProgress(); importNext(); return; }
+              var body = {
+                pais: resolvePais(row[C.pais]),
                 dia:  String(row[C.dia]).trim() !== '' ? (+row[C.dia] || null) : null,
                 mes:  String(row[C.mes]).trim() !== '' ? (+row[C.mes] || null) : null,
                 anoInicio,
@@ -540,25 +596,14 @@
                 titulo: String(row[C.titulo]||'').trim(),
                 facto
               };
-              return fetch('/api/historical-facts', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+              fetch(apiUrl(), {
+                method: 'POST', headers: authHeaders(),
                 body: JSON.stringify(body)
-              }).then(r => r.ok ? r.json() : null)
-                .then(c => { if (c) { allFacts.push(c); done++; } else errs++; updateProgress(); })
-                .catch(() => { errs++; updateProgress(); });
-            });
-            Promise.all(promises).then(() => {
-              sortFactsDesc(allFacts);
-              fill.style.width = '100%';
-              if (errs && !done) {
-                elStatus.innerHTML = '<i class="mdi mdi-alert-circle" style="color:#f05252"></i> Nenhum registo importado.';
-              } else {
-                elStatus.innerHTML = '<i class="mdi mdi-check-circle" style="color:#3fb950"></i> Importação concluída!';
-              }
-              elClose.classList.add('show');
-              document.getElementById('importFile').value = '';
-              renderList();
-            });
+              }).then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(c) { if (c) { allFacts.push(c); done++; } else errs++; updateProgress(); importNext(); })
+                .catch(function() { errs++; updateProgress(); importNext(); });
+            }
+            importNext();
           } catch(err) {
             elStatus.innerHTML = '<i class="mdi mdi-alert-circle" style="color:#f05252"></i> Erro: ' + err;
             elClose.classList.add('show');

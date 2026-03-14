@@ -299,6 +299,43 @@
             </div>
           </div>
 
+          <!-- Biblioteca Histórica -->
+          <div class="ts-card" id="histCard">
+            <h2><i class="mdi mdi-book-open-variant" style="color:var(--accent);"></i>Biblioteca Histórica</h2>
+            <p>Repositório de factos históricos utilizados na geração do Livro de Família. Cada facto é associado a uma data e a um país, sendo automaticamente atribuído às famílias cujo período de vida coincide com esse intervalo temporal.</p>
+            <div style="display:flex;align-items:flex-start;gap:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle);border-radius:6px;padding:14px 16px;">
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:0.88rem;color:var(--text-main);margin-bottom:4px;"><i class="mdi mdi-text-box-multiple-outline" style="color:var(--accent);margin-right:5px;"></i>Factos históricos</div>
+                <div id="histFactsCount" style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">A carregar...</div>
+              </div>
+              <div style="flex-shrink:0;">
+                <a href="historico-biblioteca.html" class="btn btn-ghost btn-sm"><i class="mdi mdi-pencil-box-multiple-outline"></i> Gerir factos históricos</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pessoa em Foco -->
+          <div class="ts-card" id="focusCard">
+            <h2><i class="mdi mdi-account-star" style="color:var(--accent);"></i>Pessoa em Foco</h2>
+            <p>Pesquise pessoas e defina uma como foco principal desta árvore. A seleção é guardada nas definições da árvore.</p>
+            <div style="display:flex;align-items:flex-start;gap:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle);border-radius:6px;padding:14px 16px;">
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:0.88rem;color:var(--text-main);margin-bottom:8px;"><i class="mdi mdi-account-search-outline" style="color:var(--accent);margin-right:5px;"></i>Pesquisar pessoa</div>
+                <div style="position:relative;width:100%;max-width:420px;">
+                  <input type="search" id="personSearch" placeholder="Pesquisar pessoa (nome)"
+                    style="width:100%;max-width:320px;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--text-main);" />
+                  <div id="peopleSuggestions"
+                    style="position:absolute;left:0;top:38px;background:var(--bg-surface);border:1px solid var(--border);max-height:160px;overflow:auto;width:320px;z-index:230;display:none;border-radius:var(--radius-sm);"></div>
+                </div>
+                <div style="margin-top:10px;font-size:0.78rem;color:var(--text-secondary);">Pessoa em foco atual: <span id="currentFocus" style="font-weight:600;color:var(--text-main);"></span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+                <button class="btn btn-ghost btn-sm" id="setFocusBtn"><i class="mdi mdi-account-check-outline"></i> Definir Pessoa</button>
+                <button class="btn btn-ghost btn-sm" id="clearFocusBtn">Remover foco</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Danger zone -->
           <div class="ts-card ts-danger" id="dangerCard">
             <h2><i class="mdi mdi-alert-outline"></i>Zona de perigo</h2>
@@ -595,10 +632,109 @@
           });
       });
 
+      /* ── Biblioteca Histórica – load count ────────────────────── */
+      function loadHistFactsCount() {
+        fetch('/api/trees/' + treeId + '/historical-facts', { headers: headers() })
+          .then(function(r) { return r.ok ? r.json() : {}; })
+          .then(function(data) {
+            var records = data && typeof data === 'object' && !Array.isArray(data)
+              ? Object.values(data)
+              : (Array.isArray(data) ? data : []);
+            var active = records.filter(function(n) { return !n.deletedAt; }).length;
+            var el = document.getElementById('histFactsCount');
+            if (el) el.textContent = active + ' facto' + (active !== 1 ? 's' : '') + ' registado' + (active !== 1 ? 's' : '');
+          })
+          .catch(function() {
+            var el = document.getElementById('histFactsCount');
+            if (el) el.textContent = 'Não foi possível carregar.';
+          });
+      }
+
+      /* ── Pessoa em Foco ───────────────────────────────────────── */
+      (function() {
+        var DB2 = window.GedcomDB;
+        if (!DB2) return;
+
+        var searchEl = document.getElementById('personSearch');
+        var setFocusBtn = document.getElementById('setFocusBtn');
+        var clearFocusBtn = document.getElementById('clearFocusBtn');
+        var currentFocusEl = document.getElementById('currentFocus');
+        var suggestions = document.getElementById('peopleSuggestions');
+        var selectedPersonId = null;
+
+        function nowISO() { return new Date().toISOString(); }
+
+        function saveFocus(name, id) {
+          var obj = { name: name, when: nowISO() };
+          if (id) obj.id = id;
+          DB2.setSetting('focusedPerson', obj);
+          showCurrentFocus();
+        }
+        function clearFocus() { DB2.setSetting('focusedPerson', null); showCurrentFocus(); }
+        function showCurrentFocus() {
+          var v = DB2.getSetting('focusedPerson');
+          if (currentFocusEl) currentFocusEl.textContent = v ? v.name : '—';
+        }
+
+        function renderSuggestions(filter) {
+          var q = (filter || '').toLowerCase().trim();
+          if (!q) { suggestions.innerHTML = ''; suggestions.style.display = 'none'; return; }
+          var people = DB2.getIndividuals();
+          var list = people.filter(function(p) {
+            return DB2.getDisplayName(p).toLowerCase().indexOf(q) !== -1;
+          }).slice(0, 30);
+          suggestions.innerHTML = '';
+          if (!list.length) { suggestions.style.display = 'none'; return; }
+          list.forEach(function(p) {
+            var label = DB2.getDisplayName(p);
+            var row = document.createElement('div');
+            row.style.cssText = 'padding:7px 10px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.84rem;';
+            row.textContent = label;
+            row.addEventListener('mouseover', function() { row.style.background = 'rgba(68,147,248,0.1)'; });
+            row.addEventListener('mouseout', function() { row.style.background = ''; });
+            row.addEventListener('click', function() {
+              searchEl.value = label;
+              selectedPersonId = p.id;
+              suggestions.style.display = 'none';
+              searchEl.focus();
+            });
+            suggestions.appendChild(row);
+          });
+          suggestions.style.display = 'block';
+        }
+
+        function setFromInput() {
+          var val = (searchEl.value || '').trim();
+          if (!val) { alert('Escreva ou selecione uma pessoa.'); return; }
+          var people = DB2.getIndividuals();
+          var found = null;
+          if (selectedPersonId) found = people.find(function(p) { return p.id === selectedPersonId; });
+          if (!found) found = people.find(function(p) { return DB2.getDisplayName(p).toLowerCase() === val.toLowerCase(); });
+          if (!found) { alert('Pessoa não encontrada. Verifique se o nome corresponde a uma pessoa existente.'); return; }
+          saveFocus(DB2.getDisplayName(found), found.id || null);
+          alert('Pessoa definida como foco principal.');
+        }
+
+        searchEl.addEventListener('input', function() { selectedPersonId = null; renderSuggestions(this.value); });
+        searchEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); setFocusBtn.click(); } });
+        document.addEventListener('click', function(e) {
+          if (!suggestions.contains(e.target) && e.target !== searchEl) suggestions.style.display = 'none';
+        });
+        setFocusBtn.addEventListener('click', setFromInput);
+        clearFocusBtn.addEventListener('click', function() {
+          if (!confirm('Remover pessoa em foco?')) return;
+          clearFocus();
+          alert('Foco removido.');
+        });
+
+        showCurrentFocus();
+      })();
+
       /* ── Init ────────────────────────────────────────────────────── */
       loadTreeInfo();
       loadMembers();
       loadInvitations();
+      loadHistFactsCount();
       applyPermissions();
 
     })();

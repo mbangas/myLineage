@@ -75,41 +75,6 @@
           </div>
         </div>
 
-        <div class="card centered-panel" style="max-width:760px;width:100%;margin-top:16px;padding-bottom:20px;">
-          <h2 style="margin:0 0 8px;"><i class="mdi mdi-book-open-variant" style="color:#4493f8;margin-right:8px;"></i>Biblioteca Histórica</h2>
-          <p style="color:var(--text-secondary);margin:0 0 16px;font-size:0.85rem;">Repositório de factos históricos utilizados na geração do Livro de Família. Cada facto é associado a uma data e a um país, sendo automaticamente atribuído às famílias cujo período de vida coincide com esse intervalo temporal.</p>
-          <div style="display:flex;align-items:flex-start;gap:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:14px 16px;">
-            <div style="flex:1;">
-              <div style="font-weight:700;font-size:0.88rem;color:var(--text-main);margin-bottom:4px;"><i class="mdi mdi-text-box-multiple-outline" style="color:#4493f8;margin-right:5px;"></i>Factos históricos</div>
-              <div id="histFactsCount" style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">A carregar...</div>
-            </div>
-            <div style="flex-shrink:0;">
-              <a href="historico-biblioteca.html" class="btn btn-ghost btn-sm"><i class="mdi mdi-pencil-box-multiple-outline"></i> Gerir factos históricos</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="card centered-panel" style="max-width:760px;width:100%;margin-top:16px;padding-bottom:20px;">
-          <h2 style="margin:0 0 8px;"><i class="mdi mdi-account-star" style="color:#4493f8;margin-right:8px;"></i>Pessoa em Foco</h2>
-          <p style="color:var(--text-secondary);margin:0 0 16px;font-size:0.85rem;">Pesquise pessoas e defina uma como foco principal. A seleção será salva nas configurações locais.</p>
-          <div style="display:flex;flex-direction:column;gap:14px;">
-            <div style="display:flex;align-items:flex-start;gap:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:14px 16px;">
-              <div style="flex:1;">
-                <div style="font-weight:700;font-size:0.88rem;color:var(--text-main);margin-bottom:8px;"><i class="mdi mdi-account-search-outline" style="color:#4493f8;margin-right:5px;"></i>Pesquisar pessoa</div>
-                <div style="position:relative;width:100%;max-width:420px;">
-                  <input type="search" id="personSearch" placeholder="Pesquisar pessoa (nome)" style="width:220px;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--text-main);" />
-                  <div id="peopleSuggestions" style="position:absolute;left:0;top:38px;background:var(--bg-card);border:1px solid rgba(0,0,0,0.06);max-height:160px;overflow:auto;width:220px;z-index:230;display:none;"></div>
-                </div>
-                <div style="margin-top:10px;font-size:0.78rem;color:var(--text-secondary);">Pessoa em foco atual: <span id="currentFocus" style="font-weight:600;color:var(--text-main);"></span></div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-                <button class="btn btn-ghost btn-sm" id="setFocusBtn"><i class="mdi mdi-account-check-outline"></i> Definir Pessoa</button>
-                <button class="btn btn-ghost btn-sm" id="clearFocusBtn">Remover foco</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- ── Pedidos de Acesso ──────────────────────────────────────────── -->
         <div class="card centered-panel" id="cardPedidos" style="max-width:760px;width:100%;margin-top:16px;display:none;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -334,68 +299,6 @@
         }
 
         clearBtn.addEventListener('click', function(){ if(!confirm('Remover a configuração da pasta base?')) return; clearBase(); showCurrent(); alert('Configuração removida.'); });
-
-        // --- Pessoa em Foco ---
-        const search = document.getElementById('personSearch');
-        const setFocusBtn = document.getElementById('setFocusBtn');
-        const currentFocusEl = document.getElementById('currentFocus');
-        const clearFocusBtn = document.getElementById('clearFocusBtn');
-        const suggestions = document.getElementById('peopleSuggestions');
-        let selectedPersonId = null;
-
-        function saveFocus(name, id){ const obj = { name, when: nowISO() }; if(id) obj.id = id; DB.setSetting('focusedPerson', obj); showCurrentFocus(); }
-        function clearFocus(){ DB.setSetting('focusedPerson', null); showCurrentFocus(); }
-        function showCurrentFocus(){ const v = DB.getSetting('focusedPerson'); currentFocusEl.textContent = v ? v.name : '—'; }
-
-        function renderSuggestions(filter){
-          const q = (filter||'').toLowerCase().trim();
-          if(!q){ suggestions.innerHTML = ''; suggestions.style.display = 'none'; return; }
-          const people = DB.getIndividuals();
-          const list = people.filter(p => DB.getDisplayName(p).toLowerCase().includes(q)).slice(0, 30);
-          suggestions.innerHTML = '';
-          if(list.length===0){ suggestions.style.display='none'; return; }
-          list.forEach(p => {
-            const label = DB.getDisplayName(p);
-            const row = document.createElement('div');
-            row.style.padding='6px'; row.style.cursor='pointer'; row.style.borderBottom='1px solid rgba(255,255,255,0.03)';
-            row.textContent = label;
-            row.addEventListener('click', function(){ search.value = label; selectedPersonId = p.id; suggestions.style.display='none'; search.focus(); });
-            suggestions.appendChild(row);
-          });
-          suggestions.style.display='block';
-        }
-
-        function setFromInput(){
-          const val = (search.value||'').trim();
-          if(!val) return alert('Escreva ou selecione uma pessoa.');
-          const people = DB.getIndividuals();
-          let found = null;
-          if(selectedPersonId) found = people.find(p => p.id === selectedPersonId);
-          if(!found) found = people.find(p => DB.getDisplayName(p).toLowerCase() === val.toLowerCase());
-          if(!found) return alert('Pessoa não encontrada. Verifique se o nome corresponde a uma pessoa existente.');
-          saveFocus(DB.getDisplayName(found), found.id || null);
-          alert('Pessoa definida como foco principal.');
-        }
-
-        search.addEventListener('input', function(){ selectedPersonId = null; renderSuggestions(this.value); });
-        search.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); setFocusBtn.click(); } });
-        setFocusBtn.addEventListener('click', setFromInput);
-        clearFocusBtn.addEventListener('click', function(){ if(!confirm('Remover pessoa em foco?')) return; clearFocus(); alert('Foco removido.'); });
-
-        showCurrentFocus();
-
-        // ── Biblioteca Histórica count ──
-        fetch('/api/historical-facts')
-          .then(r => r.ok ? r.json() : [])
-          .then(data => {
-            const active = (data || []).filter(n => !n.deletedAt).length;
-            const el = document.getElementById('histFactsCount');
-            if (el) el.textContent = active + ' facto' + (active !== 1 ? 's' : '') + ' registado' + (active !== 1 ? 's' : '');
-          })
-          .catch(() => {
-            const el = document.getElementById('histFactsCount');
-            if (el) el.textContent = 'Não foi possível carregar.';
-          });
       });
 
       function dangerDeleteAllContent() {

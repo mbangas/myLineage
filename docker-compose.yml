@@ -50,16 +50,16 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DATABASE_URL=postgres://mylineage:${POSTGRES_PASSWORD:-mylineage_dev}@postgres:5432/mylineage
-      - JWT_SECRET=${JWT_SECRET:-change_me_in_production}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-miguel.bangueses@gmail.com}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - DATABASE_URL=postgres://mylineage:${POSTGRES_PASSWORD}@postgres:5432/mylineage
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - APP_URL=${APP_URL:-http://localhost:3000}
-      - SMTP_HOST=${SMTP_HOST:-smtp.mailersend.net}
+      - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USER=${SMTP_USER:-MS_Vvnfir@test-nrw7gymwp9kg2k8e.mlsender.net}
-      - SMTP_PASS=${SMTP_PASS:-mssp.jbtqhby.3z0vklo2jj747qrx.aQVTR35}
-      - SMTP_FROM=${SMTP_FROM:-myLineage <MS_Vvnfir@test-nrw7gymwp9kg2k8e.mlsender.net>}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
 
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000"]

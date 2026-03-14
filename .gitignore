@@ -1,0 +1,16 @@
+# ── Credenciais e segredos ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Dependências ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Dados locais (uploads e JSON legado) ─────────────────────────────────────
+uploads/
+JSON-DATA/
+
+# ── SO e editores ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp

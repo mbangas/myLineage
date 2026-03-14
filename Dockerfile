@@ -38,6 +38,7 @@ COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/routes ./routes
 COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/docs ./docs
 
 # Criar diretórios de dados e uploads
 RUN mkdir -p \

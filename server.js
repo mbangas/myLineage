@@ -16,6 +16,25 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const os = require('os');
+const { execSync } = require('child_process');
+
+/* ── In-memory log ring buffer (last 200 lines) ──────────────────────────── */
+const LOG_BUFFER_SIZE = 200;
+const _logBuffer = [];
+
+function _pushLog(line) {
+  _logBuffer.push(line);
+  if (_logBuffer.length > LOG_BUFFER_SIZE) _logBuffer.shift();
+}
+
+(['log', 'warn', 'error']).forEach(function (method) {
+  const orig = console[method].bind(console);
+  console[method] = function (...args) {
+    _pushLog('[' + method.toUpperCase() + '] ' + args.map(String).join(' '));
+    orig(...args);
+  };
+});
 
 const { LEGACY_TREE_ID }       = require('./lib/crud-helpers');
 const { authMiddleware }       = require('./lib/auth-middleware');
@@ -34,6 +53,67 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname), { etag: false, lastModified: false, setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate') }));
+
+// Public info endpoint — version, database type, caller IP, container info
+app.get('/api/info', (req, res) => {
+  const { version, name: pkgName } = require('./package.json');
+  const callerIp = ((req.headers['x-forwarded-for'] || '').split(',')[0].trim())
+    || req.socket.remoteAddress
+    || 'unknown';
+
+  // Container / process info
+  const containerId = process.env.HOSTNAME || 'n/a';
+
+  let containerName = containerId;
+  try { containerName = fs.readFileSync('/etc/hostname', 'utf8').trim(); } catch (_) {}
+
+  let osInfo = os.type() + ' ' + os.release();
+  try {
+    const rel = fs.readFileSync('/etc/os-release', 'utf8');
+    const pretty = (rel.match(/PRETTY_NAME="(.+?)"/) || [])[1];
+    if (pretty) osInfo = pretty;
+  } catch (_) {}
+
+  const createdAt = new Date(Date.now() - process.uptime() * 1000).toISOString();
+
+  // Internal container IP (first non-loopback IPv4)
+  let internalIp = 'n/a';
+  const ifaces = os.networkInterfaces();
+  for (const iface of Object.values(ifaces)) {
+    const found = (iface || []).find(a => a.family === 'IPv4' && !a.internal);
+    if (found) { internalIp = found.address; break; }
+  }
+
+  // CPU load (1-min average) and memory
+  const cpuLoad = os.loadavg()[0].toFixed(2) + ' (1-min avg), ' + os.cpus().length + ' core(s)';
+  const totalMb = (os.totalmem() / 1048576).toFixed(0);
+  const usedMb  = ((os.totalmem() - os.freemem()) / 1048576).toFixed(0);
+  const ramInfo = usedMb + ' MB used / ' + totalMb + ' MB total';
+
+  // Docker image name from label or env or package name
+  const imageName = process.env.DOCKER_IMAGE || process.env.IMAGE_NAME || pkgName || 'n/a';
+
+  // Last 30 log lines
+  const logs = _logBuffer.slice(-30).join('\n') || '(no logs yet)';
+
+  res.json({
+    version,
+    platform: 'myLineage',
+    database: process.env.DATABASE_URL ? 'PostgreSQL' : 'JSON (file)',
+    ip: callerIp,
+    container: {
+      id: containerId,
+      name: containerName,
+      os: osInfo,
+      created: createdAt,
+      internalIp,
+      cpu: cpuLoad,
+      ram: ramInfo,
+      image: imageName,
+      logs,
+    },
+  });
+});
 
 /* ── Auth routes (public — no authMiddleware) ────────────────────────── */
 app.use('/api/auth', authRoutes);

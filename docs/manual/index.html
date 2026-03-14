@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manual do Utilizador — myLineage</title>
+  <style>
+    /* ── Reset & tokens ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0f1117;
+      --bg-surface:  #161b27;
+      --bg-card:     #1c2333;
+      --border:      rgba(255,255,255,.09);
+      --border-sub:  rgba(255,255,255,.05);
+      --text:        #e2e8f0;
+      --text-sec:    #94a3b8;
+      --text-dim:    #64748b;
+      --accent:      #4493f8;
+      --accent-soft: rgba(68,147,248,.10);
+      --accent-brd:  rgba(68,147,248,.25);
+      --green:       #3fb950;
+      --green-soft:  rgba(63,185,80,.10);
+      --amber:       #d29922;
+      --amber-soft:  rgba(210,153,34,.10);
+      --red:         #f85149;
+      --radius:      8px;
+      --sidebar-w:   260px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      display: flex;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Sidebar navigation ───────────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0 32px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-brd);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .nav-logo-text { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .nav-logo-ver  { font-size: 0.7rem; color: var(--text-dim); }
+
+    .nav-group-label {
+      padding: 12px 20px 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 20px;
+      font-size: 0.82rem;
+      color: var(--text-sec);
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: background .12s, color .12s, border-color .12s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.04); color: var(--text); }
+    .nav-item.active { background: var(--accent-soft); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+    .nav-item .nav-num {
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-brd);
+      border-radius: 50%;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Main content ─────────────────────────────────────────────── */
+    #content {
+      flex: 1;
+      min-width: 0;
+      padding: 40px 56px 80px;
+      max-width: 900px;
+    }
+
+    /* Page header */
+    .page-header { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .page-header p  { color: var(--text-sec); font-size: 0.875rem; }
+    .page-header-meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+    .meta-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 0.75rem; color: var(--text-sec);
+    }
+    .meta-badge.accent { background: var(--accent-soft); border-color: var(--accent-brd); color: var(--accent); }
+
+    /* Section anchors */
+    .section { margin-bottom: 56px; scroll-margin-top: 80px; }
+
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-header .s-num {
+      flex-shrink: 0; width: 28px; height: 28px;
+      background: var(--accent-soft); border: 2px solid var(--accent);
+      border-radius: 50%; font-size: 0.75rem; font-weight: 700;
+      color: var(--accent); display: flex; align-items: center; justify-content: center;
+    }
+    .section-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+
+    /* Sub-sections */
+    .sub-section { margin-bottom: 28px; }
+    .sub-section h3 {
+      font-size: 0.95rem; font-weight: 600; color: var(--text);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 7px;
+    }
+    .sub-section h3 .tag {
+      font-size: 0.68rem; padding: 1px 7px; border-radius: 12px;
+      background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-brd);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    p { color: var(--text-sec); margin-bottom: 10px; }
+
+    /* Feature table */
+    .feat-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.82rem; }
+    .feat-table th {
+      text-align: left; padding: 7px 12px;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim); font-weight: 600;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .feat-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-sub);
+      vertical-align: top;
+      color: var(--text-sec);
+    }
+    .feat-table td:first-child { color: var(--text); font-weight: 500; white-space: nowrap; }
+    .feat-table tr:last-child td { border-bottom: none; }
+    .feat-table tr:hover td { background: rgba(255,255,255,.02); }
+
+    /* Pill badges */
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    }
+    .pill-green  { background: var(--green-soft);  color: var(--green);  border: 1px solid rgba(63,185,80,.2); }
+    .pill-blue   { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-brd); }
+    .pill-amber  { background: var(--amber-soft);  color: var(--amber);  border: 1px solid rgba(210,153,34,.2); }
+    .pill-red    { background: rgba(248,81,73,.10); color: var(--red);   border: 1px solid rgba(248,81,73,.2); }
+
+    /* Info/tip/warning callouts */
+    .callout {
+      display: flex; gap: 10px;
+      padding: 10px 14px; border-radius: var(--radius);
+      margin-bottom: 12px; font-size: 0.82rem;
+    }
+    .callout-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
+    .callout-tip  { background: rgba(68,147,248,.07); border: 1px solid rgba(68,147,248,.2); color: var(--text-sec); }
+    .callout-warn { background: var(--amber-soft);   border: 1px solid rgba(210,153,34,.25); color: #c9a227; }
+    .callout-danger { background: rgba(248,81,73,.07); border: 1px solid rgba(248,81,73,.2); color: #e06c75; }
+
+    /* Step list */
+    .steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 16px; }
+    .step  { display: flex; gap: 0; position: relative; }
+    .step:not(:last-child) .step-line {
+      position: absolute; left: 13px; top: 28px; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .step-num {
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-soft); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: var(--accent);
+      margin-top: 2px; position: relative; z-index: 1;
+    }
+    .step-body  { flex: 1; padding: 0 0 20px 12px; }
+    .step-title { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .step-text  { font-size: 0.82rem; color: var(--text-sec); line-height: 1.6; }
+
+    /* Keyboard shortcut */
+    kbd {
+      display: inline-block; padding: 1px 6px; border-radius: 4px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      font-family: monospace; font-size: 0.78rem; color: var(--text-sec);
+    }
+
+    /* Roles table */
+    .role-row td:nth-child(2) { text-align: center; }
+
+    /* Print styles */
+    @media print {
+      body { background: #fff; color: #111; font-size: 10pt; }
+      #sidebar { display: none; }
+      #content { padding: 20px; max-width: 100%; }
+      .section { page-break-inside: avoid; }
+      .section-header { border-bottom: 1pt solid #ccc; }
+      .feat-table th { background: #f0f0f0; color: #333; }
+      .feat-table td { border-bottom: 0.5pt solid #e0e0e0; color: #333; }
+      p, .step-text { color: #444; }
+      .callout-tip  { background: #f0f6ff; border-color: #99b8e0; color: #334; }
+      .callout-warn { background: #fffbec; border-color: #ddb44a; color: #554; }
+      .callout-danger { background: #fff0ef; border-color: #e8a09d; color: #544; }
+      .pill-green { background: #eafbee; color: #22703a; border-color: #8ad49b; }
+      .pill-blue  { background: #eef4ff; color: #2255bb; border-color: #99b3e0; }
+      .pill-amber { background: #fffbec; color: #886611; border-color: #ddc877; }
+      .pill-red   { background: #fff0ef; color: #883322; border-color: #e8a09d; }
+      a { color: #2255bb; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ Sidebar navigation ═══════════════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🌳</div>
+    <div>
+      <div class="nav-logo-text">myLineage</div>
+      <div class="nav-logo-ver">Manual do Utilizador · v2.0</div>
+    </div>
+  </div>
+
+  <div class="nav-group-label">Introdução</div>
+  <a class="nav-item" href="#intro">Visão geral</a>
+  <a class="nav-item" href="#roles">Perfis e permissões</a>
+
+  <div class="nav-group-label">Conta</div>
+  <a class="nav-item" href="#auth">Autenticação</a>
+  <a class="nav-item" href="#2fa">Autenticação de dois fatores</a>
+
+  <div class="nav-group-label">Árvores</div>
+  <a class="nav-item" href="#trees">Gestão de árvores</a>
+  <a class="nav-item" href="#members">Membros e convites</a>
+
+  <div class="nav-group-label">Genealogia</div>
+  <a class="nav-item" href="#cadastro">Cadastro de pessoas</a>
+  <a class="nav-item" href="#arvore">Visualização da árvore</a>
+  <a class="nav-item" href="#album">Álbum de fotos</a>
+  <a class="nav-item" href="#documentos">Documentos</a>
+  <a class="nav-item" href="#aniversarios">Aniversários</a>
+  <a class="nav-item" href="#mundo">Distribuição mundial</a>
+
+  <div class="nav-group-label">Análise</div>
+  <a class="nav-item" href="#indicadores">Indicadores</a>
+  <a class="nav-item" href="#historico">Histórico de alterações</a>
+  <a class="nav-item" href="#validacao">Validação de dados</a>
+  <a class="nav-item" href="#historico-biblioteca">Biblioteca histórica</a>
+
+  <div class="nav-group-label">Importar / Exportar</div>
+  <a class="nav-item" href="#gedcom">GEDCOM</a>
+
+  <div class="nav-group-label">Definições</div>
+  <a class="nav-item" href="#tree-settings">Definições da árvore</a>
+  <a class="nav-item" href="#configuracao">Definições globais</a>
+  <a class="nav-item" href="#notifications">Notificações</a>
+</nav>
+
+<!-- ══ Main content ═════════════════════════════════════════════════ -->
+<main id="content">
+
+  <!-- ── Page header ─────────────────────────────────────────────── -->
+  <header class="page-header">
+    <h1>Manual do Utilizador</h1>
+    <p>Referência completa de todas as funcionalidades do myLineage — gestão de genealogia familiar na nuvem.</p>
+    <div class="page-header-meta">
+      <span class="meta-badge accent">v2.0.0</span>
+      <span class="meta-badge">Atualizado: Março 2026</span>
+      <span class="meta-badge">Idioma: Português</span>
+    </div>
+  </header>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 1. VISÃO GERAL                                                  -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="intro">
+    <div class="section-header">
+      <div class="s-num">1</div>
+      <h2>Visão geral</h2>
+    </div>
+
+    <p>O <strong>myLineage</strong> é uma aplicação web multi-utilizador para construir, visualizar e partilhar árvores genealógicas. Os dados são guardados em segurança na nuvem, acessíveis de qualquer dispositivo com browser.</p>
+
+    <div class="sub-section">
+      <h3>Conceitos fundamentais</h3>
+      <table class="feat-table">
+        <thead><tr><th>Conceito</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>Conta</td><td>Identidade de utilizador — email + palavra-passe. Uma conta pode pertencer a múltiplas árvores com papéis diferentes.</td></tr>
+          <tr><td>Árvore</td><td>Espaço isolado de dados genealógicos (pessoas, famílias, fotos…). Uma conta pode ter várias árvores.</td></tr>
+          <tr><td>Pessoa (INDI)</td><td>Registo individual de um familiar — nome, datas, eventos, ligações a famílias.</td></tr>
+          <tr><td>Família (FAM)</td><td>Liga um casal e os seus filhos; pode ter eventos de casamento e divórcio.</td></tr>
+          <tr><td>Fonte (SOUR)</td><td>Referência documental que suporta factos genealógicos (certidões, registos paroquiais…).</td></tr>
+          <tr><td>Repositório (REPO)</td><td>Arquivo ou instituição que detém fontes (ex.: Arquivo Distrital de Lisboa).</td></tr>
+          <tr><td>GEDCOM</td><td>Formato universal de genealogia (.ged) para importar e exportar árvores.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Navegação global</h3>
+      <p>Todas as páginas partilham uma barra lateral esquerda com acesso a:</p>
+      <table class="feat-table">
+        <thead><tr><th>Item</th><th>Página</th></tr></thead>
+        <tbody>
+          <tr><td>Cadastro</td><td>Lista e edição de todas as pessoas</td></tr>
+          <tr><td>Indicadores</td><td>Dashboard de estatísticas genealógicas</td></tr>
+          <tr><td>Árvore</td><td>Diagrama interativo da árvore</td></tr>
+          <tr><td>Álbum</td><td>Galeria de fotos e multimídia</td></tr>
+          <tr><td>Documentos</td><td>Biblioteca de documentos</td></tr>
+          <tr><td>Validação</td><td>Auditoria de qualidade dos dados</td></tr>
+          <tr><td>Histórico</td><td>Registo de alterações</td></tr>
+          <tr><td>🌳 Árvore (rodapé)</td><td>Definições da árvore ativa</td></tr>
+          <tr><td>⚙ Definições (rodapé)</td><td>Preferências globais da aplicação</td></tr>
+          <tr><td>? Ajuda (rodapé)</td><td>Início rápido, manual, debug e contacto</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <span>O seletor de árvore no topo da barra lateral permite mudar de árvore em qualquer página sem perder o contexto.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 2. PERFIS E PERMISSÕES                                          -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="roles">
+    <div class="section-header">
+      <div class="s-num">2</div>
+      <h2>Perfis e permissões</h2>
+    </div>
+
+    <p>Cada utilizador tem um papel por árvore. Os administradores da plataforma têm acesso irrestrito a todas as árvores.</p>
+
+    <table class="feat-table role-row">
+      <thead>
+        <tr>
+          <th>Ação</th>
+          <th>Leitor</th>
+          <th>Editor</th>
+          <th>Dono</th>
+          <th>Admin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Ver dados da árvore</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Criar / editar pessoas e famílias</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Apagar registos</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Importar / exportar GEDCOM</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Convidar membros</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Alterar papéis de membros</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Editar nome/descrição da árvore</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Eliminar a árvore</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Painel de administração</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 3. AUTENTICAÇÃO                                                 -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="auth">
+    <div class="section-header">
+      <div class="s-num">3</div>
+      <h2>Autenticação</h2>
+    </div>
+
+    <div class="sub-section">
+      <h3>Criar conta</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Aceda à página inicial</div><div class="step-text">Navegue até ao myLineage e clique em <strong>Registar</strong>.</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Preencha o formulário</div><div class="step-text">Introduza o seu nome (opcional), endereço de email e uma palavra-passe com pelo menos 8 caracteres.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Confirme e inicie sessão</div><div class="step-text">Após o registo, inicie sessão com o seu email e palavra-passe para aceder à aplicação.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Iniciar e terminar sessão</h3>
+      <table class="feat-table">
+        <thead><tr><th>Ação</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>Iniciar sessão</td><td>Email + palavra-passe. Se a 2FA estiver ativada, é pedido um código TOTP adicional.</td></tr>
+          <tr><td>Terminar sessão</td><td>Clique no botão de logout. O token é removido do cliente — operação instantânea.</td></tr>
+          <tr><td>Renovar sessão</td><td>Automático — o cliente renova o token silenciosamente em segundo plano.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Perfil e dados pessoais</h3>
+      <table class="feat-table">
+        <thead><tr><th>Ação</th><th>Onde</th></tr></thead>
+        <tbody>
+          <tr><td>Ver perfil</td><td>Menu de utilizador → Perfil</td></tr>
+          <tr><td>Alterar nome / email</td><td>Perfil → Editar</td></tr>
+          <tr><td>Alterar palavra-passe</td><td>Perfil → Palavra-passe</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 4. AUTENTICAÇÃO DE DOIS FATORES (2FA)                          -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="2fa">
+    <div class="section-header">
+      <div class="s-num">4</div>
+      <h2>Autenticação de dois fatores (2FA / TOTP)</h2>
+    </div>
+
+    <p>A 2FA adiciona uma segunda camada de segurança ao login — mesmo que a sua palavra-passe seja comprometida, o acesso requer também um código de 6 dígitos gerado por uma app autenticadora (Google Authenticator, Microsoft Authenticator, Authy, etc.).</p>
+
+    <div class="sub-section">
+      <h3>Ativar a 2FA</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Aceda às Definições de segurança</div><div class="step-text">Perfil → Segurança → Ativar autenticação de dois fatores</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Leia o QR code</div><div class="step-text">Abra a app autenticadora no telemóvel e digitalize o código QR apresentado.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Confirme o primeiro código</div><div class="step-text">Introduza o código de 6 dígitos gerado pela app para confirmar a ativação.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Comportamento da 2FA</h3>
+      <table class="feat-table">
+        <thead><tr><th>Situação</th><th>Comportamento</th></tr></thead>
+        <tbody>
+          <tr><td>Login normal com 2FA ativa</td><td>Após email+password corretos, é pedido o código TOTP</td></tr>
+          <tr><td>Conta de administrador</td><td>A 2FA é obrigatória; encaminhado para configuração se não estiver ativa</td></tr>
+          <tr><td>Código expirado</td><td>Tolerância de ±30 segundos (1 janela de deriva) para compensar desfasamento de relógio</td></tr>
+          <tr><td>Desativar 2FA</td><td>Perfil → Segurança → Desativar; requer confirmação com código TOTP atual</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span>Se perder acesso à app autenticadora sem fazer backup do segredo TOTP, pode perder o acesso à conta. Guarde o segredo apresentado durante a configuração num local seguro.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 5. GESTÃO DE ÁRVORES                                            -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="trees">
+    <div class="section-header">
+      <div class="s-num">5</div>
+      <h2>Gestão de árvores</h2>
+    </div>
+
+    <p>Uma <strong>árvore</strong> é um espaço independente de dados genealógicos. Pode ter várias árvores — por exemplo, uma para o ramo materno e outra para o paterno.</p>
+
+    <div class="sub-section">
+      <h3>Criar uma árvore</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Abra o seletor de árvore</div><div class="step-text">Na barra lateral, clique no seletor de árvore no topo.</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Clique em "Nova árvore"</div><div class="step-text">Introduza um nome obrigatório e uma descrição opcional.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Confirme</div><div class="step-text">A árvore é criada e fica ativa de imediato. Fica como Dono.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Operações sobre árvores</h3>
+      <table class="feat-table">
+        <thead><tr><th>Ação</th><th>Onde</th><th>Papel mínimo</th></tr></thead>
+        <tbody>
+          <tr><td>Listar árvores</td><td>Seletor de árvore</td><td>Qualquer</td></tr>
+          <tr><td>Editar nome/descrição</td><td>Definições da Árvore → Informações Gerais</td><td>Dono</td></tr>
+          <tr><td>Eliminar árvore</td><td>Definições da Árvore → Zona de Perigo</td><td>Dono</td></tr>
+          <tr><td>Mudar de árvore ativa</td><td>Seletor de árvore (barra lateral)</td><td>Qualquer</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-danger">
+        <span class="callout-icon">⛔</span>
+        <span>Eliminar uma árvore é irreversível. Todos os dados (pessoas, famílias, fotos, documentos, histórico) são permanentemente apagados. Exige confirmação digitando o nome exato da árvore.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 6. MEMBROS E CONVITES                                           -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="members">
+    <div class="section-header">
+      <div class="s-num">6</div>
+      <h2>Membros e convites</h2>
+    </div>
+
+    <p>Partilhe a sua árvore com familiares para que todos possam contribuir ou consultar.</p>
+
+    <div class="sub-section">
+      <h3>Convidar por email</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Aceda à Definições da Árvore</div><div class="step-text">Menu lateral → ícone 🌳 no rodapé → secção "Convidar por Email"</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Preencha o formulário</div><div class="step-text">Introduza o email do familiar e escolha o papel: <span class="pill pill-blue">Editor</span> (pode criar/editar) ou <span class="pill pill-green">Leitor</span> (só visualiza).</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Enviar</div><div class="step-text">O convidado recebe um email com um link único. Se já tiver conta, recebe também uma notificação na aplicação.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Estado dos convites</h3>
+      <table class="feat-table">
+        <thead><tr><th>Estado</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-amber">Pendente</span></td><td>Email enviado, aguarda aceitação</td></tr>
+          <tr><td><span class="pill pill-green">Aceite</span></td><td>Utilizador aceitou e foi adicionado à árvore</td></tr>
+          <tr><td><span class="pill pill-red">Recusado</span></td><td>Utilizador recusou o convite</td></tr>
+          <tr><td><span class="pill pill-red">Expirado</span></td><td>Link expirou sem resposta</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Gerir membros existentes</h3>
+      <table class="feat-table">
+        <thead><tr><th>Ação</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>Ver membros</td><td>Definições da Árvore → Membros — listagem com nome, email, papel e data de entrada</td></tr>
+          <tr><td>Alterar papel</td><td>Dropdown na linha do membro — alteração imediata</td></tr>
+          <tr><td>Remover membro</td><td>Botão ✕ na linha do membro — o utilizador perde acesso imediatamente</td></tr>
+          <tr><td>Reenviar convite</td><td>Secção de convites → botão "Reenviar" num convite pendente</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 7. CADASTRO DE PESSOAS                                          -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="cadastro">
+    <div class="section-header">
+      <div class="s-num">7</div>
+      <h2>Cadastro de pessoas</h2>
+    </div>
+
+    <p>O <strong>Cadastro</strong> é o registo central de todas as pessoas na árvore ativa. Aqui cria, pesquisa, edita e apaga indivíduos.</p>
+
+    <div class="sub-section">
+      <h3>Pesquisa e filtros</h3>
+      <table class="feat-table">
+        <thead><tr><th>Controlo</th><th>Função</th></tr></thead>
+        <tbody>
+          <tr><td>Campo de pesquisa</td><td>Filtra a lista pelo nome em tempo real</td></tr>
+          <tr><td>Ocultar eliminados</td><td>Toggle que esconde registos marcados como apagados</td></tr>
+          <tr><td>Colunas</td><td>Nome, Nascimento, Idade calculada, Parentesco, Apelido, Árvore</td></tr>
+          <tr><td>Legenda</td><td>Linha direta (azul), Cônjuges (roxo), Colaterais (laranja), Foco (dourado)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Adicionar uma pessoa</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Clique em "+ Adicionar pessoa"</div><div class="step-text">Botão no topo do Cadastro. Abre o painel lateral de edição.</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Preencha os dados</div><div class="step-text">Nome próprio, apelido, sexo, datas e locais de eventos (nascimento, batismo, óbito, sepultura), notas, fontes, foto. Só o preenchimento mínimo (nome) é obrigatório.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Guarde</div><div class="step-text">Clique em <strong>Guardar</strong>. A pessoa aparece de imediato na lista.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Relações familiares</h3>
+      <p>No painel de edição de uma pessoa, encontra as secções <strong>Pais</strong>, <strong>Cônjuges</strong> e <strong>Filhos</strong>. Clique em <strong>+ Adicionar</strong> para criar ligações.</p>
+      <table class="feat-table">
+        <thead><tr><th>Relação</th><th>Como adicionar</th></tr></thead>
+        <tbody>
+          <tr><td>Pais</td><td>Secção "Pais" no painel da pessoa → pesquisar e escolher pai/mãe</td></tr>
+          <tr><td>Cônjuge</td><td>Secção "Cônjuges" → pesquisar e adicionar; cria registo FAM automaticamente</td></tr>
+          <tr><td>Filhos</td><td>Secção "Filhos" → pesquisar e adicionar filho a um casal</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <span>As relações são bidirecionais — adicionar um filho a um casal aparece automaticamente nos perfis dos pais.</span>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Campos suportados por pessoa</h3>
+      <table class="feat-table">
+        <thead><tr><th>Campo</th><th>Tipo</th></tr></thead>
+        <tbody>
+          <tr><td>Nome próprio / Apelido</td><td>Texto livre; suporta variantes (alcunha, nome de solteira…)</td></tr>
+          <tr><td>Sexo</td><td>Masculino, Feminino, Desconhecido</td></tr>
+          <tr><td>Nascimento / Batismo / Óbito / Sepultura</td><td>Data + local</td></tr>
+          <tr><td>Atributos</td><td>Ocupação, título, nobreza, raça, nacionalidade, endereço…</td></tr>
+          <tr><td>Notas</td><td>Texto livre associado à pessoa</td></tr>
+          <tr><td>Fontes</td><td>Referências a registos SOUR</td></tr>
+          <tr><td>Multimídia</td><td>Fotos e documentos associados</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 8. VISUALIZAÇÃO DA ÁRVORE                                       -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="arvore">
+    <div class="section-header">
+      <div class="s-num">8</div>
+      <h2>Visualização da árvore</h2>
+    </div>
+
+    <p>A página <strong>Árvore</strong> mostra o diagrama interativo da família, centrado numa pessoa de foco. Suporta múltiplos modos de visualização.</p>
+
+    <div class="sub-section">
+      <h3>Modos de visualização</h3>
+      <table class="feat-table">
+        <thead><tr><th>Modo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>Ampulheta</td><td>Mostra ascendentes e descendentes da pessoa em foco (motor Topola)</td></tr>
+          <tr><td>Parentes</td><td>Mostra todos os parentes próximos num layout relacional (motor Topola)</td></tr>
+          <tr><td>Fancy</td><td>Visualização elegante com fundo de cor por ramo (motor Topola)</td></tr>
+          <tr><td>Donatso</td><td>Diagrama de família moderno com animações suaves (motor F3 family-chart)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Navegação no diagrama</h3>
+      <table class="feat-table">
+        <thead><tr><th>Gesto / Controlo</th><th>Ação</th></tr></thead>
+        <tbody>
+          <tr><td>Clicar numa pessoa</td><td>Abre o painel lateral de edição dessa pessoa</td></tr>
+          <tr><td>Arrastar (drag)</td><td>Deslocar o diagrama (pan)</td></tr>
+          <tr><td>Roda do rato / pinch</td><td>Zoom in/out</td></tr>
+          <tr><td>Botão "Zoom +"</td><td>Aumentar ampliação</td></tr>
+          <tr><td>Botão "Ajustar ao ecrã"</td><td>Mostrar toda a árvore</td></tr>
+          <tr><td>Botão "Centrar"</td><td>Centrar na pessoa em foco</td></tr>
+          <tr><td>Campo de foco</td><td>Pesquisar e centrar a árvore em qualquer pessoa</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Livro de História Familiar</h3>
+      <p>O botão <strong>Livro de Família</strong> (na barra de ferramentas da árvore) abre uma visualização de livro interativo — folhear página a página com fotos e factos históricos contextualizados.</p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 9. ÁLBUM DE FOTOS                                               -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="album">
+    <div class="section-header">
+      <div class="s-num">9</div>
+      <h2>Álbum de fotos</h2>
+    </div>
+
+    <p>Gestão completa de fotografias e multimídia associados à árvore, com marcação de pessoas em fotos.</p>
+
+    <div class="sub-section">
+      <h3>Galeria</h3>
+      <table class="feat-table">
+        <thead><tr><th>Controlo</th><th>Função</th></tr></thead>
+        <tbody>
+          <tr><td>Pesquisa</td><td>Filtrar por nome ou pessoa associada</td></tr>
+          <tr><td>Modo seleção</td><td>Selecionar múltiplas fotos para operações em lote</td></tr>
+          <tr><td>Imprimir</td><td>Imprimir layout de galeria com as fotos selecionadas</td></tr>
+          <tr><td>Deduplicar</td><td>Ocultar fotos duplicadas (mesmo ficheiro importado mais do que uma vez)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Detalhe da foto</h3>
+      <p>Clicar numa miniatura abre o painel de detalhe:</p>
+      <table class="feat-table">
+        <thead><tr><th>Função</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>Navegação ← →</td><td>Percorrer fotos com as setas do teclado ou botões</td></tr>
+          <tr><td>Download</td><td>Transferir o ficheiro original</td></tr>
+          <tr><td>Eliminar</td><td>Apagar permanentemente (requer confirmação)</td></tr>
+          <tr><td>Maximizar</td><td>Ver a foto em ecrã inteiro</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Marcação de pessoas (zonas)</h3>
+      <p>É possível marcar quem aparece em cada foto com um rectângulo delimitador.</p>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Clique em "Desenhar"</div><div class="step-text">Ativa o modo de desenho — o cursor muda para mira.</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Arraste sobre a face</div><div class="step-text">Desenhe um rectângulo em torno da face da pessoa.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Associe a pessoa</div><div class="step-text">Selecione o nome da pessoa na lista que aparece. A zona fica guardada e visível como retângulo azul.</div></div></div>
+      </div>
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <span>As zonas têm alças de redimensionamento nos 4 cantos. Pode ajustar ou eliminar cada zona individualmente.</span>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Elegibilidade para o Livro</h3>
+      <p>No painel de detailhe de cada foto, o toggle <strong>Incluir no Livro</strong> determina se ela aparece no Livro de História Familiar.</p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 10. DOCUMENTOS                                                  -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="documentos">
+    <div class="section-header">
+      <div class="s-num">10</div>
+      <h2>Documentos</h2>
+    </div>
+
+    <p>A biblioteca de <strong>Documentos</strong> organiza ficheiros não-fotográficos — PDFs, certidões, registos, etc.</p>
+
+    <table class="feat-table">
+      <thead><tr><th>Funcionalidade</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Pesquisa</td><td>Filtrar por nome ou caminho do ficheiro</td></tr>
+        <tr><td>Filtro por tipo</td><td>Pastilhas de filtragem dinâmicas por tipo de ficheiro (PDF, JPG, etc.)</td></tr>
+        <tr><td>Visualizador</td><td>PDF em iframe, imagens em &lt;img&gt;, texto em pre-formatado; ficheiros não suportados têm botão de download</td></tr>
+        <tr><td>Download</td><td>Transferir o ficheiro original a partir do visualizador</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 11. ANIVERSÁRIOS                                                -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="aniversarios">
+    <div class="section-header">
+      <div class="s-num">11</div>
+      <h2>Aniversários</h2>
+    </div>
+
+    <p>Calendário de aniversários de todas as pessoas com data de nascimento conhecida, agrupado por mês.</p>
+
+    <table class="feat-table">
+      <thead><tr><th>Elemento</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Data</td><td>Caixa com dia, mês e dia da semana; cor verde se for hoje</td></tr>
+        <tr><td>Contagem regressiva</td><td>Pastilha "X dias" até ao próximo aniversário, ou "Hoje!" se for hoje</td></tr>
+        <tr><td>Idade</td><td>Idade calculada automaticamente ou ano de nascimento</td></tr>
+        <tr><td>Link para a árvore</td><td>Clique no nome para centrar a árvore nessa pessoa</td></tr>
+        <tr><td>Painel de edição</td><td>Clique na foto/avatar para abrir o painel completo de edição</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 12. DISTRIBUIÇÃO MUNDIAL                                        -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="mundo">
+    <div class="section-header">
+      <div class="s-num">12</div>
+      <h2>Distribuição mundial</h2>
+    </div>
+
+    <p>Mapa interativo com a distribuição geográfica de pessoas da árvore, baseada nos locais dos eventos registados.</p>
+
+    <div class="sub-section">
+      <h3>Filtros de evento</h3>
+      <p>Pastilhas no topo para incluir/excluir tipos de evento: <strong>Nascimento</strong>, <strong>Óbito</strong>, <strong>Residência</strong>, <strong>Outros</strong>.</p>
+    </div>
+
+    <div class="sub-section">
+      <h3>Indicadores</h3>
+      <table class="feat-table">
+        <thead><tr><th>KPI</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>Total de locais</td><td>Locais com país identificado</td></tr>
+          <tr><td>Países distintos</td><td>Número de países únicos</td></tr>
+          <tr><td>País principal</td><td>País com mais ocorrências</td></tr>
+          <tr><td>Sem país</td><td>Locais não mapeados a um país</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Interação com o mapa</h3>
+      <table class="feat-table">
+        <thead><tr><th>Gesto</th><th>Ação</th></tr></thead>
+        <tbody>
+          <tr><td>Passar o rato sobre um país</td><td>Tooltip com nome e contagem de pessoas</td></tr>
+          <tr><td>Arrastar</td><td>Pan do mapa</td></tr>
+          <tr><td>Botões +/−/reset</td><td>Zoom e reposição</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 13. INDICADORES                                                 -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="indicadores">
+    <div class="section-header">
+      <div class="s-num">13</div>
+      <h2>Indicadores genealógicos</h2>
+    </div>
+
+    <p>Dashboard de estatísticas e análises sobre a árvore, organizado em 5 separadores.</p>
+
+    <div class="sub-section">
+      <h3>KPIs principais</h3>
+      <p>Barra de 5 cartões no topo: Total de Pessoas, Nascimentos, Óbitos, Casamentos, Relações.</p>
+    </div>
+
+    <div class="sub-section">
+      <h3>Separadores</h3>
+      <table class="feat-table">
+        <thead><tr><th>Separador</th><th>Conteúdo</th></tr></thead>
+        <tbody>
+          <tr><td>Geral</td><td>Qualidade dos dados (erros/avisos), distribuição por género, eventos por tipo, os mais velhos e mais recentes da árvore</td></tr>
+          <tr><td>Locais</td><td>Mapa-mundo com países por calor, ranking de países, localidades mais frequentes</td></tr>
+          <tr><td>Nomes</td><td>Top nomes masculinos, femininos e apelidos</td></tr>
+          <tr><td>Linha do Tempo</td><td>Histogramas de longevidade por género, nascimentos e óbitos por década, pessoascom mais e menos idade</td></tr>
+          <tr><td>Família</td><td>Casamento mais antigo e mais recente, família com mais filhos, casamento mais longo, pais mais velhos, média de filhos por casal</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 14. HISTÓRICO DE ALTERAÇÕES                                     -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="historico">
+    <div class="section-header">
+      <div class="s-num">14</div>
+      <h2>Histórico de alterações</h2>
+    </div>
+
+    <p>Registo de auditoria de todas as operações realizadas na árvore — quem fez o quê e quando.</p>
+
+    <table class="feat-table">
+      <thead><tr><th>Funcionalidade</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Linha do tempo</td><td>Entradas agrupadas por dia, com ação, detalhe, hora e utilizador</td></tr>
+        <tr><td>Pesquisa textual</td><td>Filtrar por qualquer texto na entrada</td></tr>
+        <tr><td>Filtro por categoria</td><td>Pessoas, Eventos, Relações, GEDCOM, Álbum, Documentos, Geral, Logins</td></tr>
+        <tr><td>Badges de ação</td><td>CREATE (verde), UPDATE (azul), DELETE (vermelho)</td></tr>
+        <tr><td>Limpar tudo</td><td>Apaga todo o histórico (com confirmação)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 15. VALIDAÇÃO DE DADOS                                          -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="validacao">
+    <div class="section-header">
+      <div class="s-num">15</div>
+      <h2>Validação de dados</h2>
+    </div>
+
+    <p>Auditoria automática de qualidade que identifica problemas estruturais, lógicos e de boas práticas nos dados genealógicos.</p>
+
+    <div class="sub-section">
+      <h3>KPIs de qualidade</h3>
+      <table class="feat-table">
+        <thead><tr><th>Indicador</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-red">Erros</span></td><td>Problemas críticos que invalidam dados ou relações</td></tr>
+          <tr><td><span class="pill pill-amber">Avisos</span></td><td>Anomalias que merecem atenção mas não impedem funcionamento</td></tr>
+          <tr><td><span class="pill pill-blue">Informações</span></td><td>Sugestões de boas práticas genealógicas</td></tr>
+          <tr><td><span class="pill pill-green">Pessoas analisadas</span></td><td>Total de pessoas incluídas na análise</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Tipos de problemas detetados</h3>
+      <table class="feat-table">
+        <thead><tr><th>Categoria</th><th>Exemplos</th></tr></thead>
+        <tbody>
+          <tr><td>Funcional</td><td>Pessoas sem ligação a nenhuma família, nomes duplicados, impossibilidades de idade pai/filho, ciclos genealógicos</td></tr>
+          <tr><td>Técnico</td><td>Campos obrigatórios em falta, datas inválidas ou contraditórias, estrutura GEDCOM incorreta</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Utilização</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Clique em "Executar Análise"</div><div class="step-text">O sistema analisa todas as pessoas e famílias da árvore.</div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Reveja os resultados</div><div class="step-text">Use os filtros de severidade e categoria para focar nos problemas mais importantes.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Corrija</div><div class="step-text">Clique no nome da pessoa na tabela de problemas para abrir diretamente o seu painel de edição.</td></div></div></div>
+      </div>
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <span>Clique em <strong>Regras</strong> para ver a lista completa de todas as regras de validação com ID, severidade e descrição.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 16. BIBLIOTECA HISTÓRICA                                        -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="historico-biblioteca">
+    <div class="section-header">
+      <div class="s-num">16</div>
+      <h2>Biblioteca histórica</h2>
+    </div>
+
+    <p>Base de dados de factos históricos que contextualizam a vida das pessoas na árvore. Usada na geração do Livro de História Familiar.</p>
+
+    <div class="sub-section">
+      <h3>Campos de um facto histórico</h3>
+      <table class="feat-table">
+        <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>País</td><td>País ao qual o facto se aplica (aceita valores livres: "Mundial", "Europa", etc.)</td></tr>
+          <tr><td>Dia / Mês</td><td>Dia e mês exatos (opcionais)</td></tr>
+          <tr><td>Ano início / fim</td><td>Período de vigência; aceita texto livre (ex.: "c. 700 a.C.")</td></tr>
+          <tr><td>Título</td><td>Etiqueta breve (opcional)</td></tr>
+          <tr><td>Descrição / Facto</td><td>Texto longo do evento histórico (obrigatório)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <h3>Importar e exportar</h3>
+      <table class="feat-table">
+        <thead><tr><th>Operação</th><th>Formatos</th><th>Notas</th></tr></thead>
+        <tbody>
+          <tr><td>Exportar</td><td>Excel (XLSX)</td><td>Exporta todos os factos ativos da árvore</td></tr>
+          <tr><td>Importar</td><td>XLSX, XLS, ODS, CSV</td><td>Importação sequencial com barra de progresso; mostra total/importados/erros</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span>A importação <strong>adiciona</strong> registos sem eliminar os existentes. Para substituir a biblioteca, utilize "Apagar tudo" antes de importar.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 17. GEDCOM — IMPORTAR E EXPORTAR                                -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="gedcom">
+    <div class="section-header">
+      <div class="s-num">17</div>
+      <h2>GEDCOM — Importar e exportar</h2>
+    </div>
+
+    <p>O <strong>GEDCOM</strong> (Genealogical Data Communication) é o formato padrão da indústria para partilha de dados genealógicos. O myLineage suporta GEDCOM 7.</p>
+
+    <div class="sub-section">
+      <h3>Exportar</h3>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Aceda a Definições da Árvore → GEDCOM → Exportar</div><div class="step-text"></div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Escolha o formato</div><div class="step-text">Ficheiro <code>.ged</code> simples, ou <code>.zip</code> com fotos incluídas.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Clique em "Exportar GEDCOM"</div><div class="step-text">O ficheiro é gerado e transferido de imediato.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Importar</h3>
+      <div class="callout callout-danger">
+        <span class="callout-icon">⛔</span>
+        <span>A importação <strong>substitui todos os dados</strong> da árvore. Exporte uma cópia de segurança antes de importar.</span>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-line"></div><div class="step-num">1</div><div class="step-body"><div class="step-title">Aceda a Definições da Árvore → GEDCOM → Importar</div><div class="step-text"></div></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num">2</div><div class="step-body"><div class="step-title">Selecione o ficheiro</div><div class="step-text">Ficheiros <code>.ged</code> ou <code>.gedcom</code>. Máximo 50 MB.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Confirme a importação</div><div class="step-text">Após importação, o log apresenta mensagens de info/sucesso/erro. As últimas 5 importações ficam registadas no histórico.</div></div></div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>Compatibilidade</h3>
+      <p>Ficheiros GEDCOM exportados podem ser abertos em: Ancestry, FamilySearch, MacFamilyTree, Gramps, RootsMagic, entre outros. Marcações de zonas (bounding boxes de fotos) são preservadas no re-import.</p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 18. DEFINIÇÕES DA ÁRVORE                                        -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="tree-settings">
+    <div class="section-header">
+      <div class="s-num">18</div>
+      <h2>Definições da árvore</h2>
+    </div>
+
+    <p>Acedido pelo ícone 🌳 no rodapé do menu lateral. Configurações por árvore — disponíveis apenas para o Dono.</p>
+
+    <table class="feat-table">
+      <thead><tr><th>Secção</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Informações Gerais</td><td>Editar nome e descrição da árvore</td></tr>
+        <tr><td>Membros</td><td>Ver lista de membros, alterar papéis, remover membros</td></tr>
+        <tr><td>Convidar por Email</td><td>Enviar convites e gerir convites existentes</td></tr>
+        <tr><td>GEDCOM</td><td>Importar e exportar (ver secção <a href="#gedcom">17</a>)</td></tr>
+        <tr><td>Biblioteca Histórica</td><td>Contador de factos e acesso à gestão da biblioteca</td></tr>
+        <tr><td>Pessoa em Foco</td><td>Definir a pessoa central do diagrama da árvore</td></tr>
+        <tr><td>Zona de Perigo</td><td>Eliminação permanente e irreversível da árvore</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 19. DEFINIÇÕES GLOBAIS                                          -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="configuracao">
+    <div class="section-header">
+      <div class="s-num">19</div>
+      <h2>Definições globais</h2>
+    </div>
+
+    <p>Preferências da aplicação independentes da árvore ativa. Acedido pelo ícone ⚙ no rodapé do menu.</p>
+
+    <table class="feat-table">
+      <thead><tr><th>Secção</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Biblioteca de Documentos</td><td>Configurar pasta local de documentos (File System Access API ou input de diretório)</td></tr>
+        <tr><td>Biblioteca de Fotos</td><td>Configurar pasta local de fotos</td></tr>
+        <tr><td>Pedidos de Acesso</td><td>Gerir pedidos pendentes (visível quando aplicável)</td></tr>
+        <tr><td>Administrador</td><td>Configurar número de telefone para Microsoft Authenticator (só admins)</td></tr>
+        <tr><td>Ações Perigosas</td><td>Apagar todo o conteúdo da árvore ou limpar todas as definições</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- 20. NOTIFICAÇÕES                                                -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section class="section" id="notifications">
+    <div class="section-header">
+      <div class="s-num">20</div>
+      <h2>Notificações</h2>
+    </div>
+
+    <p>Sistema de notificações in-app para convites e outras ações que requerem atenção do utilizador.</p>
+
+    <table class="feat-table">
+      <thead><tr><th>Ação</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Ver notificações</td><td>Ícone de sino na barra de navegação; badge com contagem de não lidas</td></tr>
+        <tr><td>Marcar como lida</td><td>Clicar numa notificação individual</td></tr>
+        <tr><td>Marcar todas como lidas</td><td>Botão "Marcar todas" no topo da lista</td></tr>
+        <tr><td>Eliminar</td><td>Botão ✕ em cada notificação</td></tr>
+        <tr><td>Tipos de notificação</td><td>Convite para árvore (recebido automaticamente ao ser convidado)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- Active nav highlight on scroll -->
+<script>
+  (function () {
+    var navItems = document.querySelectorAll('.nav-item[href^="#"]');
+    var sections = Array.from(navItems).map(function (a) {
+      return document.getElementById(a.getAttribute('href').slice(1));
+    });
+    function onScroll() {
+      var scrollY = window.scrollY + 120;
+      var active = sections[0];
+      sections.forEach(function (s) {
+        if (s && s.offsetTop <= scrollY) active = s;
+      });
+      navItems.forEach(function (a) {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + (active && active.id));
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+</body>
+</html>

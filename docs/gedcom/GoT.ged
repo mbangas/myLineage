@@ -1,0 +1,140 @@
+0 HEAD
+1 SOUR ChatGPT
+2 VERS 1.0
+2 NAME Game of Thrones Full Genealogy Simplified for Topola
+1 GEDC
+2 VERS 7.0
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+
+0 @I1@ INDI
+1 NAME Aegon I /Targaryen/
+1 SEX M
+1 BIRT
+2 DATE c. 27 AC
+2 PLAC Dragonstone, Westeros
+1 DEAT
+2 DATE c. 37 AC
+2 PLAC Porto Real, Westeros
+1 FAMS @F1@
+1 OBJE https://awoiaf.westeros.org/images/characters/Aegon_I.jpg
+1 NOTE Primeiro Rei dos Sete Reinos, fundador da dinastia Targaryen.
+
+0 @I2@ INDI
+1 NAME Visenya /Targaryen/
+1 SEX F
+1 BIRT
+2 DATE c. 30 AC
+2 PLAC Dragonstone, Westeros
+1 FAMS @F1@
+1 OBJE https://awoiaf.westeros.org/images/characters/Visenya_Targaryen.jpg
+1 NOTE Irmã-esposa de Aegon I, conhecida por sua habilidade com dragões.
+
+0 @I3@ INDI
+1 NAME Rhaenys /Targaryen/
+1 SEX F
+1 BIRT
+2 DATE c. 31 AC
+2 PLAC Dragonstone, Westeros
+1 FAMS @F1@
+1 OBJE https://awoiaf.westeros.org/images/characters/Rhaenys_Targaryen.jpg
+1 NOTE Irmã-esposa de Aegon I, participou da Conquista de Westeros.
+
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 WIFE @I3@
+1 CHIL @I4
+1 CHIL @I5
+
+0 @I4@ INDI
+1 NAME Aenys I /Targaryen/
+1 SEX M
+1 BIRT
+2 DATE c. 37 AC
+2 PLAC Porto Real, Westeros
+1 DEAT
+2 DATE c. 48 AC
+2 PLAC Porto Real, Westeros
+1 FAMC @F1@
+1 FAMS @F2@
+1 OBJE https://awoiaf.westeros.org/images/characters/Aenys_I.jpg
+1 NOTE Filho de Aegon I, reinado marcado por instabilidade e rebeliões.
+
+0 @I5@ INDI
+1 NAME Maegor I /Targaryen/
+1 SEX M
+1 BIRT
+2 DATE c. 38 AC
+2 PLAC Porto Real, Westeros
+1 DEAT
+2 DATE c. 48 AC
+2 PLAC Porto Real, Westeros
+1 FAMC @F1@
+1 OBJE https://awoiaf.westeros.org/images/characters/Maegor_I.jpg
+1 NOTE Irmão de Aenys I, conhecido como Maegor, o Cruel.
+
+0 @I6@ INDI
+1 NAME Jaehaerys I /Targaryen/
+1 SEX M
+1 BIRT
+2 DATE c. 48 AC
+2 PLAC Porto Real, Westeros
+1 DEAT
+2 DATE c. 103 AC
+2 PLAC Porto Real, Westeros
+1 FAMS @F3@
+1 OBJE https://awoiaf.westeros.org/images/characters/Jaehaerys_I.jpg
+1 NOTE Rei conhecido pela longevidade e estabilidade do seu reinado.
+
+0 @I7@ INDI
+1 NAME Alysanne /Velaryon/
+1 SEX F
+1 BIRT
+2 DATE c. 50 AC
+2 PLAC Driftmark, Westeros
+1 FAMS @F3@
+1 OBJE https://awoiaf.westeros.org/images/characters/Alysanne_Velaryon.jpg
+1 NOTE Esposa de Jaehaerys I, conhecida por promover paz e infraestrutura.
+
+0 @F3@ FAM
+1 HUSB @I6@
+1 WIFE @I7@
+1 CHIL @I8
+1 CHIL @I9
+1 CHIL @I10
+
+0 @I8@ INDI
+1 NAME Viserys I /Targaryen/
+1 SEX M
+1 BIRT
+2 DATE c. 103 AC
+2 PLAC Porto Real, Westeros
+1 FAMC @F3@
+1 FAMS @F4@
+1 OBJE https://awoiaf.westeros.org/images/characters/Viserys_I.jpg
+1 NOTE Rei de Westeros antes da Dança dos Dragões.
+
+0 @I9@ INDI
+1 NAME Daemon /Targaryen/
+1 SEX M
+1 BIRT
+2 DATE c. 110 AC
+2 PLAC Porto Real, Westeros
+1 FAMC @F3@
+1 FAMS @F5@
+1 OBJE https://awoiaf.westeros.org/images/characters/Daemon_Targaryen.jpg
+1 NOTE Irmão de Viserys I, conhecido por sua ambição e coragem.
+
+0 @I10@ INDI
+1 NAME Rhaenys II /Targaryen/
+1 SEX F
+1 BIRT
+2 DATE c. 115 AC
+2 PLAC Porto Real, Westeros
+1 FAMC @F3@
+1 OBJE https://awoiaf.westeros.org/images/characters/Rhaenys_II.jpg
+1 NOTE Participou da Dinastia Targaryen, filha de Jaehaerys I e Alysanne.
+
+0 TRLR
+

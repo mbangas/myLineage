@@ -42,6 +42,29 @@
     '.qs-pdf-bar{display:flex;justify-content:flex-end;margin-top:8px;padding-top:16px;border-top:1px solid var(--border-subtle);}',
     '.qs-pdf-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);background:var(--accent-soft);color:var(--accent);border:1px solid rgba(68,147,248,.3);font-size:0.82rem;font-weight:600;cursor:pointer;transition:background .15s;}',
     '.qs-pdf-btn:hover{background:rgba(68,147,248,.18);}',
+    '.ab-section{margin-bottom:20px;}',
+    '.ab-label{font-size:0.7rem;font-weight:700;color:var(--text-disabled);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;}',
+    '.ab-version{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);border:1px solid rgba(68,147,248,.25);border-radius:20px;padding:4px 12px;font-size:0.85rem;font-weight:600;color:var(--accent);}',
+    '.ab-link{display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--accent);text-decoration:none;}',
+    '.ab-link:hover{text-decoration:underline;}',
+    '.ab-debug-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}',
+    '.ab-debug-block{background:rgba(255,255,255,.03);border:1px solid var(--border-subtle);border-radius:8px;padding:14px 16px;font-family:monospace;font-size:0.78rem;color:var(--text-secondary);line-height:1.9;white-space:pre-wrap;word-break:break-all;}',
+    '.ab-copy-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--radius-sm);background:var(--accent-soft);color:var(--accent);border:1px solid rgba(68,147,248,.25);font-size:0.78rem;font-weight:600;cursor:pointer;transition:background .15s;}',
+    '.ab-copy-btn:hover{background:rgba(68,147,248,.18);}',
+    '.ab-copy-btn.copied{background:rgba(72,199,142,.12);color:#48c78e;border-color:rgba(72,199,142,.3);}',
+    '.br-form{display:flex;flex-direction:column;gap:14px;}',
+    '.br-field{display:flex;flex-direction:column;gap:5px;}',
+    '.br-label{font-size:0.72rem;font-weight:600;color:var(--text-secondary);letter-spacing:0.03em;}',
+    '.br-label span{color:var(--red,#f85149);margin-left:2px;}',
+    '.br-input,.br-select,.br-textarea{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius-sm,6px);color:var(--text-main,#e2e8f0);font-size:0.84rem;padding:8px 10px;font-family:inherit;transition:border-color .15s;width:100%;}',
+    '.br-textarea{min-height:90px;resize:vertical;line-height:1.6;}',
+    '.br-input:focus,.br-select:focus,.br-textarea:focus{outline:none;border-color:var(--accent,#4493f8);}',
+    '.br-select option{background:#1c2333;}',
+    '.br-hint{font-size:0.74rem;color:var(--text-disabled,#64748b);}',
+    '.br-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:6px;border-top:1px solid var(--border-subtle);}',
+    '.br-submit{display:inline-flex;align-items:center;gap:6px;padding:7px 18px;border-radius:var(--radius-sm,6px);background:var(--accent,#4493f8);color:#fff;border:none;font-size:0.84rem;font-weight:600;cursor:pointer;transition:background .15s;}',
+    '.br-submit:hover{background:#2d7de0;}',
+    '.br-submit:disabled{opacity:.5;cursor:not-allowed;}',
     '@media print{body > *:not(.help-modal-overlay){display:none !important;} .help-modal-overlay{display:flex !important;position:static !important;background:none !important;} .help-modal{max-height:none !important;box-shadow:none !important;border:none !important;max-width:100% !important;padding:16px !important;} .help-modal-close,.qs-pdf-bar,.help-modal-subtitle{display:none !important;} .qs-diagram{white-space:pre;font-size:0.72rem;} .qs-step{break-inside:avoid;}}',
   ].join('\n');
   var styleEl = document.createElement('style');
@@ -256,6 +279,252 @@
     }
   } catch (e) {
     console.warn('[help-menu] Quickstart content error:', e);
+  }
+
+  /* ── Manual modal content ─────────────────────────────────────── */
+  try {
+    var manualSub = document.getElementById('helpModal-manual-subtitle');
+    if (manualSub) manualSub.textContent = 'Refer\u00eancia completa de todas as funcionalidades do myLineage';
+
+    var manualBody = document.getElementById('helpModal-manual-body');
+    if (manualBody) {
+      manualBody.innerHTML = [
+        '<p style="margin-bottom:18px;line-height:1.7;">',
+          'O manual cobre todas as \u00e1reas da aplica\u00e7\u00e3o: conta e autentica\u00e7\u00e3o, gest\u00e3o de \u00e1rvores, cadastro de pessoas, ',
+          '\u00e1lbum, documentos, indicadores, valida\u00e7\u00e3o, biblioteca hist\u00f3rica, GEDCOM e defini\u00e7\u00f5es.',
+        '</p>',
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">',
+          '<a class="qs-pdf-btn" href="docs/manual/index.html" target="_blank" rel="noopener noreferrer" ',
+             'style="text-decoration:none;">',
+            '<i class="mdi mdi-book-open-variant" aria-hidden="true"></i>',
+            'Abrir manual</a>',
+          '<a class="qs-pdf-btn" id="manualDownloadBtn" href="docs/manual/index.html" download="myLineage-manual.html" ',
+             'style="text-decoration:none;background:rgba(63,185,80,.09);color:#3fb950;border-color:rgba(63,185,80,.25);">',
+            '<i class="mdi mdi-download" aria-hidden="true"></i>',
+            'Descarregar PDF</a>',
+        '</div>',
+        '<div class="qs-tip">',
+          '<i class="mdi mdi-lightbulb-outline"></i>',
+          '<span>O manual abre diretamente no browser. Para guardar em <strong>PDF</strong>, clique em <strong>Descarregar PDF</strong> ',
+          'ou abra o manual e use <strong>Ctrl+P</strong> (File \u2192 Print) e escolha "Guardar como PDF" no destino de impress\u00e3o.</span>',
+        '</div>',
+      ].join('');
+
+      var dlBtn = document.getElementById('manualDownloadBtn');
+      if (dlBtn) {
+        dlBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var win = window.open('docs/manual/index.html', '_blank');
+          if (win) {
+            win.addEventListener('load', function () {
+              setTimeout(function () { win.print(); }, 400);
+            });
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[help-menu] Manual content error:', e);
+  }
+
+  /* ── Bug report modal content ────────────────────────────────────── */
+  try {
+    var bugSub = document.getElementById('helpModal-bug-subtitle');
+    if (bugSub) bugSub.textContent = 'Preencha o formulário — será aberta uma issue no GitHub';
+
+    var bugBody = document.getElementById('helpModal-bug-body');
+    if (bugBody) {
+      bugBody.innerHTML = [
+        '<form class="br-form" id="brForm" novalidate>',
+          '<div class="br-field">',
+            '<label class="br-label" for="brTitle">Título<span>*</span></label>',
+            '<input class="br-input" id="brTitle" type="text" maxlength="150"',
+              ' placeholder="Resumo curto do problema…" required />',
+          '</div>',
+          '<div class="br-field">',
+            '<label class="br-label" for="brCategory">Categoria<span>*</span></label>',
+            '<select class="br-select" id="brCategory">',
+              '<option value="bug">🐛 Bug — algo não funciona como esperado</option>',
+              '<option value="visual">&#127912; Visual / Interface</option>',
+              '<option value="performance">⚡ Performance / lentidão</option>',
+              '<option value="data">&#128196; Dados / import ou export</option>',
+              '<option value="other">&#10067; Outro</option>',
+            '</select>',
+          '</div>',
+          '<div class="br-field">',
+            '<label class="br-label" for="brPage">Página / área</label>',
+            '<input class="br-input" id="brPage" type="text" maxlength="80"',
+              ' placeholder="ex.: Álbum, Cadastro, Árvore…" />',
+          '</div>',
+          '<div class="br-field">',
+            '<label class="br-label" for="brSteps">Passos para reproduzir<span>*</span></label>',
+            '<textarea class="br-textarea" id="brSteps"',
+              ' placeholder="1. Abri a p\u00e1gina X&#10;2. Cliquei em Y&#10;3. Apareceu o erro Z\u2026" required></textarea>',
+          '</div>',
+          '<div class="br-field">',
+            '<label class="br-label" for="brExpected">Comportamento esperado</label>',
+            '<input class="br-input" id="brExpected" type="text" maxlength="200"',
+              ' placeholder="Deveria acontecer…" />',
+          '</div>',
+          '<div class="br-field">',
+            '<label class="br-label" for="brActual">Comportamento atual</label>',
+            '<input class="br-input" id="brActual" type="text" maxlength="200"',
+              ' placeholder="Em vez disso aconteceu…" />',
+          '</div>',
+          '<div class="br-actions">',
+            '<button type="submit" class="br-submit" id="brSubmit">',
+              '<i class="mdi mdi-github" aria-hidden="true"></i>',
+              'Abrir issue no GitHub',
+            '</button>',
+          '</div>',
+        '</form>',
+      ].join('');
+
+      var brForm = document.getElementById('brForm');
+      if (brForm) {
+        brForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var title    = (document.getElementById('brTitle').value    || '').trim();
+          var category = (document.getElementById('brCategory').value || 'bug').trim();
+          var page     = (document.getElementById('brPage').value     || '').trim();
+          var steps    = (document.getElementById('brSteps').value    || '').trim();
+          var expected = (document.getElementById('brExpected').value || '').trim();
+          var actual   = (document.getElementById('brActual').value   || '').trim();
+
+          if (!title || !steps) {
+            document.getElementById('brTitle').focus();
+            return;
+          }
+
+          var body = [];
+          body.push('## Descrição');
+          if (page) body.push('**Página / área:** ' + page);
+          body.push('');
+          body.push('## Passos para reproduzir');
+          body.push(steps);
+          if (expected) { body.push(''); body.push('## Comportamento esperado'); body.push(expected); }
+          if (actual)   { body.push(''); body.push('## Comportamento atual');    body.push(actual);   }
+          body.push('');
+          body.push('## Ambiente');
+          body.push('- **Browser:** ' + navigator.userAgent);
+          body.push('- **App version:** ' + (document.getElementById('abVersion') ? document.getElementById('abVersion').textContent : 'n/a'));
+          body.push('- **Data:** ' + new Date().toISOString());
+
+          var label = category === 'bug' ? 'bug' : category;
+          var url = 'https://github.com/mbangas/myLineage/issues/new'
+            + '?title=' + encodeURIComponent('[Bug] ' + title)
+            + '&body='  + encodeURIComponent(body.join('\n'))
+            + '&labels=' + encodeURIComponent(label);
+
+          window.open(url, '_blank', 'noopener,noreferrer');
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[help-menu] Bug report content error:', e);
+  }
+
+  /* ── About modal content ───────────────────────────────────────── */
+  try {
+    var aboutSub = document.getElementById('helpModal-about-subtitle');
+    if (aboutSub) aboutSub.textContent = 'myLineage — Genealogia digital para a sua família';
+
+    var aboutBody = document.getElementById('helpModal-about-body');
+    if (aboutBody) {
+      aboutBody.innerHTML = [
+        '<div class="ab-section">',
+          '<p class="ab-label">Vers\u00e3o da aplica\u00e7\u00e3o</p>',
+          '<div class="ab-version"><i class="mdi mdi-tag-outline" aria-hidden="true"></i>',
+            '<span id="abVersion">\u2026</span></div>',
+        '</div>',
+        '<div class="ab-section">',
+          '<p class="ab-label">C\u00f3digo fonte</p>',
+          '<a class="ab-link" href="https://github.com/mbangas/myLineage"',
+             ' target="_blank" rel="noopener noreferrer">',
+            '<i class="mdi mdi-github" aria-hidden="true"></i>',
+            'github.com/mbangas/myLineage</a>',
+        '</div>',
+        '<div class="ab-section">',
+          '<div class="ab-debug-bar">',
+            '<p class="ab-label" style="margin:0">Debug</p>',
+            '<button class="ab-copy-btn" id="abCopyBtn">',
+              '<i class="mdi mdi-content-copy" aria-hidden="true"></i>Copiar</button>',
+          '</div>',
+          '<div class="ab-debug-block" id="abDebugBlock">A carregar\u2026</div>',
+        '</div>',
+      ].join('');
+
+      var token = localStorage.getItem('auth_token') || '';
+      var fetchOpts = token ? { headers: { Authorization: 'Bearer ' + token } } : undefined;
+      fetch('/api/info', fetchOpts)
+        .then(function (r) { return r.json(); })
+        .then(function (info) {
+          var vEl = document.getElementById('abVersion');
+          if (vEl) vEl.textContent = info.version || '\u2014';
+
+          var dbEl = document.getElementById('abDebugBlock');
+          if (dbEl) {
+            var now = new Date().toISOString();
+            var c = info.container || {};
+            var debugText = [
+              '# Debug info',
+              '',
+              '## core',
+              '',
+              '- Version: '  + (info.version  || '\u2014'),
+              '- platform: myLineage',
+              '- database: ' + (info.database || '\u2014'),
+              '',
+              '## container',
+              '',
+              '- ID: '      + (c.id         || '\u2014'),
+              '- Name: '    + (c.name       || '\u2014'),
+              '- OS: '      + (c.os         || '\u2014'),
+              '- Created: ' + (c.created    || '\u2014'),
+              '- IP: '      + (c.internalIp || '\u2014'),
+              '- CPU: '     + (c.cpu        || '\u2014'),
+              '- RAM: '     + (c.ram        || '\u2014'),
+              '- Image: '   + (c.image      || '\u2014'),
+              '',
+              '### LOGs (last 30 lines)',
+              '',
+              (c.logs || '(no logs)'),
+              '',
+              '## client',
+              '',
+              '- userAgent: ' + navigator.userAgent,
+              '- userIP: '    + (info.ip || '\u2014'),
+              '',
+              'Generated at: ' + now,
+            ].join('\n');
+            dbEl.textContent = debugText;
+            dbEl.dataset.debug = debugText;
+          }
+        })
+        .catch(function () {
+          var dbEl = document.getElementById('abDebugBlock');
+          if (dbEl) dbEl.textContent = 'Erro ao carregar informa\u00e7\u00f5es.';
+        });
+
+      var copyBtn = document.getElementById('abCopyBtn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+          var dbEl = document.getElementById('abDebugBlock');
+          var text = (dbEl && (dbEl.dataset.debug || dbEl.textContent)) || '';
+          if (!text || text === 'A carregar\u2026') return;
+          navigator.clipboard.writeText(text).then(function () {
+            copyBtn.classList.add('copied');
+            copyBtn.innerHTML = '<i class="mdi mdi-check" aria-hidden="true"></i>Copiado!';
+            setTimeout(function () {
+              copyBtn.classList.remove('copied');
+              copyBtn.innerHTML = '<i class="mdi mdi-content-copy" aria-hidden="true"></i>Copiar';
+            }, 2000);
+          });
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[help-menu] About content error:', e);
   }
 
 })();

@@ -52,7 +52,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static(path.join(__dirname), { etag: false, lastModified: false, setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate') }));
+app.use(express.static(path.join(__dirname), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res, filePath) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    // Force UTF-8 encoding for all HTML files so the browser never falls back
+    // to its default charset (e.g. Windows-1252), which mangles accented chars.
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    }
+  }
+}));
 
 // Public info endpoint — version, database type, caller IP, container info
 app.get('/api/info', (req, res) => {

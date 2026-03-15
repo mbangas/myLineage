@@ -73,11 +73,24 @@
 
   // ── Helpers ────────────────────────────────────────────────────
 
-  /** Parse GEDCOM date strings (e.g. "2 FEB 1962") → year number or null */
+  /** Parse GEDCOM date strings (e.g. "2 FEB 1962") → year number or null.
+   *  Also handles fictional short years used in GoT/Westeros GEDCOM files:
+   *  "ABT 187 DC", "200 DC", "c. 27 AC", "259 DC" (DC = Depois da Conquista,
+   *  AC = After/Antes Conquest). */
   function parseYear(str) {
     if (!str) return null;
-    const m = String(str).match(/\b(\d{4})\b/);
-    return m ? parseInt(m[1], 10) : null;
+    const s = String(str);
+    // Standard 4-digit year (most common — real-world dates)
+    const m4 = s.match(/\b(\d{4})\b/);
+    if (m4) return parseInt(m4[1], 10);
+    // Fictional/short year: number followed by era marker (DC / AC / BC)
+    // Handles "ABT 187 DC", "200 DC", "c. 27 AC", "259 DC"
+    const mEra = s.match(/\b(\d{1,3})\s+(?:DC|AC|BC)\b/i);
+    if (mEra) return parseInt(mEra[1], 10);
+    // Qualifier-prefixed short year with no era marker: e.g. "ABT 187"
+    const mQual = s.match(/(?:ABT|BEF|AFT|EST|CAL|INT|c\.)\s*(\d{1,3})\b/i);
+    if (mQual) return parseInt(mQual[1], 10);
+    return null;
   }
 
   const MONTH_NUM = {
@@ -165,12 +178,48 @@
     return String(noteRef);
   }
 
+  /**
+   * Fix double-encoded UTF-8 (mojibake): UTF-8 multi-byte sequences whose bytes were
+   * stored as individual Latin-1 characters and then re-saved as UTF-8.
+   * Example: "ã" (U+00E3, UTF-8 0xC3 0xA3) stored as two chars "Ã" (U+00C3) + "£" (U+00A3)
+   *          → the string we receive is "Ã£" instead of "ã".
+   * Strategy: scan char by char; when charCode fits the start of a UTF-8 multi-byte
+   * sequence AND the following char(s) are continuation bytes (0x80-0xBF), decode
+   * them as raw UTF-8 bytes.  Real Unicode chars > U+00FF are left untouched.
+   */
+  function fixMojibake(text) {
+    if (!text) return text;
+    let out = '';
+    for (let i = 0; i < text.length; i++) {
+      const c0 = text.charCodeAt(i);
+      // 2-byte UTF-8 start: 0xC2-0xDF, continuation: 0x80-0xBF
+      if (c0 >= 0xC2 && c0 <= 0xDF && i + 1 < text.length) {
+        const c1 = text.charCodeAt(i + 1);
+        if (c1 >= 0x80 && c1 <= 0xBF) {
+          out += String.fromCodePoint(((c0 & 0x1F) << 6) | (c1 & 0x3F));
+          i++; continue;
+        }
+      }
+      // 3-byte UTF-8 start: 0xE0-0xEF, two continuation bytes
+      if (c0 >= 0xE0 && c0 <= 0xEF && i + 2 < text.length) {
+        const c1 = text.charCodeAt(i + 1);
+        const c2 = text.charCodeAt(i + 2);
+        if (c1 >= 0x80 && c1 <= 0xBF && c2 >= 0x80 && c2 <= 0xBF) {
+          out += String.fromCodePoint(((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F));
+          i += 2; continue;
+        }
+      }
+      out += text[i];
+    }
+    return out;
+  }
+
   /** Gather notes text for individual */
   function gatherNotes(DB, ind) {
     if (!ind || !ind.notes) return '';
     const notes = Array.isArray(ind.notes) ? ind.notes : [ind.notes];
     if (!notes.length) return '';
-    return notes.map(n => resolveNote(DB, n)).filter(Boolean).join('\n\n');
+    return notes.map(n => fixMojibake(resolveNote(DB, n))).filter(Boolean).join('\n\n');
   }
 
   /** Get event of given type from individual events array */
@@ -197,6 +246,29 @@
       // A note is eligible for a family whose refYear window [birthYear, birthYear+30]
       // overlaps with [startYear, endYear].
       this._historicalNotes = [
+        // ── WESTEROS (Game of Thrones / House of the Dragon / Knight of the Seven Kingdoms) ──
+        // Datas em DC = Depois da Conquista de Aegon (equivalente a AC no inglês)
+        { region:'WESTEROS', startYear:0, endYear:50,
+          titulo:'A Conquista de Aegon',
+          text:'Aegon I Targaryen, acompanhado pelas irmãs-esposas Visenya e Rhaenys, partiu de Pedra do Dragão montados nos dragões Balerion, o Terror Negro, Meraxes e Vhagar para conquistar os Sete Reinos. As batalhas do Campo de Fogo e do Sussurro selaram a sujeição dos reinos. Aegon fundou Porto Real como capital e ergueu o Trono de Ferro, forjado com as espadas fundidas dos inimigos derrotados. A Conquista unificou Westeros sob uma única coroa Targaryen, mas as feridas da subjugação — e o poder absoluto dos dragões — marcariam o destino desta dinastia por gerações.' },
+        { region:'WESTEROS', startYear:35, endYear:115,
+          titulo:'Jaehaerys I, o Conciliador',
+          text:'O reinado de Jaehaerys I Targaryen foi o mais longo e próspero da história de Westeros. O "Velho Rei" construiu a Grande Estrada, unificou as leis dos Sete Reinos e forjou paz duradoura com os lordes e com a Fé. Com a sua rainha Alysanne, percorreu o reino para conhecer o povo comum. A prosperidade chegou a todas as casas nobres e aos camponeses. A Grande Maestria de Archmaester Vaegon e os Concílios de Lord Commander Ryam Redwyne moldaram as instituições. A morte de Jaehaerys sem herdeiro definido criou a disputa que eclodiria sob o seu neto Viserys I.' },
+        { region:'WESTEROS', startYear:95, endYear:140,
+          titulo:'A Dança dos Dragões',
+          text:'A Dança dos Dragões foi a guerra civil mais devastadora da história Targaryen. Rhaenyra Targaryen, herdeira designada, disputou o Trono de Ferro com o meio-irmão Aegon II após a morte do rei Viserys I. Westeros fragmentou-se em dois campos: os Negros (Rhaenyra) e os Verdes (Aegon). Os dragões pereceram quase todos — em batalhas aéreas, nas Pedras Fumegantes e em fossos. Famílias foram destruídas, cidades incendiadas, e a crueldade tornou-se norma. No fim, a dinastia Targaryen sobreviveu na pessoa de Aegon III, mas os dragões — o pilar do poder Targaryen — estavam extintos para sempre.' },
+        { region:'WESTEROS', startYear:180, endYear:262,
+          titulo:'Ser Duncan e o Príncipe Egg',
+          text:'Décadas após a Dança dos Dragões, Westeros conheceu relativa estabilidade mas marcada por torneios, pequenos conflitos e injustiças feudais. Ser Duncan, o Alto — cavaleiro errante de origem humilde, sem títulos nem terras — percorreu os reinos com o jovem príncipe Aegon V, apelidado "Egg". Juntos, testemunharam a arrogância da nobreza e defenderam os comuns com a lâmina e a honra. Aegon V, ao tornar-se rei, tentou reformas que favoreciam o povo mas foram resistidas pelos grandes lordes. A tragédida Summerhall, onde Aegon V morreu tentando reanimar ovos de dragão num incêndio catastrófico, encerrou uma era de esperança.' },
+        { region:'WESTEROS', startYear:255, endYear:283,
+          titulo:'O Rei Louco Aerys II',
+          text:'O reinado de Aerys II Targaryen começou com promessas de uma nova era de ouro — jovem, inteligente, com o leal Tywin Lannister como Mão do Rei. Mas décadas de paranoia, humilhações e conspirações reais e imaginárias transformaram-no no "Rei Louco". Aerys queimava vivos os opositores com fogo valyrio, rindo enquanto as chamas consumiam carne. Tywin Lannister governou eficazmente enquanto o rei enlouquecia, mas acabou por renunciar humilhado. Quando Lyanna Stark e o príncipe Rhaegar fugiram, e Aerys mandou executar os Stark, selou o destino da sua própria dinastia. Os "sussurros do fogo" tornaram-se a loucura de um rei.' },
+        { region:'WESTEROS', startYear:278, endYear:286,
+          titulo:'A Rebelião de Robert',
+          text:'A fuga de Lyanna Stark com o príncipe Rhaegar Targaryen e a execução de Rickard e Brandon Stark pelo Rei Louco desencadearam a maior rebelião que Westeros conhecera em décadas. Robert Baratheon, Eddard Stark, Jon Arryn e Hoster Tully uniram as suas forças contra a Coroa. A batalha do Afluente Tridente foi decisiva — Robert matou Rhaegar em combate singular. A traição de Jaime Lannister, que matou o rei que jurou proteger, ficou para sempre na memória de Westeros. Quando os Lannister saquearam Porto Real, a era dos Targaryen terminou. Daenerys e Viserys Targaryen fugiram como exilados através do Mar Estreito, herdando apenas um nome e promessas de dragões.' },
+        { region:'WESTEROS', startYear:292, endYear:306,
+          titulo:'A Guerra dos Cinco Reis',
+          text:'A prisão e decapitação de Eddard Stark, Lorde de Winterfell e Mão do Rei, precipitou Westeros numa guerra entre cinco pretendentes ao Trono de Ferro: Joffrey Baratheon, Renly Baratheon, Stannis Baratheon, Robb Stark e Balon Greyjoy. Casas aliadas destruíam-se mutuamente enquanto o povo afogava-se em fome e violência. Para além da Grande Muralha, os Caminhantes Brancos reuniam os seus exércitos de mortos para a Grande Invasão. A frase que ecoava em cada linho de Westeros — "O inverno está a chegar" — deixou de ser advertência para se tornar realidade. No caos, nasceu a esperança: uma jovem Targaryen cruzava o Mar com dragões.' },
         // ── PORTUGAL ─────────────────────────────────────────────────────
         { region:'PT', startYear:1640, endYear:1715,
           text:'O Portugal do século XVII viveu sob a sombra da Restauração de 1640, que encerrou 60 anos de domínio espanhol. As guerras com Espanha prolongaram-se até 1668, esgotando os recursos do reino. O ouro do Brasil começou a chegar em quantidade nos anos 1690, transformando a economia e financiando a construção de palácios e igrejas. D. Pedro II (1683–1706) estabilizou o país e assinou o Tratado de Methuen (1703) com Inglaterra, que trocava vinhos por tecidos. A sociedade era profundamente rural, hierárquica e marcada pelo peso da Igreja e do Santo Ofício.' },
@@ -275,8 +347,13 @@
         { region:'WORLD', startYear:2019, endYear:2024,
           text:'Em Dezembro de 2019, um novo coronavírus surgiu em Wuhan, China. A pandemia de COVID-19 declarada em Março de 2020 pela OMS matou mais de 7 milhões de pessoas oficialmente registadas, paralisou economias e encerrou fronteiras. As vacinas desenvolvidas em tempo recorde salvaram centenas de milhões de vidas. A crise climática acelerou: os dez anos mais quentes da história registada ocorreram todos entre 2010 e 2024. Incêndios na Austrália (2019–20), inundações na Europa e secas em África empurram populações inteiras. A inteligência artificial generativa, a partir de 2023, começa a transformar o mercado de trabalho de forma imprevisível.' },
       ];
-      // If historical notes were fetched from /api/historical-facts, use them instead
-      if (externalNotes && externalNotes.length) this._historicalNotes = externalNotes;
+      // If historical notes were fetched from /api/historical-facts, use them instead.
+      // WESTEROS (fictional world) notes are always preserved because they'll never
+      // appear in the real-world API data — they're needed to contextualise GoT trees.
+      if (externalNotes && externalNotes.length) {
+        const westerosNotes = this._historicalNotes.filter(n => n.region === 'WESTEROS');
+        this._historicalNotes = [...westerosNotes, ...externalNotes];
+      }
     }
 
     _detectRegionForFamily(fam) {
@@ -300,6 +377,8 @@
       if (/alemanha|germany|berlin|münchen|hamburg/.test(allPlaces)) return 'DE';
       if (/reino unido|united kingdom|london|manchester|birmingham/.test(allPlaces)) return 'GB';
       if (/estados unidos|united states|usa|new york|los angeles|chicago/.test(allPlaces)) return 'US';
+      // Fictional worlds — detect Westeros (Game of Thrones / House of the Dragon)
+      if (/westeros|porto real|desembarque do rei|king's landing|dragonstone|pedra do drag[aã]o|roca drag[aã]o|winterfell|castelo negro|noite?s watch|muro|harrenhall|harrenhal|dorne|altojardim|highgarden|cornucópia|lannisport|the eyrie|arryn|riverrun|rio rubro|storm's end|cabo da tempestade|tarth|driftmark|baía do silêncio/.test(allPlaces)) return 'WESTEROS';
       return 'WORLD';
     }
 
@@ -794,15 +873,19 @@
           ? `<span class="bio-photo-fn-badge">${photoIdx}</span>` : '';
         const rot = (Math.random() * 5 - 2.5).toFixed(1);
         const z = photoIdx;
-        let imgStyle = style;
+        let imgStyle = style; // default: object-fit:cover (center)
         let extraAttrs = '';
-        if (isSolo) {
-          // Solo portrait: never crop the face — use contain with a warm background
-          imgStyle = 'width:100%;height:100%;object-fit:contain;background:#2a1a08;';
-        } else if (bbox) {
-          // Group photo with a marked face zone: pan to it after load
+        if (bbox) {
+          // Face zone is known — cover + pan to face, guaranteed not to clip it.
+          // Works for both single-person and group photos.
           extraAttrs = ` data-bbox="${bbox.x1},${bbox.y1},${bbox.x2},${bbox.y2}"
             onload="window._livroFaceCrop&&window._livroFaceCrop(this)"`;
+        } else {
+          // No face bbox: always align to the top of the image.
+          // Faces almost universally appear in the upper half of any portrait/photo,
+          // so "center top" is always safer than "center center" when the exact
+          // face position is unknown.
+          imgStyle = 'width:100%;height:100%;object-fit:cover;object-position:center top;';
         }
         return `<div class="album-photo" style="--rot:${rot}deg;--z:${z};">` +
           `<span class="album-corner tl"></span><span class="album-corner tr"></span>` +
@@ -869,7 +952,7 @@
       // ── Smart photo selection ──────────────────────────────────────────
       // Rule 1: Don't show both a cutout thumbnail and its parent photo.
       // Rule 2: Photos with a face-zone for this person get priority.
-      // Rule 3: Solo/personal photos use object-fit:contain (no face crop).
+      // Rule 3: For single-person photos the face must never be cropped out.
       const _rawPhotos = [];
       (ind.multimediaRefs || []).forEach(mid => {
         const mm = DB.getMultimediaItem ? DB.getMultimediaItem(mid) : null;
@@ -2077,7 +2160,9 @@
     }
   }, true);
 
-  // ── Face-crop helper: pans object-position to the tagged face zone ──────
+  // ── Face-crop helper ────────────────────────────────────────────────────
+  // Positions the image (object-fit:cover) so the tagged face bbox is fully
+  // visible and centred in the container. The face is NEVER clipped.
   window._livroFaceCrop = function (img) {
     const raw = img.getAttribute('data-bbox');
     if (!raw) return;
@@ -2085,10 +2170,41 @@
     if (isNaN(x1)) return;
     const nw = img.naturalWidth, nh = img.naturalHeight;
     if (!nw || !nh) return;
-    // Centre of the zone as percentage of the image dimensions
-    const cx = ((x1 + x2) / 2 / nw * 100).toFixed(1);
-    const cy = ((y1 + y2) / 2 / nh * 100).toFixed(1);
-    img.style.objectPosition = cx + '% ' + cy + '%';
+
+    // Container size — the .album-photo wrapper
+    const wrap = img.closest('.album-photo') || img.parentElement;
+    const cw = (wrap && wrap.clientWidth)  || img.clientWidth  || nw;
+    const ch = (wrap && wrap.clientHeight) || img.clientHeight || nh;
+
+    // Scale factor that object-fit:cover applies to fill the container
+    const scale = Math.max(cw / nw, ch / nh);
+    const rw = nw * scale, rh = nh * scale; // rendered image size
+
+    // Face bbox in rendered pixels
+    const fx1 = x1 * scale, fy1 = y1 * scale;
+    const fx2 = x2 * scale, fy2 = y2 * scale;
+    const faceH = fy2 - fy1;
+
+    // Preferred crop: center the face horizontally; add a little headroom above
+    let ox = ((fx1 + fx2) / 2) - cw / 2;
+    let oy = fy1 - faceH * 0.35; // 35% of face height as top padding (forehead room)
+
+    // Hard clamp: the entire face bbox must remain within the visible area
+    oy = Math.min(oy, fy1);            // face top must not be cropped
+    oy = Math.max(oy, fy2 - ch);       // face bottom must not be cropped
+    ox = Math.min(ox, fx1);            // face left must not be cropped
+    ox = Math.max(ox, fx2 - cw);       // face right must not be cropped
+
+    // Clamp to image bounds
+    ox = Math.max(0, Math.min(ox, rw - cw));
+    oy = Math.max(0, Math.min(oy, rh - ch));
+
+    // Convert pixel offset to CSS object-position percentage
+    // object-position X% means: the X% point of the image aligns to X% of the container
+    // which, for cover, translates to: offset = X/100 * (renderedSize - containerSize)
+    const pctX = rw > cw ? (ox / (rw - cw) * 100).toFixed(1) : '50';
+    const pctY = rh > ch ? (oy / (rh - ch) * 100).toFixed(1) : '50';
+    img.style.objectPosition = pctX + '% ' + pctY + '%';
   };
 
   function initBook(DB, rootId, historicalNotes) {
@@ -2283,7 +2399,9 @@
             'África do Sul':'ZA','Marrocos':'MA','Egito':'EG','Nigéria':'NG','Quénia':'KE','Etiópia':'ET',
             'Ghana':'GH','Senegal':'SN','China':'CN','Índia':'IN','Japão':'JP','Coreia do Sul':'KR',
             'Austrália':'AU','Nova Zelândia':'NZ','Indonésia':'ID','Vietname':'VN','Tailândia':'TH',
-            'Singapura':'SG','Mundial':'WORLD','WORLD':'WORLD' };
+            'Singapura':'SG','Mundial':'WORLD','WORLD':'WORLD',
+            // Fictional worlds
+            'Westeros':'WESTEROS','WESTEROS':'WESTEROS' };
           const histNotes = (apiData || [])
             .filter(n => !n.deletedAt)
             .map(n => ({

@@ -1,14 +1,14 @@
 ﻿0 HEAD
 1 SOUR myLineage
 2 VERS 1.0
-2 NAME Game of Thrones - Genealogia Completa das TrÃªs SÃ©ries
+2 NAME Game of Thrones - Genealogia Completa das Três Séries
 1 GEDC
 2 VERS 5.5.1
 2 FORM LINEAGE-LINKED
 1 CHAR UTF-8
 1 LANG Portuguese
 1 DATE 14 MAR 2026
-1 NOTE Este ficheiro GEDCOM contÃ©m a genealogia completa das personagens principais e secundÃ¡rias das trÃªs sÃ©ries da saga: Game of Thrones, House of the Dragon e The Knight of the Seven Kingdoms. As datas sÃ£o aproximadas (AC = Antes da Conquista, DC = Depois da Conquista) com base no lore oficial de Westeros. As fotos referenciadas sÃ£o imagens pÃºblicas da wiki oficial.
+1 NOTE Este ficheiro GEDCOM contém a genealogia completa das personagens principais e secundárias das três séries da saga: Game of Thrones, House of the Dragon e The Knight of the Seven Kingdoms. As datas são aproximadas (AC = Antes da Conquista, DC = Depois da Conquista) com base no lore oficial de Westeros. As fotos referenciadas são imagens públicas da wiki oficial.
 
 0 @S1@ SOUR
 1 TITL Game of Thrones - HBO Series (2011-2019)
@@ -34,7 +34,7 @@
 1 PUBL Bantam Books
 1 DATE 2014
 
-0 @NOTE_GOT@ NOTE Personagens de Game of Thrones (sÃ©rie principal, AC 298-305 DC)
+0 @NOTE_GOT@ NOTE Personagens de Game of Thrones (série principal, AC 298-305 DC)
 0 @NOTE_HOTD@ NOTE Personagens de House of the Dragon (AC 112-131 DC, ~200 anos antes de GoT)
 0 @NOTE_KSK@ NOTE Personagens de The Knight of the Seven Kingdoms (~AC 209-215 DC, ~90 anos antes de HotD)
 
@@ -68,7 +68,7 @@
 2 PLAC Harenhal, Westeros
 1 OCCU Cavaleiro Errante; mais tarde Lorde Comandante da Guarda Real
 1 SOUR @S3@
-1 NOTE Ser Duncan, o Alto, cavaleiro errante e protagonista de "The Knight of the Seven Kingdoms". Protegeu o jovem prÃ­ncipe Aegon (Egg) nas suas aventuras por Westeros. Tornou-se Lorde Comandante da Guarda Real.
+1 NOTE Ser Duncan, o Alto, cavaleiro errante e protagonista de "The Knight of the Seven Kingdoms". Protegeu o jovem príncipe Aegon (Egg) nas suas aventuras por Westeros. Tornou-se Lorde Comandante da Guarda Real.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/3/31/Dunk-The_Morrow.png/revision/latest/scale-to-width-down/300?cb=20260219111850
 2 FORM JPG
@@ -86,16 +86,16 @@
 1 DEAT
 2 DATE 259 DC
 2 PLAC Harenhal, Westeros
-1 OCCU PrÃ­ncipe; mais tarde Rei de Westeros
+1 OCCU Príncipe; mais tarde Rei de Westeros
 1 FAMC @F_MAEKAR@
 1 FAMS @F_AEGONV@
 1 SOUR @S3@
 1 SOUR @S4@
-1 NOTE O jovem prÃ­ncipe Aegon, quinto filho do Rei Maekar I. Viajou com Ser Dunk como seu escudeiro sob o nome de "Egg". Tornou-se Rey Aegon V, avÃ´ de Aerys II (o Rei Louco). Morreu no incÃªndio de Harenhal tentando acordar dragÃµes (Summerhall).
+1 NOTE O jovem príncipe Aegon, quinto filho do Rei Maekar I. Viajou com Ser Dunk como seu escudeiro sob o nome de "Egg". Tornou-se Rey Aegon V, avô de Aerys II (o Rei Louco). Morreu no incêndio de Harenhal tentando acordar dragões (Summerhall).
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/1/16/Egg-AKotSK.png/revision/latest?cb=20240805061446
 2 FORM JPG
-2 TITL PrÃ­ncipe Aegon "Egg"
+2 TITL Príncipe Aegon "Egg"
 
 0 @I_MAEKAR@ INDI
 1 NAME Maekar I /Targaryen/
@@ -111,7 +111,7 @@
 1 OCCU Rei de Westeros
 1 FAMS @F_MAEKAR@
 1 SOUR @S4@
-1 NOTE Rei Maekar I Targaryen, pai do prÃ­ncipe Aegon (Egg). Reinado marcado por guerras e turbulÃªncia.
+1 NOTE Rei Maekar I Targaryen, pai do príncipe Aegon (Egg). Reinado marcado por guerras e turbulência.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/3/3a/Maekar-Seven.jpg/revision/latest?cb=20260204115453
 2 FORM PNG
@@ -156,7 +156,7 @@
 # ERA: HOUSE OF THE DRAGON (~AC 112-135 DC)
 ################################################################################
 
-# --- JAEHAERYS I E FAMÃLIA ---
+# --- JAEHAERYS I E FAMÍLIA ---
 
 0 @I_JAEHAERYS1@ INDI
 1 NAME Jaehaerys I /Targaryen/
@@ -174,7 +174,7 @@
 1 FAMS @F_JAEHAERYS1@
 1 SOUR @S2@
 1 SOUR @S4@
-1 NOTE O rei mais longo de Westeros. Reinado de 55 anos, marcado por paz, prosperidade e a construÃ§Ã£o da Estrada do Rei. Pai de vÃ¡rios filhos. Convocou o Grande Conselho de 101 DC para escolher o seu herdeiro.
+1 NOTE O rei mais longo de Westeros. Reinado de 55 anos, marcado por paz, prosperidade e a construção da Estrada do Rei. Pai de vários filhos. Convocou o Grande Conselho de 101 DC para escolher o seu herdeiro.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/22/Jaehaerys_I_Targaryen_Official_Guide.jpg/revision/latest/scale-to-width-down/272?cb=20220823075450
 2 FORM JPG
@@ -194,7 +194,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMS @F_JAEHAERYS1@
 1 SOUR @S4@
-1 NOTE Rainha consorte, esposa e irmÃ£ de Jaehaerys I. Conhecida por promover causas humanas, incluindo os direitos das mulheres e a aboliÃ§Ã£o da Primeira Noite.
+1 NOTE Rainha consorte, esposa e irmã de Jaehaerys I. Conhecida por promover causas humanas, incluindo os direitos das mulheres e a abolição da Primeira Noite.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/22/Jaehaerys_I_Targaryen_Official_Guide.jpg/revision/latest/scale-to-width-down/272?cb=20220823075450
 2 FORM PNG
@@ -221,7 +221,7 @@
 1 FAMC @F_JAEHAERYS1@
 1 FAMS @F_AEMON_JOCELYN@
 1 SOUR @S4@
-1 NOTE PrÃ­ncipe herdeiro, filho mais velho de Jaehaerys I. Pai da Princesa Rhaenys.
+1 NOTE Príncipe herdeiro, filho mais velho de Jaehaerys I. Pai da Princesa Rhaenys.
 
 0 @I_JOCELYN@ INDI
 1 NAME Jocelyn /Baratheon/
@@ -230,10 +230,10 @@
 1 SEX F
 1 BIRT
 2 DATE 57 DC
-2 PLAC BastiÃ£o das Tormentas, Westeros
+2 PLAC Bastião das Tormentas, Westeros
 1 FAMS @F_AEMON_JOCELYN@
 1 SOUR @S4@
-1 NOTE Esposa do PrÃ­ncipe Aemon, filha do Senhor Baratheon.
+1 NOTE Esposa do Príncipe Aemon, filha do Senhor Baratheon.
 
 0 @F_AEMON_JOCELYN@ FAM
 1 HUSB @I_AEMON_PRINCE@
@@ -255,7 +255,7 @@
 1 FAMC @F_JAEHAERYS1@
 1 FAMS @F_BAELON@
 1 SOUR @S4@
-1 NOTE PrÃ­ncipe, segundo filho de Jaehaerys I. Pai do Rei Viserys I e do PrÃ­ncipe Daemon.
+1 NOTE Príncipe, segundo filho de Jaehaerys I. Pai do Rei Viserys I e do Príncipe Daemon.
 
 0 @I_ALYSSA@ INDI
 1 NAME Alyssa /Targaryen/
@@ -270,7 +270,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMS @F_BAELON@
 1 SOUR @S4@
-1 NOTE IrmÃ£ e esposa do PrÃ­ncipe Baelon. Morreu no parto.
+1 NOTE Irmã e esposa do Príncipe Baelon. Morreu no parto.
 
 0 @F_BAELON@ FAM
 1 HUSB @I_BAELON@
@@ -311,7 +311,7 @@
 1 FAMS @F_VISERYS1_AEMMA@
 1 FAMS @F_VISERYS1_ALICENT@
 1 SOUR @S2@
-1 NOTE Rei Viserys I, o Pacificador. Escolheu a sua filha Rhaenyra como herdeira, causando a disputa chamada a "DanÃ§a dos DragÃµes" apÃ³s nomear Aegon II (filho da segunda esposa Alicent Hightower) como herdeiro no leito de morte.
+1 NOTE Rei Viserys I, o Pacificador. Escolheu a sua filha Rhaenyra como herdeira, causando a disputa chamada a "Dança dos Dragões" após nomear Aegon II (filho da segunda esposa Alicent Hightower) como herdeiro no leito de morte.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/3/38/Viserys_I_Targaryen_Official_Guide.jpg/revision/latest/scale-to-width-down/272?cb=20220826232345
 2 FORM JPG
@@ -330,7 +330,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMS @F_VISERYS1_AEMMA@
 1 SOUR @S2@
-1 NOTE Primeira esposa de Viserys I. Morreu durante um parto (por ordem implÃ­cita de Viserys para salvar o bebÃ©). MÃ£e de Rhaenyra.
+1 NOTE Primeira esposa de Viserys I. Morreu durante um parto (por ordem implícita de Viserys para salvar o bebé). Mãe de Rhaenyra.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/28/Aemma_Arryn_Official_Guide.jpg/revision/latest/scale-to-width-down/272?cb=20220823094427
 2 FORM JPG
@@ -354,7 +354,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMS @F_VISERYS1_ALICENT@
 1 SOUR @S2@
-1 NOTE Segunda esposa de Viserys I. Filha do MÃ£o do Rei Otto Hightower. Rival de Rhaenyra pela sucessÃ£o. Liderou o "Conselho Verde" que coroou o seu filho Aegon II.
+1 NOTE Segunda esposa de Viserys I. Filha do Mão do Rei Otto Hightower. Rival de Rhaenyra pela sucessão. Liderou o "Conselho Verde" que coroou o seu filho Aegon II.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/1/18/AlicentASfASInfobox.PNG/revision/latest/scale-to-width-down/281?cb=20240621112258
 2 FORM JPG
@@ -385,7 +385,7 @@
 1 FAMS @F_RHAENYRA_LAENOR@
 1 FAMS @F_RHAENYRA_DAEMON@
 1 SOUR @S2@
-1 NOTE Rhaenyra Targaryen, herdeira designada pelo pai. Casou primeiro com Laenor Velaryon (tendo filhos com Harwin Forte) e depois secretamente com o tio Daemon. Liderou o partido dos "Negros" durante a DanÃ§a dos DragÃµes. Executada pelo irmÃ£o Aegon II.
+1 NOTE Rhaenyra Targaryen, herdeira designada pelo pai. Casou primeiro com Laenor Velaryon (tendo filhos com Harwin Forte) e depois secretamente com o tio Daemon. Liderou o partido dos "Negros" durante a Dança dos Dragões. Executada pelo irmão Aegon II.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/5f/Queen_Rhaenyra.jpg/revision/latest/scale-to-width-down/281?cb=20221024065800
 2 FORM JPG
@@ -395,7 +395,7 @@
 1 NAME Daemon /Targaryen/
 2 GIVN Daemon
 2 SURN Targaryen
-2 NICK PrÃ­ncipe PÃ­caro
+2 NICK Príncipe Pícaro
 1 SEX M
 1 BIRT
 2 DATE 081 DC
@@ -403,17 +403,17 @@
 1 DEAT
 2 DATE 130 DC
 2 PLAC Acima de Vale Escuro, Westeros
-1 OCCU PrÃ­ncipe; Cavaleiro; Conquistador de Pedras dos Passos
+1 OCCU Príncipe; Cavaleiro; Conquistador de Pedras dos Passos
 1 FAMC @F_BAELON@
 1 FAMS @F_DAEMON_RHEA@
 1 FAMS @F_DAEMON_LAENA@
 1 FAMS @F_RHAENYRA_DAEMON@
 1 SOUR @S2@
-1 NOTE Daemon Targaryen, irmÃ£o mais novo de Viserys I. Cavaleiro altamente habilidoso e jinete do dragÃ£o Caraxes (Sangue e Queijo). Casou Rhaenyra apÃ³s a morte de Laena Velaryon. Morreu na Batalha do Golho, matando Aemond com Caraxes.
+1 NOTE Daemon Targaryen, irmão mais novo de Viserys I. Cavaleiro altamente habilidoso e jinete do dragão Caraxes (Sangue e Queijo). Casou Rhaenyra após a morte de Laena Velaryon. Morreu na Batalha do Golho, matando Aemond com Caraxes.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/a/a0/Daemon_Targaryen_S2_Infobox.png/revision/latest/scale-to-width-down/316?cb=20231202204159
 2 FORM JPG
-2 TITL PrÃ­ncipe Daemon Targaryen
+2 TITL Príncipe Daemon Targaryen
 
 0 @I_RHEA@ INDI
 1 NAME Rhea /Royce/
@@ -449,7 +449,7 @@
 1 FAMC @F_CORLYS_RHAENYS@
 1 FAMS @F_DAEMON_LAENA@
 1 SOUR @S2@
-1 NOTE Filha de Corlys Velaryon e Rhaenys. Esposa de Daemon, jinete do dragÃ£o Vhagar. Morreu apÃ³s um parto difÃ­cil em Pentos escolhendo lanÃ§ar-se Ã s chamas do seu dragÃ£o.
+1 NOTE Filha de Corlys Velaryon e Rhaenys. Esposa de Daemon, jinete do dragão Vhagar. Morreu após um parto difícil em Pentos escolhendo lançar-se às chamas do seu dragão.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/a/ab/Laena_Velaryon_Official_Guide_3.jpg/revision/latest/scale-to-width-down/272?cb=20220926034616
 2 FORM JPG
@@ -481,10 +481,10 @@
 1 DEAT
 2 DATE 135 DC
 2 PLAC Driftmark, Westeros
-1 OCCU Senhor de Driftmark; Grande Almirante; MÃ£o do Rei
+1 OCCU Senhor de Driftmark; Grande Almirante; Mão do Rei
 1 FAMS @F_CORLYS_RHAENYS@
 1 SOUR @S2@
-1 NOTE O maior marinheiro da histÃ³ria. Liderou nove grandes viagens ao Leste. Senhor de MarÃ© Alta. Casou com a Princesa Rhaenys. Apoiou Rhaenyra na DanÃ§a dos DragÃµes.
+1 NOTE O maior marinheiro da história. Liderou nove grandes viagens ao Leste. Senhor de Maré Alta. Casou com a Princesa Rhaenys. Apoiou Rhaenyra na Dança dos Dragões.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/5a/Corlys_Velaryon_S2.jpg/revision/latest/scale-to-width-down/266?cb=20240606091353
 2 FORM JPG
@@ -505,7 +505,7 @@
 1 FAMC @F_AEMON_JOCELYN@
 1 FAMS @F_CORLYS_RHAENYS@
 1 SOUR @S2@
-1 NOTE Filha do PrÃ­ncipe Aemon. Preterida na sucessÃ£o do avÃ´ Jaehaerys I a favor de Viserys I (sexismo). Jinete do dragÃ£o Meleys. Apoiou Rhaenyra. Morreu em combate contra Aemond e Vhagar.
+1 NOTE Filha do Príncipe Aemon. Preterida na sucessão do avô Jaehaerys I a favor de Viserys I (sexismo). Jinete do dragão Meleys. Apoiou Rhaenyra. Morreu em combate contra Aemond e Vhagar.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/3/39/S2_Rhaenys_Targaryen_Infobox.jpg/revision/latest/scale-to-width-down/315?cb=20240708102159
 2 FORM JPG
@@ -531,7 +531,7 @@
 1 FAMC @F_CORLYS_RHAENYS@
 1 FAMS @F_RHAENYRA_LAENOR@
 1 SOUR @S2@
-1 NOTE Filho de Corlys e Rhaenys. Casou com Rhaenyra mas era gay e tinha amante Qarl o Tejano. "Morreu" mas na verdade fugiu com Qarl para Essos (pelo menos na sÃ©rie).
+1 NOTE Filho de Corlys e Rhaenys. Casou com Rhaenyra mas era gay e tinha amante Qarl o Tejano. "Morreu" mas na verdade fugiu com Qarl para Essos (pelo menos na série).
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/50/Laenor_Velaryon_Official_Guide_3.jpg/revision/latest/scale-to-width-down/272?cb=20220926034629
 2 FORM JPG
@@ -558,9 +558,9 @@
 1 DEAT
 2 DATE 120 DC
 2 PLAC Harrenhal, Westeros
-1 OCCU CapitÃ£o da Guarda Real
+1 OCCU Capitão da Guarda Real
 1 SOUR @S2@
-1 NOTE Pai biolÃ³gico dos trÃªs filhos de Rhaenyra com Laenor Velaryon (Jacaerys, Lucerys, Joffrey). Filho de Lyonel Forte, MÃ£o do Rei. Morreu no incÃªndio de Harrenhal, provavelmente assassinado por Larys Forte.
+1 NOTE Pai biológico dos três filhos de Rhaenyra com Laenor Velaryon (Jacaerys, Lucerys, Joffrey). Filho de Lyonel Forte, Mão do Rei. Morreu no incêndio de Harrenhal, provavelmente assassinado por Larys Forte.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/d/d6/Harwin_Strong_Official_Guide.jpg/revision/latest/scale-to-width-down/272?cb=20220905145340
 2 FORM JPG
@@ -577,10 +577,10 @@
 2 PLAC Porto Real, Westeros
 1 DEAT
 2 DATE 129 DC
-2 PLAC BaÃ­a do NaufrÃ¡gio, Westeros
+2 PLAC Baía do Naufrágio, Westeros
 1 FAMC @F_RHAENYRA_LAENOR@
 1 SOUR @S2@
-1 NOTE Filho mais velho de Rhaenyra, jinete do dragÃ£o Vermax. Morreu na Batalha das Bocas contra o DragÃ£o Tessarion.
+1 NOTE Filho mais velho de Rhaenyra, jinete do dragão Vermax. Morreu na Batalha das Bocas contra o Dragão Tessarion.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/5f/Jacaerys-206.jpeg/revision/latest/scale-to-width-down/291?cb=20240719110656
 2 FORM JPG
@@ -600,7 +600,7 @@
 2 PLAC Ponta da Tempestade, Westeros
 1 FAMC @F_RHAENYRA_LAENOR@
 1 SOUR @S2@
-1 NOTE Segundo filho de Rhaenyra, jinete do dragÃ£o Arrax. Morreu quando Aemond e Vhagar os atacaram sobre a Ponta da Tempestade.
+1 NOTE Segundo filho de Rhaenyra, jinete do dragão Arrax. Morreu quando Aemond e Vhagar os atacaram sobre a Ponta da Tempestade.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/3/32/Lucerys_Velaryon_Official_Guide_2.jpg/revision/latest/scale-to-width-down/272?cb=20221010040909
 2 FORM JPG
@@ -619,7 +619,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMC @F_RHAENYRA_LAENOR@
 1 SOUR @S2@
-1 NOTE Terceiro filho de Rhaenyra. Caiu do dragÃ£o Tyraxes e morreu durante o Motim de Porto Real.
+1 NOTE Terceiro filho de Rhaenyra. Caiu do dragão Tyraxes e morreu durante o Motim de Porto Real.
 
 0 @I_AEGON_OLDER@ INDI
 1 NAME Aegon /Targaryen/
@@ -632,7 +632,7 @@
 2 PLAC Dragonstone, Westeros
 1 FAMC @F_RHAENYRA_DAEMON@
 1 SOUR @S2@
-1 NOTE Filho de Rhaenyra e Daemon. Jinete do dragÃ£o Stormcloud.
+1 NOTE Filho de Rhaenyra e Daemon. Jinete do dragão Stormcloud.
 
 0 @I_VISERYS2@ INDI
 1 NAME Viserys II /Targaryen/
@@ -648,7 +648,7 @@
 1 FAMC @F_RHAENYRA_DAEMON@
 1 FAMS @F_VISERYS2@
 1 SOUR @S4@
-1 NOTE Filho mais novo de Rhaenyra e Daemon. Capturado pelos Greens. Tornou-se Rei Viserys II apÃ³s a morte do sobrinho Aegon III.
+1 NOTE Filho mais novo de Rhaenyra e Daemon. Capturado pelos Greens. Tornou-se Rei Viserys II após a morte do sobrinho Aegon III.
 
 0 @I_VISERYS2_WIFE@ INDI
 1 NAME Larra /Rogare/
@@ -684,7 +684,7 @@
 1 FAMC @F_VISERYS1_ALICENT@
 1 FAMS @F_AEGON2_HELAENA@
 1 SOUR @S2@
-1 NOTE Aegon II, coroado pelos Greens apÃ³s a morte de Viserys I. Deu ordem de execuÃ§Ã£o de Rhaenyra. Morreu envenenado pouco depois da vitÃ³ria. Jinete do dragÃ£o Sunfyre.
+1 NOTE Aegon II, coroado pelos Greens após a morte de Viserys I. Deu ordem de execução de Rhaenyra. Morreu envenenado pouco depois da vitória. Jinete do dragão Sunfyre.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/3/3f/S2_Aegon_II_Targaryen_Infobox.jpg/revision/latest/scale-to-width-down/316?cb=20240624172214
 2 FORM JPG
@@ -704,7 +704,7 @@
 1 FAMC @F_VISERYS1_ALICENT@
 1 FAMS @F_AEGON2_HELAENA@
 1 SOUR @S2@
-1 NOTE Filha de Viserys I e Alicent. Casou com o irmÃ£o Aegon II. ProfÃ©tica e sensÃ­vel. Atirou-se da janela apÃ³s o assassinato do filho Maelor pelos agentes de Rhaenyra (Sangue e Queijo).
+1 NOTE Filha de Viserys I e Alicent. Casou com o irmão Aegon II. Profética e sensível. Atirou-se da janela após o assassinato do filho Maelor pelos agentes de Rhaenyra (Sangue e Queijo).
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/6/60/HelaenaASfASInfobox.PNG/revision/latest/scale-to-width-down/285?cb=20240621111347
 2 FORM JPG
@@ -730,7 +730,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMC @F_AEGON2_HELAENA@
 1 SOUR @S2@
-1 NOTE Filho de Aegon II e Helaena. Assassinado pelos agentes "Sangue e Queijo" ordenados por Daemon como represÃ¡lia pela morte de Lucerys.
+1 NOTE Filho de Aegon II e Helaena. Assassinado pelos agentes "Sangue e Queijo" ordenados por Daemon como represália pela morte de Lucerys.
 
 0 @I_MAELOR@ INDI
 1 NAME Maelor /Targaryen/
@@ -745,7 +745,7 @@
 2 PLAC Rota para Porto Real, Westeros
 1 FAMC @F_AEGON2_HELAENA@
 1 SOUR @S2@
-1 NOTE Filho mais novo de Aegon II e Helaena. Morreu durante uma multidÃ£o em Bitterbridge.
+1 NOTE Filho mais novo de Aegon II e Helaena. Morreu durante uma multidão em Bitterbridge.
 
 0 @I_JAEHAERA@ INDI
 1 NAME Jaehaera /Targaryen/
@@ -760,7 +760,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMC @F_AEGON2_HELAENA@
 1 SOUR @S2@
-1 NOTE Filha de Aegon II e Helaena. Sobreviveu Ã  guerra. Casada com Aegon III.
+1 NOTE Filha de Aegon II e Helaena. Sobreviveu à guerra. Casada com Aegon III.
 
 0 @I_AEMOND@ INDI
 1 NAME Aemond /Targaryen/
@@ -776,11 +776,11 @@
 2 PLAC Vale Escuro, Westeros
 1 FAMC @F_VISERYS1_ALICENT@
 1 SOUR @S2@
-1 NOTE Filho de Viserys I e Alicent. Perdeu um olho para Lucerys numa briga de crianÃ§as. Ganhou Vhagar (o maior dragÃ£o vivo) como sua montaria. Matou Lucerys em represÃ¡lia. Morreu lutando contra Daemon no Golho.
+1 NOTE Filho de Viserys I e Alicent. Perdeu um olho para Lucerys numa briga de crianças. Ganhou Vhagar (o maior dragão vivo) como sua montaria. Matou Lucerys em represália. Morreu lutando contra Daemon no Golho.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/4f/Aemond_Targaryen_S2.jpg/revision/latest/scale-to-width-down/304?cb=20240606091326
 2 FORM JPG
-2 TITL PrÃ­ncipe Aemond Targaryen
+2 TITL Príncipe Aemond Targaryen
 
 0 @I_DAERON_HOTD@ INDI
 1 NAME Daeron /Targaryen/
@@ -796,7 +796,7 @@
 2 PLAC Tumbleton, Westeros
 1 FAMC @F_VISERYS1_ALICENT@
 1 SOUR @S2@
-1 NOTE Filho mais novo de Viserys I e Alicent. Jinete do dragÃ£o Tessarion. Morreu em Tumbleton.
+1 NOTE Filho mais novo de Viserys I e Alicent. Jinete do dragão Tessarion. Morreu em Tumbleton.
 
 0 @I_BAELA@ INDI
 1 NAME Baela /Targaryen/
@@ -811,7 +811,7 @@
 2 PLAC Driftmark, Westeros
 1 FAMC @F_DAEMON_LAENA@
 1 SOUR @S2@
-1 NOTE Filha mais velha de Daemon e Laena. Jinete do dragÃ£o Moondancer. IrmÃ£ gÃ©mea de Rhaena.
+1 NOTE Filha mais velha de Daemon e Laena. Jinete do dragão Moondancer. Irmã gémea de Rhaena.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/8/8d/BaelaTargaryen2x03.PNG/revision/latest/scale-to-width-down/285?cb=20240629002449
 2 FORM JPG
@@ -830,13 +830,13 @@
 2 PLAC Dragonstone, Westeros
 1 FAMC @F_DAEMON_LAENA@
 1 SOUR @S2@
-1 NOTE Filha mais nova de Daemon e Laena. IrmÃ£ gÃ©mea de Baela.
+1 NOTE Filha mais nova de Daemon e Laena. Irmã gémea de Baela.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/43/RhaenaTargaryen2x03.PNG/revision/latest/scale-to-width-down/316?cb=20240629001943
 2 FORM JPG
 2 TITL Rhaena Targaryen
 
-# --- OUTRAS FAMÃLIAS IMPORTANTES EM HOTD ---
+# --- OUTRAS FAMÍLIAS IMPORTANTES EM HOTD ---
 
 0 @I_OTTO@ INDI
 1 NAME Otto /Hightower/
@@ -849,10 +849,10 @@
 1 DEAT
 2 DATE 131 DC
 2 PLAC Porto Real, Westeros
-1 OCCU MÃ£o do Rei (de Viserys I e Aegon II)
+1 OCCU Mão do Rei (de Viserys I e Aegon II)
 1 FAMS @F_OTTO@
 1 SOUR @S2@
-1 NOTE Senhor da Antiga Cidade, MÃ£o do Rei. Pai de Alicent. Maquinador do partido dos Greens. Demitido por Viserys I mas regressou como MÃ£o de Aegon II.
+1 NOTE Senhor da Antiga Cidade, Mão do Rei. Pai de Alicent. Maquinador do partido dos Greens. Demitido por Viserys I mas regressou como Mão de Aegon II.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/2a/Otto-S2.png/revision/latest/scale-to-width-down/289?cb=20240621093634
 2 FORM JPG
@@ -883,10 +883,10 @@
 1 DEAT
 2 DATE 120 DC
 2 PLAC Harrenhal, Westeros
-1 OCCU MÃ£o do Rei
+1 OCCU Mão do Rei
 1 FAMS @F_LYONEL@
 1 SOUR @S2@
-1 NOTE Senhor de Harrenhal, MÃ£o do Rei de Viserys I. Pai de Harwin e Larys. Morreu no incÃªndio de Harrenhal, provavelmente por obra do prÃ³prio filho Larys.
+1 NOTE Senhor de Harrenhal, Mão do Rei de Viserys I. Pai de Harwin e Larys. Morreu no incêndio de Harrenhal, provavelmente por obra do próprio filho Larys.
 
 0 @I_LYONEL_WIFE@ INDI
 1 NAME Dorea /Forte/
@@ -906,7 +906,7 @@
 1 NAME Larys /Forte/
 2 GIVN Larys
 2 SURN Forte
-2 NICK O PÃ© de Clube; Senhor Sussurros
+2 NICK O Pé de Clube; Senhor Sussurros
 1 SEX M
 1 BIRT
 2 DATE 91 DC
@@ -916,7 +916,7 @@
 2 PLAC Porto Real, Westeros
 1 OCCU Senhor de Harrenhal; Mestre dos Segredos
 1 SOUR @S2@
-1 NOTE Filho de Lyonel Forte, irmÃ£o de Harwin. Nascido com pÃ© boto. Maquinador e espiÃ£o. Aliado de Alicent Hightower. Provavelmente ordenou a morte do prÃ³prio pai e irmÃ£o. Executado por Aegon III.
+1 NOTE Filho de Lyonel Forte, irmão de Harwin. Nascido com pé boto. Maquinador e espião. Aliado de Alicent Hightower. Provavelmente ordenou a morte do próprio pai e irmão. Executado por Aegon III.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/7/76/Larys_Strong_S2.jpg/revision/latest/scale-to-width-down/298?cb=20240606091503
 2 FORM JPG
@@ -928,7 +928,7 @@
 1 NAME Aegon III /Targaryen/
 2 GIVN Aegon
 2 SURN Targaryen
-2 NICK Aegon o Tirano dos DragÃµes; Aegon das Sombras
+2 NICK Aegon o Tirano dos Dragões; Aegon das Sombras
 1 SEX M
 1 BIRT
 2 DATE 120 DC
@@ -940,7 +940,7 @@
 1 FAMC @F_RHAENYRA_DAEMON@
 1 FAMS @F_AEGON3@
 1 SOUR @S4@
-1 NOTE Filho de Rhaenyra e Daemon. Viu a morte da mÃ£e quando crianÃ§a. Rei desde os 9 anos. Testemunhou a morte do Ãºltimo dragÃ£o. AvÃ´ de Aerys II (o Rei Louco) atravÃ©s de Viserys II.
+1 NOTE Filho de Rhaenyra e Daemon. Viu a morte da mãe quando criança. Rei desde os 9 anos. Testemunhou a morte do último dragão. Avô de Aerys II (o Rei Louco) através de Viserys II.
 
 0 @I_JAEHAERA2@ INDI
 1 NAME Jaehaera /Targaryen/
@@ -965,7 +965,7 @@
 1 NAME Daeron I /Targaryen/
 2 GIVN Daeron
 2 SURN Targaryen
-2 NICK O Jovem DragÃ£o
+2 NICK O Jovem Dragão
 1 SEX M
 1 BIRT
 2 DATE 143 DC
@@ -992,7 +992,7 @@
 1 OCCU Rei de Westeros
 1 FAMC @F_VISERYS2@
 1 SOUR @S4@
-1 NOTE Considerado o pior rei Targaryen. Concedeu legitimidade a todos os seus bastardos no leito de morte, causando a Primeira RebeliÃ£o de Fogo das Brasas.
+1 NOTE Considerado o pior rei Targaryen. Concedeu legitimidade a todos os seus bastardos no leito de morte, causando a Primeira Rebelião de Fogo das Brasas.
 
 0 @I_JAEHAERYS2@ INDI
 1 NAME Jaehaerys II /Targaryen/
@@ -1009,7 +1009,7 @@
 1 FAMC @F_AEGONV@
 1 FAMS @F_JAEHAERYS2@
 1 SOUR @S4@
-1 NOTE Pai do Rei Aerys II (o Rei Louco). Reinado curto mas relativamente estÃ¡vel.
+1 NOTE Pai do Rei Aerys II (o Rei Louco). Reinado curto mas relativamente estável.
 
 0 @I_SHAERA@ INDI
 1 NAME Shaera /Targaryen/
@@ -1041,7 +1041,7 @@
 1 FAMS @F_AERYS2@
 1 SOUR @S1@
 1 SOUR @S4@
-1 NOTE O Rei Louco, assassinado por Jaime Lannister durante a RebeliÃ£o de Robert. Ordenou queimar a cidade com fogo selvagem. Pai de Rhaegar, Viserys e Daenerys.
+1 NOTE O Rei Louco, assassinado por Jaime Lannister durante a Rebelião de Robert. Ordenou queimar a cidade com fogo selvagem. Pai de Rhaegar, Viserys e Daenerys.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/47/Aerys_II_Targaryen_Mad_King.jpg/revision/latest/scale-to-width-down/330?cb=20170821102509
 2 FORM JPG
@@ -1060,7 +1060,7 @@
 2 PLAC Dragonstone, Westeros
 1 FAMS @F_AERYS2@
 1 SOUR @S4@
-1 NOTE Rainha consorte, irmÃ£ e esposa de Aerys II. Morreu a dar Ã  luz Daenerys em Dragonstone durante uma tempestade.
+1 NOTE Rainha consorte, irmã e esposa de Aerys II. Morreu a dar à luz Daenerys em Dragonstone durante uma tempestade.
 
 0 @F_AERYS2@ FAM
 1 HUSB @I_AERYS2@
@@ -1086,16 +1086,16 @@
 1 DEAT
 2 DATE 283 DC
 2 PLAC Tridente, Westeros
-1 OCCU PrÃ­ncipe Herdeiro de Westeros
+1 OCCU Príncipe Herdeiro de Westeros
 1 FAMC @F_AERYS2@
 1 FAMS @F_RHAEGAR_ELIA@
 1 FAMS @F_RHAEGAR_LYANNA@
 1 SOUR @S1@
-1 NOTE PrÃ­ncipe herdeiro, considerado um guerreiro e poeta nobre. Raptou (ou fugiu com) Lyanna Stark, causando a RebeliÃ£o de Robert. Morto por Robert Baratheon no Tridente. Pai de Jon Snow (Aegon Targaryen) com Lyanna Stark.
+1 NOTE Príncipe herdeiro, considerado um guerreiro e poeta nobre. Raptou (ou fugiu com) Lyanna Stark, causando a Rebelião de Robert. Morto por Robert Baratheon no Tridente. Pai de Jon Snow (Aegon Targaryen) com Lyanna Stark.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/51/Rhaeger_main_infobox.png/revision/latest/scale-to-width-down/245?cb=20210722174123
 2 FORM JPG
-2 TITL PrÃ­ncipe Rhaegar Targaryen
+2 TITL Príncipe Rhaegar Targaryen
 
 0 @I_ELIA@ INDI
 1 NAME Elia /Martell/
@@ -1126,7 +1126,7 @@
 1 NAME Aegon /Targaryen/
 2 GIVN Aegon
 2 SURN Targaryen
-2 NICK Filho da CanÃ§Ã£o de Gelo e Fogo (personagem Young Griff)
+2 NICK Filho da Canção de Gelo e Fogo (personagem Young Griff)
 1 SEX M
 1 BIRT
 2 DATE 281 DC
@@ -1136,7 +1136,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMC @F_RHAEGAR_ELIA@
 1 SOUR @S1@
-1 NOTE Filho de Rhaegar e Elia. Assassinado pela Montanha como bebÃ© durante o saque de Porto Real. (Nos livros existe um personagem "Young Griff" que alega ser este Aegon sobrevivente.)
+1 NOTE Filho de Rhaegar e Elia. Assassinado pela Montanha como bebé durante o saque de Porto Real. (Nos livros existe um personagem "Young Griff" que alega ser este Aegon sobrevivente.)
 
 0 @I_RHAENYS_BABY@ INDI
 1 NAME Rhaenys /Targaryen/
@@ -1151,7 +1151,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMC @F_RHAEGAR_ELIA@
 1 SOUR @S1@
-1 NOTE Filha de Rhaegar e Elia. Assassinada pela Montanha como crianÃ§a durante o saque de Porto Real.
+1 NOTE Filha de Rhaegar e Elia. Assassinada pela Montanha como criança durante o saque de Porto Real.
 
 0 @I_LYANNA@ INDI
 1 NAME Lyanna /Stark/
@@ -1167,7 +1167,7 @@
 1 FAMC @F_RICKARD@
 1 FAMS @F_RHAEGAR_LYANNA@
 1 SOUR @S1@
-1 NOTE IrmÃ£ de Eddard Stark. Fugiu com Rhaegar (casamento secreto). Morreu apÃ³s o parto de Jon Snow na Torre da Alegria. Pediu a Ned que protegesse o filho e nÃ£o revelasse a paternidade.
+1 NOTE Irmã de Eddard Stark. Fugiu com Rhaegar (casamento secreto). Morreu após o parto de Jon Snow na Torre da Alegria. Pediu a Ned que protegesse o filho e não revelasse a paternidade.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/8/85/Lyanna_S7_E7.jpg/revision/latest/scale-to-width-down/241?cb=20170830234842
 2 FORM JPG
@@ -1182,7 +1182,7 @@
 1 NAME Viserys /Targaryen/
 2 GIVN Viserys
 2 SURN Targaryen
-2 NICK Rei dos Mendigos; O DragÃ£o
+2 NICK Rei dos Mendigos; O Dragão
 1 SEX M
 1 BIRT
 2 DATE 276 DC
@@ -1192,7 +1192,7 @@
 2 PLAC Vaes Dothrak, Essos
 1 FAMC @F_AERYS2@
 1 SOUR @S1@
-1 NOTE IrmÃ£o mais velho de Daenerys, fugiu com ela para Essos apÃ³s a queda da dinastia. Obcecado em recuperar o Trono de Ferro. Vendeu Daenerys ao Khal Drogo. Morto por Drogo com "uma coroa de ouro" derretida sobre a cabeÃ§a.
+1 NOTE Irmão mais velho de Daenerys, fugiu com ela para Essos após a queda da dinastia. Obcecado em recuperar o Trono de Ferro. Vendeu Daenerys ao Khal Drogo. Morto por Drogo com "uma coroa de ouro" derretida sobre a cabeça.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/46/Viseryspromoheadshot.jpg/revision/latest/scale-to-width-down/313?cb=20210722093457
 2 FORM JPG
@@ -1214,7 +1214,7 @@
 1 FAMC @F_AERYS2@
 1 FAMS @F_DAENERYS_DROGO@
 1 SOUR @S1@
-1 NOTE A Ãšltima Targaryen (pensava-se). MÃ£e dos dragÃµes Drogon, Rhaegal e Viserion. Libertou os escravos em Essos. Chegou a Westeros e venceu os Lannister. Destruiu Porto Real com Drogon num ato de raiva. Assassinada por Jon Snow.
+1 NOTE A Ãšltima Targaryen (pensava-se). Mãe dos dragões Drogon, Rhaegal e Viserion. Libertou os escravos em Essos. Chegou a Westeros e venceu os Lannister. Destruiu Porto Real com Drogon num ato de raiva. Assassinada por Jon Snow.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/4f/Daenerys_Season_8.jpg/revision/latest/scale-to-width-down/240?cb=20190415212013
 2 FORM JPG
@@ -1227,14 +1227,14 @@
 1 SEX M
 1 BIRT
 2 DATE 270 DC
-2 PLAC PlanÃ­cies Dothraki, Essos
+2 PLAC Planícies Dothraki, Essos
 1 DEAT
 2 DATE 298 DC
-2 PLAC PlanÃ­cies Dothraki, Essos
-1 OCCU Khal (lÃ­der Dothraki)
+2 PLAC Planícies Dothraki, Essos
+1 OCCU Khal (líder Dothraki)
 1 FAMS @F_DAENERYS_DROGO@
 1 SOUR @S1@
-1 NOTE Khal dos Dothraki, mais poderoso guerreiro. Casado com Daenerys. Morreu de infecÃ§Ã£o apÃ³s ferida de batalha, mantido "vivo" por feitiÃ§aria de Mirri Maz Duur atÃ© Daenerys sacrificÃ¡-lo.
+1 NOTE Khal dos Dothraki, mais poderoso guerreiro. Casado com Daenerys. Morreu de infecção após ferida de batalha, mantido "vivo" por feitiçaria de Mirri Maz Duur até Daenerys sacrificá-lo.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/21/Khal_Drogo_infobox_promo.jpg/revision/latest/scale-to-width-down/254?cb=20190427051349
 2 FORM JPG
@@ -1243,7 +1243,7 @@
 0 @F_DAENERYS_DROGO@ FAM
 1 HUSB @I_DROGO@
 1 WIFE @I_DAENERYS@
-1 NOTE Rhaego, filho de Daenerys e Drogo, nasceu morto por feitiÃ§aria.
+1 NOTE Rhaego, filho de Daenerys e Drogo, nasceu morto por feitiçaria.
 
 # === CASA STARK ===
 
@@ -1261,7 +1261,7 @@
 1 OCCU Lorde de Winterfell
 1 FAMS @F_RICKARD@
 1 SOUR @S1@
-1 NOTE Pai de Ned, Benjen e Lyanna Stark. Queimado vivo por Aerys II durante a RebeliÃ£o de Robert.
+1 NOTE Pai de Ned, Benjen e Lyanna Stark. Queimado vivo por Aerys II durante a Rebelião de Robert.
 
 0 @I_LYARRA@ INDI
 1 NAME Lyarra /Stark/
@@ -1276,7 +1276,7 @@
 2 PLAC Winterfell, Norte, Westeros
 1 FAMS @F_RICKARD@
 1 SOUR @S1@
-1 NOTE MÃ£e de Ned, Benjen e Lyanna. Morreu quando eram crianÃ§as.
+1 NOTE Mãe de Ned, Benjen e Lyanna. Morreu quando eram crianças.
 
 0 @F_RICKARD@ FAM
 1 HUSB @I_RICKARD@
@@ -1297,7 +1297,7 @@
 1 DEAT
 2 DATE 298 DC
 2 PLAC Porto Real, Westeros
-1 OCCU Lorde de Winterfell; MÃ£o do Rei
+1 OCCU Lorde de Winterfell; Mão do Rei
 1 FAMC @F_RICKARD@
 1 FAMS @F_NED_CATELYN@
 1 SOUR @S1@
@@ -1318,11 +1318,11 @@
 2 PLAC AguasDoces, Terras Ribeirinhas, Westeros
 1 DEAT
 2 DATE 299 DC
-2 PLAC GÃªmeos, Westeros
+2 PLAC Gêmeos, Westeros
 1 FAMC @F_HOSTER@
 1 FAMS @F_NED_CATELYN@
 1 SOUR @S1@
-1 NOTE Filha de Hoster Tully. Esposa de Ned Stark. MÃ£e de Robb, Sansa, Arya, Bran e Rickon. Morreu no Casamento Vermelho. Ressuscitada como Senhora CoraÃ§Ã£o de Pedra (nos livros).
+1 NOTE Filha de Hoster Tully. Esposa de Ned Stark. Mãe de Robb, Sansa, Arya, Bran e Rickon. Morreu no Casamento Vermelho. Ressuscitada como Senhora Coração de Pedra (nos livros).
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/d/d8/CatelynS3Promo.jpg/revision/latest/scale-to-width-down/242?cb=20190427043743
 2 FORM JPG
@@ -1346,10 +1346,10 @@
 1 BIRT
 2 DATE 282 DC
 2 PLAC Torre da Alegria, Dorne, Westeros
-1 OCCU Lorde Comandante da Guarda da Noite; Rei do Norte; Exilado sempre alÃ©m da Muralha
+1 OCCU Lorde Comandante da Guarda da Noite; Rei do Norte; Exilado sempre além da Muralha
 1 FAMC @F_RHAEGAR_LYANNA@
 1 SOUR @S1@
-1 NOTE Filho secreto de Rhaegar Targaryen e Lyanna Stark. Criado por Ned Stark como filho bastardo. Entrou para a Guarda da Noite. Morreu e ressuscitou. Liderou a Grande Guerra. Assassinou Daenerys. Exilado para alÃ©m da Muralha.
+1 NOTE Filho secreto de Rhaegar Targaryen e Lyanna Stark. Criado por Ned Stark como filho bastardo. Entrou para a Guarda da Noite. Morreu e ressuscitou. Liderou a Grande Guerra. Assassinou Daenerys. Exilado para além da Muralha.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/d/d0/JonSnow8x06.PNG/revision/latest/scale-to-width-down/278?cb=20190714094440
 2 FORM JPG
@@ -1365,12 +1365,12 @@
 2 PLAC Porto Real, Westeros
 1 DEAT
 2 DATE 299 DC
-2 PLAC GÃªmeos, Westeros
+2 PLAC Gêmeos, Westeros
 1 OCCU Rei do Norte
 1 FAMC @F_NED_CATELYN@
 1 FAMS @F_ROBB@
 1 SOUR @S1@
-1 NOTE PrimogÃ©nito de Ned e Catelyn. Rei invicto no campo de batalha. Assassinado no Casamento Vermelho com a mÃ£e Catelyn, organizado pelos Frey e Lannister.
+1 NOTE Primogénito de Ned e Catelyn. Rei invicto no campo de batalha. Assassinado no Casamento Vermelho com a mãe Catelyn, organizado pelos Frey e Lannister.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/50/S3E9_Robb_Stark_main.jpg/revision/latest/scale-to-width-down/261?cb=20160718071203
 2 FORM JPG
@@ -1386,10 +1386,10 @@
 2 PLAC Volantis, Essos
 1 DEAT
 2 DATE 299 DC
-2 PLAC GÃªmeos, Westeros
+2 PLAC Gêmeos, Westeros
 1 FAMS @F_ROBB@
 1 SOUR @S1@
-1 NOTE MÃ©dica de guerra de Volantis. Robb Stark quebrou o seu juramento com os Frey para casar com ela. Morreu grÃ¡vida no Casamento Vermelho.
+1 NOTE Médica de guerra de Volantis. Robb Stark quebrou o seu juramento com os Frey para casar com ela. Morreu grávida no Casamento Vermelho.
 
 0 @F_ROBB@ FAM
 1 HUSB @I_ROBB@
@@ -1406,7 +1406,7 @@
 1 OCCU Rainha do Norte
 1 FAMC @F_NED_CATELYN@
 1 SOUR @S1@
-1 NOTE Filha de Ned e Catelyn. Capturada em Porto Real, forÃ§ada a casar com Tyrion Lannister e depois Ramsay Bolton. Sobreviveu e tornou-se Rainha do Norte independente no final da sÃ©rie.
+1 NOTE Filha de Ned e Catelyn. Capturada em Porto Real, forçada a casar com Tyrion Lannister e depois Ramsay Bolton. Sobreviveu e tornou-se Rainha do Norte independente no final da série.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/6/63/QueenSansa.PNG/revision/latest/scale-to-width-down/282?cb=20210215100224
 2 FORM JPG
@@ -1423,7 +1423,7 @@
 1 OCCU Assassina (Sem Rosto); Exploradora Ocidente do Mundo
 1 FAMC @F_NED_CATELYN@
 1 SOUR @S1@
-1 NOTE Filha de Ned e Catelyn. Treinou como assassina em Braavos com os Sem Rosto. Assassinou Walder Frey e toda a sua famÃ­lia. Matou o Rei da Noite e os Caminhantes Brancos. No final navegou para Ocidente do mundo conhecido.
+1 NOTE Filha de Ned e Catelyn. Treinou como assassina em Braavos com os Sem Rosto. Assassinou Walder Frey e toda a sua família. Matou o Rei da Noite e os Caminhantes Brancos. No final navegou para Ocidente do mundo conhecido.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/b/be/AryaShipIronThrone.PNG/revision/latest/scale-to-width-down/268?cb=20190520174300
 2 FORM JPG
@@ -1433,7 +1433,7 @@
 1 NAME Brandon /Stark/
 2 GIVN Brandon
 2 SURN Stark
-2 NICK Bran; Bran o Partido; O Corvo de TrÃªs Olhos
+2 NICK Bran; Bran o Partido; O Corvo de Três Olhos
 1 SEX M
 1 BIRT
 2 DATE 290 DC
@@ -1441,7 +1441,7 @@
 1 OCCU Rei dos Seis Reinos
 1 FAMC @F_NED_CATELYN@
 1 SOUR @S1@
-1 NOTE Filho de Ned e Catelyn. Ficou paraplÃ©gico apÃ³s ser lanÃ§ado de uma torre por Jaime Lannister. Tornou-se o Corvo de TrÃªs Olhos, guardiÃ£o de toda a memÃ³ria humana. Eleito Rei dos Seis Reinos no final.
+1 NOTE Filho de Ned e Catelyn. Ficou paraplégico após ser lançado de uma torre por Jaime Lannister. Tornou-se o Corvo de Três Olhos, guardião de toda a memória humana. Eleito Rei dos Seis Reinos no final.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/8/81/KingBran.PNG/revision/latest/scale-to-width-down/269?cb=20190520173855
 2 FORM JPG
@@ -1473,11 +1473,11 @@
 2 PLAC Winterfell, Norte, Westeros
 1 DEAT
 2 DATE 305 DC
-2 PLAC Para alÃ©m da Muralha, Westeros
+2 PLAC Para além da Muralha, Westeros
 1 OCCU Primeiro Ranger da Guarda da Noite
 1 FAMC @F_RICKARD@
 1 SOUR @S1@
-1 NOTE IrmÃ£o mais novo de Ned. Desapareceu alÃ©m da Muralha, transformado em meio-morto pelo Rei da Noite. Resgatou Jon Snow vÃ¡rias vezes.
+1 NOTE Irmão mais novo de Ned. Desapareceu além da Muralha, transformado em meio-morto pelo Rei da Noite. Resgatou Jon Snow várias vezes.
 
 # --- CASA TULLY ---
 
@@ -1526,7 +1526,7 @@
 1 FAMC @F_HOSTER@
 1 FAMS @F_LYSA_JON@
 1 SOUR @S1@
-1 NOTE IrmÃ£ de Catelyn. Casou com Jon Arryn (MÃ£o do Rei). MÃ£e de Robin Arryn. Assassinada por Petyr Baelish (Mindinho) que a lanÃ§ou pelo PortÃ£o da Lua.
+1 NOTE Irmã de Catelyn. Casou com Jon Arryn (Mão do Rei). Mãe de Robin Arryn. Assassinada por Petyr Baelish (Mindinho) que a lançou pelo Portão da Lua.
 
 0 @I_JON_ARRYN@ INDI
 1 NAME Jon /Arryn/
@@ -1539,10 +1539,10 @@
 1 DEAT
 2 DATE 297 DC
 2 PLAC Porto Real, Westeros
-1 OCCU MÃ£o do Rei (de Robert Baratheon)
+1 OCCU Mão do Rei (de Robert Baratheon)
 1 FAMS @F_LYSA_JON@
 1 SOUR @S1@
-1 NOTE Antigo tutor de Ned e Robert. MÃ£o do Rei. Descobriu o segredo dos filhos de Cersei. Envenenado por Lysa Tully a pedido de Petyr Baelish. A sua morte desencadeou os eventos de GoT.
+1 NOTE Antigo tutor de Ned e Robert. Mão do Rei. Descobriu o segredo dos filhos de Cersei. Envenenado por Lysa Tully a pedido de Petyr Baelish. A sua morte desencadeou os eventos de GoT.
 
 0 @F_LYSA_JON@ FAM
 1 HUSB @I_JON_ARRYN@
@@ -1560,7 +1560,7 @@
 2 PLAC Ninho de Pedra, Vale de Arryn, Westeros
 1 FAMC @F_LYSA_JON@
 1 SOUR @S1@
-1 NOTE Filho de Jon e Lysa Arryn. Lorde do Vale. CrianÃ§a mimada e perturbada. Por fim, criado pelo Mindinho.
+1 NOTE Filho de Jon e Lysa Arryn. Lorde do Vale. Criança mimada e perturbada. Por fim, criado pelo Mindinho.
 
 0 @I_EDMURE@ INDI
 1 NAME Edmure /Tully/
@@ -1573,7 +1573,7 @@
 1 FAMC @F_HOSTER@
 1 FAMS @F_EDMURE@
 1 SOUR @S1@
-1 NOTE IrmÃ£o de Catelyn e Lysa. Senhor das Terras Ribeirinhas. Casou com Roslin Frey no Casamento Vermelho (capturado depois). Libertado no final da sÃ©rie.
+1 NOTE Irmão de Catelyn e Lysa. Senhor das Terras Ribeirinhas. Casou com Roslin Frey no Casamento Vermelho (capturado depois). Libertado no final da série.
 
 0 @I_ROSLIN@ INDI
 1 NAME Roslin /Frey/
@@ -1582,10 +1582,10 @@
 1 SEX F
 1 BIRT
 2 DATE 282 DC
-2 PLAC GÃªmeos, Terras Ribeirinhas, Westeros
+2 PLAC Gêmeos, Terras Ribeirinhas, Westeros
 1 FAMS @F_EDMURE@
 1 SOUR @S1@
-1 NOTE Filha de Walder Frey. ForÃ§ada a ser o isco no Casamento Vermelho, mas aparentemente inocente da conspiraÃ§Ã£o.
+1 NOTE Filha de Walder Frey. Forçada a ser o isco no Casamento Vermelho, mas aparentemente inocente da conspiração.
 
 0 @F_EDMURE@ FAM
 1 HUSB @I_EDMURE@
@@ -1604,10 +1604,10 @@
 1 DEAT
 2 DATE 300 DC
 2 PLAC Porto Real, Westeros
-1 OCCU Senhor do Rochedo Casterly; MÃ£o do Rei
+1 OCCU Senhor do Rochedo Casterly; Mão do Rei
 1 FAMS @F_TYWIN@
 1 SOUR @S1@
-1 NOTE O mais poderoso senhor de Westeros. Liderou o saque de Porto Real. Pai de Cersei, Jaime e Tyrion. Assassinado por Tyrion com uma besta enquanto estava no sanitÃ¡rio.
+1 NOTE O mais poderoso senhor de Westeros. Liderou o saque de Porto Real. Pai de Cersei, Jaime e Tyrion. Assassinado por Tyrion com uma besta enquanto estava no sanitário.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/7/71/Tywin_Lannister_4x08.jpg/revision/latest/scale-to-width-down/278?cb=20170830015346
 2 FORM JPG
@@ -1626,7 +1626,7 @@
 2 PLAC Rochedo Casterly, Westeros
 1 FAMS @F_TYWIN@
 1 SOUR @S1@
-1 NOTE Prima e esposa de Tywin. Morreu ao dar Ã  luz Tyrion. Amada por Tywin, a sua morte mudou-o para sempre.
+1 NOTE Prima e esposa de Tywin. Morreu ao dar à luz Tyrion. Amada por Tywin, a sua morte mudou-o para sempre.
 
 0 @F_TYWIN@ FAM
 1 HUSB @I_TYWIN@
@@ -1650,7 +1650,7 @@
 1 FAMC @F_TYWIN@
 1 FAMS @F_ROBERT_CERSEI@
 1 SOUR @S1@
-1 NOTE Filha de Tywin, gÃ©mea de Jaime. Liga incestuosa com o irmÃ£o Jaime (pai dos filhos). Rainha de facto. Morreu esmagada com Jaime quando a Fortaleza Vermelha desmoronou.
+1 NOTE Filha de Tywin, gémea de Jaime. Liga incestuosa com o irmão Jaime (pai dos filhos). Rainha de facto. Morreu esmagada com Jaime quando a Fortaleza Vermelha desmoronou.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/b/b0/CERSEIBATTLEOFKINGSLANDING.PNG/revision/latest/scale-to-width-down/270?cb=20190906021534
 2 FORM JPG
@@ -1660,7 +1660,7 @@
 1 NAME Jaime /Lannister/
 2 GIVN Jaime
 2 SURN Lannister
-2 NICK O Assassino de Reis; O LeÃ£o
+2 NICK O Assassino de Reis; O Leão
 1 SEX M
 1 BIRT
 2 DATE 266 DC
@@ -1671,7 +1671,7 @@
 1 OCCU Cavaleiro da Guarda Real; Lorde Comandante da Guarda Real
 1 FAMC @F_TYWIN@
 1 SOUR @S1@
-1 NOTE Filho de Tywin, gÃ©meo de Cersei. O mais hÃ¡bil espadachim de Westeros. Matou Aerys para salvar Porto Real do fogo selvagem (apesar do epÃ­teto). Perdeu a mÃ£o direita. Redemption arc. Morreu com Cersei.
+1 NOTE Filho de Tywin, gémeo de Cersei. O mais hábil espadachim de Westeros. Matou Aerys para salvar Porto Real do fogo selvagem (apesar do epíteto). Perdeu a mão direita. Redemption arc. Morreu com Cersei.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/5/51/JaimeLannisterSeason8.PNG/revision/latest/scale-to-width-down/254?cb=20190207112813
 2 FORM JPG
@@ -1681,16 +1681,16 @@
 1 NAME Tyrion /Lannister/
 2 GIVN Tyrion
 2 SURN Lannister
-2 NICK O AnÃ£o; O Imp; O Meio-Homem; Senhor da Luz (ironia)
+2 NICK O Anão; O Imp; O Meio-Homem; Senhor da Luz (ironia)
 1 SEX M
 1 BIRT
 2 DATE 273 DC
 2 PLAC Rochedo Casterly, Westeros
-1 OCCU MÃ£o do Rei; MÃ£o da Rainha; MÃ£o do Rei (Bran)
+1 OCCU Mão do Rei; Mão da Rainha; Mão do Rei (Bran)
 1 FAMC @F_TYWIN@
 1 FAMS @F_TYRION_SANSA@
 1 SOUR @S1@
-1 NOTE Filho mais novo de Tywin. AnÃ£o. O personagem mais complexo da sÃ©rie. Duas vezes MÃ£o do Rei/Rainha. Matou Tywin. Tornou-se MÃ£o do Rei de Bran no final.
+1 NOTE Filho mais novo de Tywin. Anão. O personagem mais complexo da série. Duas vezes Mão do Rei/Rainha. Matou Tywin. Tornou-se Mão do Rei de Bran no final.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/9/95/HandoftheKingTyrionLannister.PNG/revision/latest/scale-to-width-down/264?cb=20190520175204
 2 FORM JPG
@@ -1699,7 +1699,7 @@
 0 @F_TYRION_SANSA@ FAM
 1 HUSB @I_TYRION@
 1 WIFE @I_SANSA@
-1 NOTE Casamento forÃ§ado (nunca consumado).
+1 NOTE Casamento forçado (nunca consumado).
 
 0 @I_JOFFREY@ INDI
 1 NAME Joffrey /Baratheon/
@@ -1715,7 +1715,7 @@
 1 OCCU Rei dos Sete Reinos
 1 FAMC @F_ROBERT_CERSEI@
 1 SOUR @S1@
-1 NOTE Filho de Cersei e Jaime (nÃ£o de Robert). Rei cruel e caprichoso. Ordenou a execuÃ§Ã£o de Ned Stark. Assassinado por veneno (Estrangulador) no seu banquete de casamento, perpetrado por Olenna Tyrell e Petyr Baelish.
+1 NOTE Filho de Cersei e Jaime (não de Robert). Rei cruel e caprichoso. Ordenou a execução de Ned Stark. Assassinado por veneno (Estrangulador) no seu banquete de casamento, perpetrado por Olenna Tyrell e Petyr Baelish.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/25/Joffrey_Season_4_Episode_2_TLATR.jpg/revision/latest/scale-to-width-down/240?cb=20210722092942
 2 FORM JPG
@@ -1751,7 +1751,7 @@
 1 FAMC @F_ROBERT_CERSEI@
 1 FAMS @F_TOMMEN@
 1 SOUR @S1@
-1 NOTE Filho de Cersei e Jaime. Bonzinho e gentil. Tornou-se rei apÃ³s a morte de Joffrey. Saltou da janela apÃ³s Cersei destruir o Septo de Baelor onde estava a sua esposa Margaery Tyrell.
+1 NOTE Filho de Cersei e Jaime. Bonzinho e gentil. Tornou-se rei após a morte de Joffrey. Saltou da janela após Cersei destruir o Septo de Baelor onde estava a sua esposa Margaery Tyrell.
 
 0 @I_MARGAERY@ INDI
 1 NAME Margaery /Tyrell/
@@ -1767,7 +1767,7 @@
 1 FAMC @F_MACE@
 1 FAMS @F_TOMMEN@
 1 SOUR @S1@
-1 NOTE Filha de Mace Tyrell. Casou com Joffrey, depois Renly Baratheon (livros) e Tommen Baratheon. Morreu na explosÃ£o do Septo de Baelor.
+1 NOTE Filha de Mace Tyrell. Casou com Joffrey, depois Renly Baratheon (livros) e Tommen Baratheon. Morreu na explosão do Septo de Baelor.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/b/b5/Margaery_Tyrell_S6.png/revision/latest/scale-to-width-down/262?cb=20210722163311
 2 FORM JPG
@@ -1786,14 +1786,14 @@
 1 SEX M
 1 BIRT
 2 DATE 240 DC
-2 PLAC BastiÃ£o das Tormentas, Westeros
+2 PLAC Bastião das Tormentas, Westeros
 1 DEAT
 2 DATE 278 DC
-2 PLAC BastiÃ£o das Tormentas, Westeros
-1 OCCU Senhor de BastiÃ£o das Tormentas
+2 PLAC Bastião das Tormentas, Westeros
+1 OCCU Senhor de Bastião das Tormentas
 1 FAMS @F_STEFFON@
 1 SOUR @S1@
-1 NOTE Pai de Robert, Stannis e Renly. Morreu num naufrÃ¡gio enquanto Cersei e os filhos assistiam da costa.
+1 NOTE Pai de Robert, Stannis e Renly. Morreu num naufrágio enquanto Cersei e os filhos assistiam da costa.
 
 0 @I_CASSANA@ INDI
 1 NAME Cassana /Estermont/
@@ -1817,7 +1817,7 @@
 1 SEX M
 1 BIRT
 2 DATE 262 DC
-2 PLAC BastiÃ£o das Tormentas, Westeros
+2 PLAC Bastião das Tormentas, Westeros
 1 DEAT
 2 DATE 297 DC
 2 PLAC Westeros
@@ -1825,7 +1825,7 @@
 1 FAMC @F_STEFFON@
 1 FAMS @F_ROBERT_CERSEI@
 1 SOUR @S1@
-1 NOTE O rei que derrubou os Targaryen. Amou Lyanna Stark. Casou com Cersei Lannister por polÃ­tica. Mau rei, mas grande guerreiro. Morreu apÃ³s um acidente de caÃ§a (encorajado por Cersei).
+1 NOTE O rei que derrubou os Targaryen. Amou Lyanna Stark. Casou com Cersei Lannister por política. Mau rei, mas grande guerreiro. Morreu após um acidente de caça (encorajado por Cersei).
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/43/Robert_crop.png/revision/latest/scale-to-width-down/338?cb=20210223122212
 2 FORM JPG
@@ -1845,15 +1845,15 @@
 1 SEX M
 1 BIRT
 2 DATE 264 DC
-2 PLAC BastiÃ£o das Tormentas, Westeros
+2 PLAC Bastião das Tormentas, Westeros
 1 DEAT
 2 DATE 304 DC
 2 PLAC Norte, Westeros
-1 OCCU Senhor de Pedra do DragÃ£o; Pretendente ao Trono
+1 OCCU Senhor de Pedra do Dragão; Pretendente ao Trono
 1 FAMC @F_STEFFON@
 1 FAMS @F_STANNIS@
 1 SOUR @S1@
-1 NOTE IrmÃ£o de Robert. RÃ­gido e devotado Ã  lei. Acreditava ser o verdadeiro herdeiro. Seguidor do Deus R'hllor por influÃªncia de Melisandre. Queimou a filha Shireen. Morreu nos bosques do Norte.
+1 NOTE Irmão de Robert. Rígido e devotado à lei. Acreditava ser o verdadeiro herdeiro. Seguidor do Deus R'hllor por influência de Melisandre. Queimou a filha Shireen. Morreu nos bosques do Norte.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/2f/StannisNew.png/revision/latest/scale-to-width-down/310?cb=20210313165449
 2 FORM JPG
@@ -1866,7 +1866,7 @@
 1 SEX F
 1 FAMS @F_STANNIS@
 1 SOUR @S1@
-1 NOTE Esposa de Stannis. Fervorosa do Deus R'hllor. Pendurou-se apÃ³s ver Shireen queimar.
+1 NOTE Esposa de Stannis. Fervorosa do Deus R'hllor. Pendurou-se após ver Shireen queimar.
 
 0 @F_STANNIS@ FAM
 1 HUSB @I_STANNIS@
@@ -1880,13 +1880,13 @@
 1 SEX F
 1 BIRT
 2 DATE 288 DC
-2 PLAC Pedra do DragÃ£o, Westeros
+2 PLAC Pedra do Dragão, Westeros
 1 DEAT
 2 DATE 304 DC
 2 PLAC Norte, Westeros
 1 FAMC @F_STANNIS@
 1 SOUR @S1@
-1 NOTE Filha de Stannis e Selyse. Tinha o rosto marcado pela Pedregosa. Gentil e inteligente. Queimada viva pelo prÃ³prio pai a pedido de Melisandre como sacrifÃ­cio a R'hllor.
+1 NOTE Filha de Stannis e Selyse. Tinha o rosto marcado pela Pedregosa. Gentil e inteligente. Queimada viva pelo próprio pai a pedido de Melisandre como sacrifício a R'hllor.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/e/eb/Shireen_Baratheon_Season_4_profile.jpg/revision/latest/scale-to-width-down/295?cb=20210722092809
 2 FORM JPG
@@ -1899,14 +1899,14 @@
 1 SEX M
 1 BIRT
 2 DATE 277 DC
-2 PLAC BastiÃ£o das Tormentas, Westeros
+2 PLAC Bastião das Tormentas, Westeros
 1 DEAT
 2 DATE 299 DC
 2 PLAC Campo das Margens, Westeros
 1 FAMC @F_STEFFON@
 1 FAMS @F_RENLY@
 1 SOUR @S1@
-1 NOTE IrmÃ£o mais novo de Robert e Stannis. Pretendente ao trono. Gay, amante de Loras Tyrell. Assassinado pela "sombra" convocada por Melisandre para Stannis.
+1 NOTE Irmão mais novo de Robert e Stannis. Pretendente ao trono. Gay, amante de Loras Tyrell. Assassinado pela "sombra" convocada por Melisandre para Stannis.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/f/ff/Profile-Renly_Baratheon.png/revision/latest/scale-to-width-down/263?cb=20171006064500
 2 FORM JPG
@@ -1916,7 +1916,7 @@
 1 NAME Brienne /de Tarth/
 2 GIVN Brienne
 2 SURN Tarth
-2 NICK A Rapariga de Renly; Brienne a Bela (escÃ¡rnio)
+2 NICK A Rapariga de Renly; Brienne a Bela (escárnio)
 1 SEX F
 1 BIRT
 2 DATE 281 DC
@@ -1924,7 +1924,7 @@
 1 OCCU Cavaleira; Lorde-Comandante da Guarda Real de Bran
 1 FAMS @F_RENLY@
 1 SOUR @S1@
-1 NOTE Guarda de Renly. ApÃ³s a sua morte, serviu Catelyn e depois Sansa. A mulher mais habilidosa em combate de Westeros. Jurada cavaleiro por Jaime Lannister. Lorde Comandante da Guarda Real de Bran no final.
+1 NOTE Guarda de Renly. Após a sua morte, serviu Catelyn e depois Sansa. A mulher mais habilidosa em combate de Westeros. Jurada cavaleiro por Jaime Lannister. Lorde Comandante da Guarda Real de Bran no final.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/a/a9/S8_Brienne_Profil.jpg/revision/latest/scale-to-width-down/280?cb=20190423165941
 2 FORM JPG
@@ -1933,7 +1933,7 @@
 0 @F_RENLY@ FAM
 1 HUSB @I_RENLY@
 1 WIFE @I_BRIENNE@
-1 NOTE RelaÃ§Ã£o formal como guarda/protegida sem laÃ§o romÃ¢ntico formalizado.
+1 NOTE Relação formal como guarda/protegida sem laço romântico formalizado.
 
 # === CASA TYRELL ===
 
@@ -1948,7 +1948,7 @@
 1 DEAT
 2 DATE 305 DC
 2 PLAC Porto Real, Westeros
-1 OCCU Senhor do Jardim das Flores; MÃ£o do Rei
+1 OCCU Senhor do Jardim das Flores; Mão do Rei
 1 FAMS @F_MACE@
 1 SOUR @S1@
 
@@ -1980,7 +1980,7 @@
 2 PLAC Porto Real, Westeros
 1 FAMC @F_MACE@
 1 SOUR @S1@
-1 NOTE O melhor cavaleiro da sua geraÃ§Ã£o. Amante de Renly Baratheon. Morreu na explosÃ£o do Septo de Baelor.
+1 NOTE O melhor cavaleiro da sua geração. Amante de Renly Baratheon. Morreu na explosão do Septo de Baelor.
 
 0 @I_OLENNA@ INDI
 1 NAME Olenna /Redwyne/
@@ -1995,7 +1995,7 @@
 2 DATE 305 DC
 2 PLAC Jardim das Flores, Westeros
 1 FAMS @F_MACE@
-1 NOTE MÃ£e de Mace Tyrell (posiÃ§Ã£o como avÃ³ de Margaery e Loras). A mulher mais inteligente de Westeros. ResponsÃ¡vel pelo assassinato de Joffrey. Envenenada por Jaime, confessou o assassinato de Joffrey antes de morrer.
+1 NOTE Mãe de Mace Tyrell (posição como avó de Margaery e Loras). A mulher mais inteligente de Westeros. Responsável pelo assassinato de Joffrey. Envenenada por Jaime, confessou o assassinato de Joffrey antes de morrer.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/f/f2/OlennaS7E3.png/revision/latest/scale-to-width-down/292?cb=20170803074257
 2 FORM JPG
@@ -2014,10 +2014,10 @@
 1 DEAT
 2 DATE 304 DC
 2 PLAC Sunspear, Dorne, Westeros
-1 OCCU PrÃ­ncipe de Dorne
+1 OCCU Príncipe de Dorne
 1 FAMS @F_DORAN@
 1 SOUR @S1@
-1 NOTE PrÃ­ncipe de Dorne, irmÃ£o de Oberyn Martell. Sofredor de gota. Planeador paciente. Assassinado por Ellaria Sand e as Serpentes Areia numa revolta.
+1 NOTE Príncipe de Dorne, irmão de Oberyn Martell. Sofredor de gota. Planeador paciente. Assassinado por Ellaria Sand e as Serpentes Areia numa revolta.
 
 0 @I_MELLARIO@ INDI
 1 NAME Mellario /de Norvos/
@@ -2051,7 +2051,7 @@
 1 NAME Oberyn /Martell/
 2 GIVN Oberyn
 2 SURN Martell
-2 NICK A VÃ­bora Vermelha
+2 NICK A Víbora Vermelha
 1 SEX M
 1 BIRT
 2 DATE 258 DC
@@ -2061,11 +2061,11 @@
 2 PLAC Porto Real, Westeros
 1 FAMS @F_OBERYN@
 1 SOUR @S1@
-1 NOTE IrmÃ£o de Doran. Guerreiro e amante famoso. Combateu a Montanha em julgamento por combate para vingar Elia Martell. Morreu quando a Montanha lhe esmagou o crÃ¢nio, apesar de ter vencido.
+1 NOTE Irmão de Doran. Guerreiro e amante famoso. Combateu a Montanha em julgamento por combate para vingar Elia Martell. Morreu quando a Montanha lhe esmagou o crânio, apesar de ter vencido.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/44/Oberyn-Martell-house-martell_s3.jpg/revision/latest/scale-to-width-down/230?cb=20190427200207
 2 FORM JPG
-2 TITL Oberyn Martell - A VÃ­bora Vermelha
+2 TITL Oberyn Martell - A Víbora Vermelha
 
 0 @I_ELLARIA@ INDI
 1 NAME Ellaria /Sand/
@@ -2077,7 +2077,7 @@
 2 PLAC Dorne, Westeros
 1 FAMS @F_OBERYN@
 1 SOUR @S1@
-1 NOTE Amante de Oberyn (nÃ£o casados formalmente, "bastarda" de Dorne). ApÃ³s a morte de Oberyn, tornou-se extremista da vinganÃ§a. Envenenou Myrcella e matou Doran. Capturada por Cersei e aprisionada.
+1 NOTE Amante de Oberyn (não casados formalmente, "bastarda" de Dorne). Após a morte de Oberyn, tornou-se extremista da vingança. Envenenou Myrcella e matou Doran. Capturada por Cersei e aprisionada.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/4/4c/Ellaria_Sand_The_End.png/revision/latest/scale-to-width-down/266?cb=20170830014137
 2 FORM JPG
@@ -2087,7 +2087,7 @@
 1 HUSB @I_OBERYN@
 1 WIFE @I_ELLARIA@
 
-# === FIGURAS NOTÃVEIS DE GOT (SEM FAMÃLIA PRINCIPAL) ===
+# === FIGURAS NOTÁVEIS DE GOT (SEM FAMÍLIA PRINCIPAL) ===
 
 0 @I_PETYR@ INDI
 1 NAME Petyr /Baelish/
@@ -2101,9 +2101,9 @@
 1 DEAT
 2 DATE 304 DC
 2 PLAC Winterfell, Norte, Westeros
-1 OCCU Mestre dos BenefÃ­cios; Senhor dos Cruzamentos; Lord Protetor do Vale
+1 OCCU Mestre dos Benefícios; Senhor dos Cruzamentos; Lord Protetor do Vale
 1 SOUR @S1@
-1 NOTE Filho de um lorde menor. Genial maquinador por trÃ¡s de muitos eventos de GoT. Amava Catelyn Tully desde crianÃ§a. ResponsÃ¡vel (com Lysa) pela morte de Jon Arryn. Provocou a guerra entre Starks e Lannisters. Executado por Arya Stark sob ordem de Sansa.
+1 NOTE Filho de um lorde menor. Genial maquinador por trás de muitos eventos de GoT. Amava Catelyn Tully desde criança. Responsável (com Lysa) pela morte de Jon Arryn. Provocou a guerra entre Starks e Lannisters. Executado por Arya Stark sob ordem de Sansa.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/9/9f/Profile-Littlefinger.png/revision/latest/scale-to-width-down/268?cb=20170826005231
 2 FORM JPG
@@ -2120,9 +2120,9 @@
 1 DEAT
 2 DATE 305 DC
 2 PLAC Dragonstone, Westeros
-1 OCCU Mestre dos MurmÃºrios (Spymaster)
+1 OCCU Mestre dos Murmúrios (Spymaster)
 1 SOUR @S1@
-1 NOTE Eunuco castrado em crianÃ§a por um feiticeiro. O melhor espiÃ£o de Westeros. Serviu mÃºltiplos reis mas sempre disse ser fiel ao reino. Apoiou Daenerys mas traiu-a ao tentar colocar Jon. Queimado por Drogon.
+1 NOTE Eunuco castrado em criança por um feiticeiro. O melhor espião de Westeros. Serviu múltiplos reis mas sempre disse ser fiel ao reino. Apoiou Daenerys mas traiu-a ao tentar colocar Jon. Queimado por Drogon.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/f/ff/Varys8x05Dragonstone.PNG/revision/latest/scale-to-width-down/276?cb=20190513041715
 2 FORM JPG
@@ -2141,7 +2141,7 @@
 2 PLAC Norte, Westeros
 1 OCCU Sacerdotisa de R'hllor
 1 SOUR @S1@
-1 NOTE Sacerdotisa de R'hllor com poderes mÃ¡gicos reais. Ressuscitou Jon Snow. Gerou a "sombra" que matou Renly. Queimou Shireen. No final usou o seu poder para ajudar contra o Rei da Noite e morreu logo depois (tinha sÃ©culos de vida).
+1 NOTE Sacerdotisa de R'hllor com poderes mágicos reais. Ressuscitou Jon Snow. Gerou a "sombra" que matou Renly. Queimou Shireen. No final usou o seu poder para ajudar contra o Rei da Noite e morreu logo depois (tinha séculos de vida).
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/0/07/Melisandre_%28The_Queen%27s_Justice%29.png/revision/latest/scale-to-width-down/255?cb=20170830235514
 2 FORM JPG
@@ -2160,7 +2160,7 @@
 2 PLAC Winterfell, Norte, Westeros
 1 OCCU Cavaleiro; Exilado
 1 SOUR @S1@
-1 NOTE Cavaleiro nobre exilado por trÃ¡fico de escravos. Serviu Daenerys por amor incondicional. EspiÃ£o para Varys inicialmente. Morreu protegendo Daenerys na Batalha de Winterfell.
+1 NOTE Cavaleiro nobre exilado por tráfico de escravos. Serviu Daenerys por amor incondicional. Espião para Varys inicialmente. Morreu protegendo Daenerys na Batalha de Winterfell.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/2/26/Winterfell_ep_Jorah_s8.jpg/revision/latest/scale-to-width-down/233?cb=20210722093523
 2 FORM JPG
@@ -2170,7 +2170,7 @@
 1 NAME Sandor /Clegane/
 2 GIVN Sandor
 2 SURN Clegane
-2 NICK O CÃ£o; The Hound
+2 NICK O Cão; The Hound
 1 SEX M
 1 BIRT
 2 DATE 268 DC
@@ -2179,17 +2179,17 @@
 2 DATE 305 DC
 2 PLAC Porto Real, Westeros
 1 SOUR @S1@
-1 NOTE IrmÃ£o mais novo de Gregor (A Montanha). Rosto queimado pelo irmÃ£o em crianÃ§a. Guarda de Joffrey. Acompanhou Arya. Convertido em algo mais nobre. O confronto entre os irmÃ£os (Cleganebowl) no final da sÃ©rie.
+1 NOTE Irmão mais novo de Gregor (A Montanha). Rosto queimado pelo irmão em criança. Guarda de Joffrey. Acompanhou Arya. Convertido em algo mais nobre. O confronto entre os irmãos (Cleganebowl) no final da série.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/b/b5/SandorConfrontsGregor.PNG/revision/latest/scale-to-width-down/260?cb=20210722093812
 2 FORM JPG
-2 TITL Sandor "O CÃ£o" Clegane
+2 TITL Sandor "O Cão" Clegane
 
 0 @I_GREGOR@ INDI
 1 NAME Gregor /Clegane/
 2 GIVN Gregor
 2 SURN Clegane
-2 NICK A Montanha; Ser Robert Forte (apÃ³s transformaÃ§Ã£o)
+2 NICK A Montanha; Ser Robert Forte (após transformação)
 1 SEX M
 1 BIRT
 2 DATE 258 DC
@@ -2199,7 +2199,7 @@
 2 PLAC Porto Real, Westeros
 1 OCCU Cavaleiro; Guarda-costas de Cersei
 1 SOUR @S1@
-1 NOTE O homem mais alto e forte de Westeros. Assassinou Elia Martell e os filhos dela. Combateu com Oberyn (que morreu mas o envenenou). Transformado em morto-vivo por Qyburn. Morreu com o irmÃ£o Sandor ao caÃ­rem nas chamas de Porto Real.
+1 NOTE O homem mais alto e forte de Westeros. Assassinou Elia Martell e os filhos dela. Combateu com Oberyn (que morreu mas o envenenou). Transformado em morto-vivo por Qyburn. Morreu com o irmão Sandor ao caírem nas chamas de Porto Real.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/8/81/GregorGregorLightenedProfile.png/revision/latest/scale-to-width-down/360?cb=20190724144505
 2 FORM JPG
@@ -2216,7 +2216,7 @@
 2 PLAC Porto Real, Westeros
 1 OCCU Cavaleiro; Conselheiro do Rei
 1 SOUR @S1@
-1 NOTE Ex-contrabandista, cavaleiro de Stannis. Perdeu os dedos como puniÃ§Ã£o por servir Stannis (e os ganhou). ApÃ³s Stannis, serviu Jon Snow e Daenerys. Um dos personagens mais honrados da sÃ©rie.
+1 NOTE Ex-contrabandista, cavaleiro de Stannis. Perdeu os dedos como punição por servir Stannis (e os ganhou). Após Stannis, serviu Jon Snow e Daenerys. Um dos personagens mais honrados da série.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/9/9d/DAVOSINFOBOXBELLS.PNG/revision/latest/scale-to-width-down/266?cb=20190513052340
 2 FORM JPG
@@ -2233,7 +2233,7 @@
 2 PLAC Colina do Corno, Westeros
 1 OCCU Maester; Grande Maester do Conselho de Bran
 1 SOUR @S1@
-1 NOTE Melhor amigo de Jon Snow na Guarda da Noite. Corajoso apesar de aparÃªncia covarde. Matou um Caminhante Branco com vidro de dragÃ£o. Estudou medicina e tornou-se maester. No final, escreveu a histÃ³ria de Westeros.
+1 NOTE Melhor amigo de Jon Snow na Guarda da Noite. Corajoso apesar de aparência covarde. Matou um Caminhante Branco com vidro de dragão. Estudou medicina e tornou-se maester. No final, escreveu a história de Westeros.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/8/8f/Maester_Sam.png/revision/latest/scale-to-width-down/305?cb=20190609215621
 2 FORM JPG
@@ -2245,10 +2245,10 @@
 1 SEX F
 1 BIRT
 2 DATE ABT 283 DC
-2 PLAC Para alÃ©m da Muralha, Westeros
+2 PLAC Para além da Muralha, Westeros
 1 FAMS @F_SAM_GILLY@
 1 SOUR @S1@
-1 NOTE Filha de Craster (e mÃ£e do seu filho, incesto forÃ§ado). Resgatada por Sam. Companheira de Sam.
+1 NOTE Filha de Craster (e mãe do seu filho, incesto forçado). Resgatada por Sam. Companheira de Sam.
 
 0 @F_SAM_GILLY@ FAM
 1 HUSB @I_SAM@
@@ -2258,7 +2258,7 @@
 1 NAME Theon /Greyjoy/
 2 GIVN Theon
 2 SURN Greyjoy
-2 NICK Reek (apÃ³s tortura)
+2 NICK Reek (após tortura)
 1 SEX M
 1 BIRT
 2 DATE 281 DC
@@ -2267,7 +2267,7 @@
 2 DATE 305 DC
 2 PLAC Winterfell, Norte, Westeros
 1 SOUR @S1@
-1 NOTE Filho de Balon Greyjoy, ward (refÃ©m) de Ned Stark. Traiu Robb capturando Winterfell. Torturado por Ramsay Bolton tornando-se "Reek". Resgatou Sansa. Morreu na Batalha de Winterfell.
+1 NOTE Filho de Balon Greyjoy, ward (refém) de Ned Stark. Traiu Robb capturando Winterfell. Torturado por Ramsay Bolton tornando-se "Reek". Resgatou Sansa. Morreu na Batalha de Winterfell.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/7/78/TheonS8E1.PNG/revision/latest/scale-to-width-down/251?cb=20190415192721
 2 FORM JPG
@@ -2283,7 +2283,7 @@
 2 DATE 276 DC
 2 PLAC Pyke, Ilhas de Ferro, Westeros
 1 SOUR @S1@
-1 NOTE IrmÃ£ de Theon, capitÃ£ da marinha. Apoiou Daenerys. Libertada dos Ilhas de Ferro para governar.
+1 NOTE Irmã de Theon, capitã da marinha. Apoiou Daenerys. Libertada dos Ilhas de Ferro para governar.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/a/a8/Game_of_thrones_6x5_yara_promo.jpg/revision/latest/scale-to-width-down/254?cb=20160808022737
 2 FORM JPG
@@ -2293,13 +2293,13 @@
 1 NAME Tormund /Gigantsbane/
 2 GIVN Tormund
 2 SURN Gigantsbane
-2 NICK Tormund Mata-Gigante; Tormund PapÃ£o Corvo
+2 NICK Tormund Mata-Gigante; Tormund Papão Corvo
 1 SEX M
 1 BIRT
 2 DATE ABT 270 DC
-2 PLAC AlÃ©m da Muralha, Westeros
+2 PLAC Além da Muralha, Westeros
 1 SOUR @S1@
-1 NOTE LÃ­der Free Folk (Selvagens). Aliado leal de Jon Snow. Sobreviveu Ã  Batalha de Winterfell.
+1 NOTE Líder Free Folk (Selvagens). Aliado leal de Jon Snow. Sobreviveu à Batalha de Winterfell.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/9/97/Tormund_Profile.PNG/revision/latest/scale-to-width-down/256?cb=20170818044433
 2 FORM JPG
@@ -2316,7 +2316,7 @@
 2 DATE 305 DC
 2 PLAC Porto Real, Westeros
 1 SOUR @S1@
-1 NOTE Tradutora e conselheira de Daenerys. Ex-escrava. Amante de Grey Worm. Capturada por Cersei e decapitada por Ser Ilyn diante do exÃ©rcito de Daenerys, provocando a decisÃ£o de destruir Porto Real.
+1 NOTE Tradutora e conselheira de Daenerys. Ex-escrava. Amante de Grey Worm. Capturada por Cersei e decapitada por Ser Ilyn diante do exército de Daenerys, provocando a decisão de destruir Porto Real.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/d/de/Missandei8X04.PNG/revision/latest/scale-to-width-down/264?cb=20190722224410
 2 FORM JPG
@@ -2325,13 +2325,13 @@
 0 @I_GREY_WORM@ INDI
 1 NAME Grey Worm //
 2 GIVN Grey Worm
-2 NICK Lorde das LÃ¢minas; Comandante dos Imaculados
+2 NICK Lorde das Lâminas; Comandante dos Imaculados
 1 SEX M
 1 BIRT
 2 DATE ABT 280 DC
-2 PLAC Possivelmente, VerÃ£o dos Mares, Essos
+2 PLAC Possivelmente, Verão dos Mares, Essos
 1 SOUR @S1@
-1 NOTE Lider dos Imaculados, exÃ©rcito de elite de Daenerys. Amante de Missandei. No final part para Naath para honrar a memÃ³ria de Missandei.
+1 NOTE Lider dos Imaculados, exército de elite de Daenerys. Amante de Missandei. No final part para Naath para honrar a memória de Missandei.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/7/77/Grey-Worm-S8E5.png/revision/latest/scale-to-width-down/276?cb=20190508211715
 2 FORM JPG
@@ -2345,13 +2345,13 @@
 1 SEX M
 1 BIRT
 2 DATE ABT 8000 AAC
-2 PLAC AlÃ©m da Muralha, Westeros
+2 PLAC Além da Muralha, Westeros
 1 DEAT
 2 DATE 305 DC
 2 PLAC Winterfell, Norte, Westeros
 1 OCCU Chefe dos Outros/Caminhantes Brancos
 1 SOUR @S1@
-1 NOTE Criado pelos Filhos da Floresta como arma contra os Primeiros Homens. Primeiro dos Caminhantes Brancos. Morto por Arya Stark com uma adaga de vidro de dragÃ£o durante a Batalha de Winterfell.
+1 NOTE Criado pelos Filhos da Floresta como arma contra os Primeiros Homens. Primeiro dos Caminhantes Brancos. Morto por Arya Stark com uma adaga de vidro de dragão durante a Batalha de Winterfell.
 1 OBJE
 2 FILE https://static.wikia.nocookie.net/gameofthrones/images/1/1f/Night_King_BTW.jpg/revision/latest/scale-to-width-down/312?cb=20210722093007
 2 FORM JPG
@@ -2360,8 +2360,8 @@
 ################################################################################
 # LIGAÃ‡Ã•ES CROSS-ERA: DESCENDÃŠNCIA TARGARYEN (LINHA CRONOLÃ“GICA)
 ################################################################################
-# Nota: A cadeia completa Ã©:
-# Aegon I â†’ Aenys I/Maegor I â†’ (Jaehaerys I Ã© neto de Aegon I)
+# Nota: A cadeia completa é:
+# Aegon I â†’ Aenys I/Maegor I â†’ (Jaehaerys I é neto de Aegon I)
 # Jaehaerys I â†’ Baelon/Aemon â†’ Viserys I/Daemon/Rhaenys
 # Viserys I â†’ Rhaenyra/Aegon II â†’ Aegon III (filho de Rhaenyra)
 # Aegon III â†’ filho â†’ ... â†’ Aegon IV â†’ Aegon V (via Viserys II)

@@ -1248,6 +1248,63 @@ body.livro-body {
   line-height: 1.3;
 }
 
+/* ── Events list in bio pages ───────────────────────────────────── */
+.bio-events {
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-bottom: 7px;
+  border-left: 2px solid #8b5a2035;
+  padding-left: 7px;
+}
+
+.bio-event-row {
+  display: flex;
+  gap: 4px;
+  line-height: 1.45;
+  padding: 1px 0;
+  border-bottom: 1px dotted #8b6a3025;
+}
+
+.bio-event-label {
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8b5a20;
+  min-width: 82px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.bio-event-detail {
+  color: #3c2010;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bio-event-note {
+  color: #7a5030;
+  font-size: 10px;
+}
+
+/* ── Inline photo caption below each photo slot ─────────────────── */
+.photo-slot-caption {
+  font-size: 9px;
+  color: #5a3820;
+  font-style: italic;
+  text-align: center;
+  line-height: 1.3;
+  padding: 2px 4px 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #faf7f0, #f2ead9);
+  border-top: 0.5px solid rgba(180,165,130,0.18);
+}
+
 .ftl-gen-num {
   font-weight: 600;
   color: #8a5820;

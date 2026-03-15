@@ -72,7 +72,10 @@
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <button id="openBookBtn" class="btn btn-sm" title="Abrir Family History Book" style="background:linear-gradient(135deg,#7a4010,#3a1808);border-color:#c8906040;">
-              <i class="mdi mdi-book-open-variant" aria-hidden="true"></i> Livro
+              <i class="mdi mdi-book-open-variant" aria-hidden="true"></i> Livro de Família
+            </button>
+            <button id="openFullBookBtn" class="btn btn-sm" title="Abrir Family History Book com todas as pessoas" style="background:linear-gradient(135deg,#4a1060,#200830);border-color:#9060c040;">
+              <i class="mdi mdi-book-multiple" aria-hidden="true"></i> Livro Completo
             </button>
             <button id="resetFocusBtn" class="btn btn-ghost btn-sm" title="Resetar foco para a pessoa configurada">
               <i class="mdi mdi-crosshairs-gps" aria-hidden="true"></i> Reset foco
@@ -761,6 +764,7 @@
       function _updateEmptyState() {
         var hasData = DB.getIndividuals().length > 0;
         document.getElementById('openBookBtn').style.display = hasData ? '' : 'none';
+        document.getElementById('openFullBookBtn').style.display = hasData ? '' : 'none';
         document.getElementById('resetFocusBtn').style.display = hasData ? '' : 'none';
         document.getElementById('createFirstPersonBtn').style.display = hasData ? 'none' : '';
         var emptyEl = document.getElementById('emptyStateTree');
@@ -1112,6 +1116,13 @@
         // Use the person currently active/rendered in the tree view
         const personId = _getSelectedOrFocusId() || getFocusPersonId();
         const url = 'livro.html' + (personId ? '?person=' + encodeURIComponent(personId) : '');
+        window.open(url, '_blank');
+      });
+
+      document.getElementById('openFullBookBtn').addEventListener('click', function() {
+        // Open the complete book with all persons in the tree
+        const personId = _getSelectedOrFocusId() || getFocusPersonId();
+        const url = 'livro.html?complete=1' + (personId ? '&person=' + encodeURIComponent(personId) : '');
         window.open(url, '_blank');
       });
 

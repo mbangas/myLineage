@@ -228,12 +228,62 @@
     return ind.events.find(e => e.type === type) || null;
   }
 
+  /** Human-readable labels for GEDCOM individual event types */
+  const EVENT_LABELS = {
+    BIRT:'Nascimento', DEAT:'Falecimento', BAPM:'Baptismo', BURI:'Sepultamento',
+    CREM:'Cremação', ADOP:'Adopção', OCCU:'Profissão', RESI:'Residência',
+    CHR:'Batismo (Cristã)', CHRA:'Batismo (Adulto)', CONF:'Confirmação',
+    FCOM:'Primeira Comunhão', ORDI:'Ordenação', EVEN:'Evento',
+    IMMI:'Imigração', EMIG:'Emigração', NATU:'Naturalização',
+    EDUC:'Educação', GRAD:'Graduação', RETI:'Reforma', CENS:'Censo',
+    MARR:'Casamento', DVOR:'Divórcio', MARC:'Contrato Nupcial',
+    TITL:'Título', PROP:'Bens', RELI:'Religião', NATI:'Naturalidade',
+    IDNO:'Nº Identificação', SSN:'NIF', DSCR:'Descrição',
+    BARM:'Bar Mitzvah', BASM:'Bat Mitzvah', WILL:'Testamento', PROB:'Inventário',
+  };
+
+  /** Build an events list HTML block for an individual.
+   *  Skips BIRT and DEAT since those are already shown in the page header.
+   *  For EVEN events, uses the TYPE subtag (e.description) as the label.
+   *  Returns empty string when there are no relevant events. */
+  function renderEventsList(DB, ind) {
+    if (!ind || !ind.events || !ind.events.length) return '';
+    const rows = ind.events
+      .filter(e => e.type !== 'BIRT' && e.type !== 'DEAT')
+      .map(e => {
+        // For generic EVEN, prefer the TYPE subtag (e.description) as label
+        let label;
+        if (e.type === 'EVEN') {
+          label = e.description || EVENT_LABELS.EVEN;
+        } else {
+          label = EVENT_LABELS[e.type] || e.type;
+        }
+        const parts = [];
+        if (e.date)  parts.push(fmtDate(e.date));
+        if (e.place) parts.push(e.place);
+        if (e.cause) parts.push('Causa: ' + e.cause);
+        // e.notes is an array in the parsed data
+        const noteArr = Array.isArray(e.notes) ? e.notes : (e.notes ? [e.notes] : []);
+        const eNote = noteArr.length
+          ? noteArr.map(n => fixMojibake(resolveNote(DB, n))).filter(Boolean).join(' ')
+          : '';
+        return `<div class="bio-event-row">` +
+          `<span class="bio-event-label">${esc(label)}</span>` +
+          `<span class="bio-event-detail">${esc(parts.join(' \u2014 '))}` +
+          (eNote ? `<em class="bio-event-note"> \u2014 ${esc(eNote)}</em>` : '') +
+          `</span></div>`;
+      });
+    if (!rows.length) return '';
+    return `<div class="bio-events">${rows.join('')}</div>`;
+  }
+
   // ── BookCompiler ───────────────────────────────────────────────
 
   class BookCompiler {
-    constructor(DB, rootId, externalNotes) {
+    constructor(DB, rootId, externalNotes, completeMode) {
       this.DB = DB;
       this.rootId = rootId;
+      this.completeMode = !!completeMode;
       this.individuals = {};   // id → individual
       this.families = {};      // id → family
       this.familyOrder = [];   // ordered family IDs for chapters
@@ -571,6 +621,122 @@
       this.familyOrder = [...new Set(this.familyOrder)];
     }
 
+    /**
+     * Alternative traversal for "Livro Completo":
+     * 1. Focused person's own families (spouse + children)
+     * 2. All descendants (BFS down)
+     * 3. Father's line of ancestors (most-distant first)
+     * 4. Mother's line of ancestors (most-distant first)
+     * 5. Any remaining families not yet visited (disconnected individuals etc.)
+     */
+    traverseComplete(rootId) {
+      const ind = this.individuals[rootId];
+      if (!ind) return;
+
+      const visitedFam = new Set();
+      const visitedInd = new Set([rootId]);
+
+      // Helper: mark a family visited and register its members
+      const addFam = (famId) => {
+        if (!famId || visitedFam.has(famId) || !this.families[famId]) return false;
+        visitedFam.add(famId);
+        this.familyOrder.push(famId);
+        const fam = this.families[famId];
+        [fam.husb, fam.wife].forEach(sid => { if (sid && !visitedInd.has(sid)) visitedInd.add(sid); });
+        (fam.children || []).forEach(cid => { if (!visitedInd.has(cid)) visitedInd.add(cid); });
+        return true;
+      };
+
+      // Phase 1: root's own spouse-families (focus person + partner + children)
+      (ind.fams || []).forEach(famId => addFam(famId));
+
+      // Phase 2: all descendants (BFS down)
+      const descQueue = [];
+      (ind.fams || []).forEach(famId => {
+        const fam = this.families[famId];
+        if (fam) (fam.children || []).forEach(cid => { if (!descQueue.includes(cid)) descQueue.push(cid); });
+      });
+      const processedDesc = new Set();
+      while (descQueue.length) {
+        const did = descQueue.shift();
+        if (processedDesc.has(did)) continue;
+        processedDesc.add(did);
+        if (!visitedInd.has(did)) visitedInd.add(did);
+        const dind = this.individuals[did];
+        if (!dind) continue;
+        (dind.fams || []).forEach(famId => {
+          if (addFam(famId)) {
+            const fam = this.families[famId];
+            (fam.children || []).forEach(cid => {
+              if (!processedDesc.has(cid)) descQueue.push(cid);
+            });
+          }
+        });
+      }
+
+      // Phase 3: father's ancestors (walk up from father, most-distant first)
+      const fatherAncOrder = [];
+      const walkUpFather = (personId) => {
+        const p = this.individuals[personId];
+        if (!p || !p.famc) return;
+        const famId = Array.isArray(p.famc) ? p.famc[0] : p.famc;
+        const fam = this.families[famId];
+        if (!fam || visitedFam.has(famId)) return;
+        visitedFam.add(famId);
+        fatherAncOrder.unshift(famId);
+        [fam.husb, fam.wife].forEach(pid => {
+          if (pid && !visitedInd.has(pid)) { visitedInd.add(pid); walkUpFather(pid); }
+        });
+      };
+      if (ind.famc) {
+        const rootFamId = Array.isArray(ind.famc) ? ind.famc[0] : ind.famc;
+        const rootFam = this.families[rootFamId];
+        if (rootFam) {
+          // Include root's family of origin (parents' family)
+          if (!visitedFam.has(rootFamId)) {
+            visitedFam.add(rootFamId);
+            fatherAncOrder.unshift(rootFamId);
+            [rootFam.husb, rootFam.wife].forEach(pid => {
+              if (pid && !visitedInd.has(pid)) visitedInd.add(pid);
+            });
+          }
+          if (rootFam.husb) walkUpFather(rootFam.husb);
+        }
+      }
+      this.familyOrder.push(...fatherAncOrder);
+
+      // Phase 4: mother's ancestors (walk up from mother, most-distant first)
+      const motherAncOrder = [];
+      const walkUpMother = (personId) => {
+        const p = this.individuals[personId];
+        if (!p || !p.famc) return;
+        const famId = Array.isArray(p.famc) ? p.famc[0] : p.famc;
+        const fam = this.families[famId];
+        if (!fam || visitedFam.has(famId)) return;
+        visitedFam.add(famId);
+        motherAncOrder.unshift(famId);
+        [fam.husb, fam.wife].forEach(pid => {
+          if (pid && !visitedInd.has(pid)) { visitedInd.add(pid); walkUpMother(pid); }
+        });
+      };
+      if (ind.famc) {
+        const rootFamId = Array.isArray(ind.famc) ? ind.famc[0] : ind.famc;
+        const rootFam = this.families[rootFamId];
+        if (rootFam && rootFam.wife) walkUpMother(rootFam.wife);
+      }
+      this.familyOrder.push(...motherAncOrder);
+
+      // Phase 5: any remaining families not yet visited (disconnected subtrees, collaterals)
+      Object.keys(this.families).forEach(famId => {
+        if (!visitedFam.has(famId) && this.families[famId]) {
+          visitedFam.add(famId);
+          this.familyOrder.push(famId);
+        }
+      });
+
+      this.familyOrder = [...new Set(this.familyOrder)];
+    }
+
     // ── Page renderers ─────────────────────────────────────────
 
     _renderCover() {
@@ -856,9 +1022,9 @@
     }
 
     /** Render a photo mosaic that fills available vertical space.
-     *  @param {string[]} photos - array of src URLs
-     *  @param {string}   name   - alt text
-     *  @param {Array}    footnotes - [{idx, text}] for photos that have notes
+     *  @param {Array}  photos    - [{src,bbox,isSolo,note}] objects
+     *  @param {string} name      - alt text
+     *  @param {Array}  footnotes - [{idx, text}] captions shown inline below each photo
      */
     _renderPhotoMosaic(photos, name, footnotes) {
       if (!photos.length) return '';
@@ -867,77 +1033,86 @@
       const esc2 = s => esc(s);
       // Normalise: accept string[] or {src,bbox,isSolo}[]
       const norm = photos.map(p => typeof p === 'string' ? { src: p, bbox: null, isSolo: false } : p);
-      // footnote index set for fast lookup by photo position (1-based)
-      const fnSet = new Set(footnotes.map(f => f.idx));
+      // Build caption lookup by 1-based photo index
+      const captionOf = {};
+      footnotes.forEach(f => { captionOf[f.idx] = f.text; });
 
-      // Helper: single photo element with smart fit/crop
+      // Helper: single album-photo element with smart fit/crop
       const img = (photoObj, style, photoIdx) => {
-        const { src, bbox, isSolo } = photoObj;
-        const badge = fnSet.has(photoIdx)
-          ? `<span class="bio-photo-fn-badge">${photoIdx}</span>` : '';
+        const { src, bbox } = photoObj;
         const rot = (Math.random() * 5 - 2.5).toFixed(1);
         const z = photoIdx;
-        let imgStyle = style; // default: object-fit:cover (center)
+        let imgStyle = style;
         let extraAttrs = '';
         if (bbox) {
-          // Face zone is known — cover + pan to face, guaranteed not to clip it.
-          // Works for both single-person and group photos.
           extraAttrs = ` data-bbox="${bbox.x1},${bbox.y1},${bbox.x2},${bbox.y2}"
             onload="window._livroFaceCrop&&window._livroFaceCrop(this)"`;
         } else {
-          // No face bbox: always align to the top of the image.
-          // Faces almost universally appear in the upper half of any portrait/photo,
-          // so "center top" is always safer than "center center" when the exact
-          // face position is unknown.
           imgStyle = 'width:100%;height:100%;object-fit:cover;object-position:center top;';
         }
         return `<div class="album-photo" style="--rot:${rot}deg;--z:${z};">` +
           `<span class="album-corner tl"></span><span class="album-corner tr"></span>` +
           `<span class="album-corner bl"></span><span class="album-corner br"></span>` +
-          `${badge}<img src="${esc2(src)}" alt="${esc2(name)}" class="bio-photo-mosaic-img" style="${imgStyle}"${extraAttrs} loading="lazy"/>` +
+          `<img src="${esc2(src)}" alt="${esc2(name)}" class="bio-photo-mosaic-img" style="${imgStyle}"${extraAttrs} loading="lazy"/>` +
           `</div>`;
       };
 
-      const imgStyle = 'width:100%;height:100%;object-fit:cover;';
+      const coverStyle = 'width:100%;height:100%;object-fit:cover;';
+
+      // Slot: photo + optional inline caption wrapped in a flex-column div
+      const slot = (photoObj, flexVal, photoIdx) => {
+        const caption = captionOf[photoIdx];
+        const photoHtml = img(photoObj, coverStyle, photoIdx);
+        if (!caption) {
+          return `<div style="${flexVal};display:flex;align-items:stretch;">${photoHtml}</div>`;
+        }
+        return `<div style="${flexVal};display:flex;flex-direction:column;">` +
+          `<div style="flex:1;min-height:0;display:flex;align-items:stretch;">${photoHtml}</div>` +
+          `<div class="photo-slot-caption">${esc2(caption)}</div>` +
+          `</div>`;
+      };
 
       if (n === 1) {
-        return `<div class="bio-photo-mosaic bio-photo-mosaic-1">${img(norm[0], imgStyle, 1)}</div>`;
+        const c1 = captionOf[1];
+        if (!c1) return `<div class="bio-photo-mosaic bio-photo-mosaic-1">${img(norm[0], coverStyle, 1)}</div>`;
+        return `<div class="bio-photo-mosaic bio-photo-mosaic-1" style="flex-direction:column;">` +
+          `<div style="flex:1;min-height:0;display:flex;align-items:stretch;">${img(norm[0], coverStyle, 1)}</div>` +
+          `<div class="photo-slot-caption">${esc2(c1)}</div>` +
+          `</div>`;
       }
       if (n === 2) {
         return `<div class="bio-photo-mosaic bio-photo-mosaic-2">
-          <div style="flex:1;display:flex;align-items:stretch;">${img(norm[0], imgStyle, 1)}</div>
-          <div style="flex:1;display:flex;align-items:stretch;">${img(norm[1], imgStyle, 2)}</div>
+          ${slot(norm[0], 'flex:1', 1)}
+          ${slot(norm[1], 'flex:1', 2)}
         </div>`;
       }
       if (n === 3) {
         return `<div class="bio-photo-mosaic bio-photo-mosaic-3">
-          <div style="flex:1.4;display:flex;align-items:stretch;">${img(norm[0], imgStyle, 1)}</div>
+          ${slot(norm[0], 'flex:1.4', 1)}
           <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
-            <div style="flex:1;display:flex;align-items:stretch;">${img(norm[1], imgStyle, 2)}</div>
-            <div style="flex:1;display:flex;align-items:stretch;">${img(norm[2], imgStyle, 3)}</div>
+            ${slot(norm[1], 'flex:1', 2)}
+            ${slot(norm[2], 'flex:1', 3)}
           </div>
         </div>`;
       }
       if (n === 4) {
         return `<div class="bio-photo-mosaic bio-photo-mosaic-4">
           <div style="display:flex;gap:6px;flex:1;min-height:0;">
-            <div style="flex:1;display:flex;align-items:stretch;">${img(norm[0], imgStyle, 1)}</div>
-            <div style="flex:1;display:flex;align-items:stretch;">${img(norm[1], imgStyle, 2)}</div>
+            ${slot(norm[0], 'flex:1', 1)}
+            ${slot(norm[1], 'flex:1', 2)}
           </div>
           <div style="display:flex;gap:6px;flex:1;min-height:0;">
-            <div style="flex:1;display:flex;align-items:stretch;">${img(norm[2], imgStyle, 3)}</div>
-            <div style="flex:1;display:flex;align-items:stretch;">${img(norm[3], imgStyle, 4)}</div>
+            ${slot(norm[2], 'flex:1', 3)}
+            ${slot(norm[3], 'flex:1', 4)}
           </div>
         </div>`;
       }
       // 5 or 6
       const first3 = norm.slice(0, 3);
       const rest   = norm.slice(3, 6);
-      const row2   = rest.map((p, ri) => `<div style="flex:1;display:flex;align-items:stretch;">${img(p, imgStyle, 4 + ri)}</div>`).join('');
+      const row2   = rest.map((p, ri) => slot(p, 'flex:1', 4 + ri)).join('');
       return `<div class="bio-photo-mosaic bio-photo-mosaic-5" style="flex-direction:column;">
-        <div style="display:flex;gap:6px;flex:1.4;min-height:0;">${first3.map((p,i) =>
-          `<div style="flex:1;display:flex;align-items:stretch;">${img(p, imgStyle, i+1)}</div>`
-        ).join('')}</div>
+        <div style="display:flex;gap:6px;flex:1.4;min-height:0;">${first3.map((p,i) => slot(p, 'flex:1', i+1)).join('')}</div>
         <div style="display:flex;gap:6px;flex:1;min-height:0;">${row2}</div>
       </div>`;
     }
@@ -1039,7 +1214,7 @@
         }
       });
 
-      // Build photo footnotes for photos that have notes
+      // Build photo footnotes / captions for photos that have notes
       const photoFootnotes = [];
       photosPage1.forEach((p, i) => {
         if (p.note) photoFootnotes.push({ idx: i + 1, text: p.note });
@@ -1051,9 +1226,8 @@
         photosPage1.length === 1 ? (hasNotes ? 'photo-h-sm' : 'photo-h-md') :
         hasNotes ? 'photo-h-sm' : 'photo-h-lg';
 
-      const footnotesHtml = photoFootnotes.length
-        ? `<div class="bio-photo-footnotes">${photoFootnotes.map(f =>
-            `<div class="bio-photo-footnote"><sup>${f.idx}</sup> ${esc(f.text)}</div>`).join('')}</div>` : '';
+      // Events section — all individual life events
+      const eventsHtml = renderEventsList(this.DB, ind);
 
       return {
         type: 'chapter-right',
@@ -1067,9 +1241,9 @@
   ${years ? `<div class="chapter-years">${esc(years)}</div>` : ''}
   <div class="chapter-divider"></div>
   <div class="bio-relations-wrap">${relations}</div>
+  ${eventsHtml}
   ${notes ? `<div class="bio-notes">${esc(notes).replace(/\n/g,'<br/>')}</div>` : ''}
   ${photosHtml ? `<div class="bio-photo-area ${photoHeightClass}">${photosHtml}</div>` : ''}
-  ${footnotesHtml}
 </div>`
       };
     }
@@ -1079,9 +1253,6 @@
       // extraPhotos are already enriched {src, note, bbox, isSolo} objects
       const footnotes = extraPhotos.map((p, i) => p.note ? { idx: i + 1, text: p.note } : null).filter(Boolean);
       const photosHtml = this._renderPhotoMosaic(extraPhotos, name, footnotes);
-      const footnotesHtml = footnotes.length
-        ? `<div class="bio-photo-footnotes">${footnotes.map(f =>
-            `<div class="bio-photo-footnote"><sup>${f.idx}</sup> ${esc(f.text)}</div>`).join('')}</div>` : '';
       return {
         type: 'photo-continuation',
         title: name + ' (fotos)',
@@ -1091,7 +1262,6 @@
   <div class="chapter-years" style="font-style:normal;font-size:11px;">${esc(pageLabel)}</div>
   <div class="chapter-divider"></div>
   <div class="bio-photo-area" style="flex:1;min-height:0;height:auto;">${photosHtml}</div>
-  ${footnotesHtml}
 </div>`
       };
     }
@@ -1249,11 +1419,13 @@
           relations += `<div class="bio-relations"><strong>Filhos:</strong> ${kids.map(k => `${esc(displayName(k))}${pgRef(k.id)}`).join(', ')}</div>`;
       });
 
+      const eventsHtml = renderEventsList(this.DB, ind);
       return `<div class="combined-bio-person" id="ind_${esc(personId)}">
   <div class="chapter-heading combined-bio-heading">${esc(name)}</div>
   ${years ? `<div class="chapter-years">${esc(years)}</div>` : ''}
   <div class="chapter-divider"></div>
   <div class="bio-relations-wrap">${relations}</div>
+  ${eventsHtml}
   ${notes ? `<div class="bio-notes">${esc(notes).replace(/\n/g,'<br/>')}</div>` : ''}
 </div>`;
     }
@@ -1317,19 +1489,30 @@
       if (!ind) return '';
       const name = displayName(ind);
       const years = lifeYears(ind);
-      const birt = getEvent(ind, 'BIRT');
-      const deat = getEvent(ind, 'DEAT');
-      const bapm = getEvent(ind, 'BAPM');
       const notes = gatherNotes(DB, ind);
-      const pgRef = (pid) => `<span class="bio-pg-ref" data-pgref="${pid}"></span>`;
-      const items = [
-        birt ? `<span class="mini-bio-label">Nasc.</span> ${esc(fmtDate(birt.date))}${birt.place?' — '+esc(birt.place):''}` : null,
-        bapm ? `<span class="mini-bio-label">Bapt.</span> ${esc(fmtDate(bapm.date))}${bapm.place?' — '+esc(bapm.place):''}` : null,
-        deat ? `<span class="mini-bio-label">Fal.</span> ${esc(fmtDate(deat.date))}${deat.place?' — '+esc(deat.place):''}` : null,
-      ].filter(Boolean);
+      const allEvents = (ind.events || [])
+        .filter(e => e.type !== 'BIRT' && e.type !== 'DEAT')
+        .map(e => {
+        const label = e.type === 'EVEN'
+          ? (e.description || EVENT_LABELS.EVEN)
+          : (EVENT_LABELS[e.type] || e.type);
+        const parts = [];
+        if (e.date)  parts.push(fmtDate(e.date));
+        if (e.place) parts.push(e.place);
+        if (e.cause) parts.push('Causa: ' + e.cause);
+        const noteArr = Array.isArray(e.notes) ? e.notes : (e.notes ? [e.notes] : []);
+        const eNote = noteArr.length
+          ? noteArr.map(n => fixMojibake(resolveNote(DB, n))).filter(Boolean).join(' ')
+          : '';
+        return `<div class="mini-bio-line">` +
+          `<span class="mini-bio-label">${esc(label)}</span> ` +
+          esc(parts.join(' \u2014 ')) +
+          (eNote ? ` <em>${esc(eNote)}</em>` : '') +
+          `</div>`;
+      });
       return `<div class="mini-bio-block" id="mini_${personId}">
   <div class="mini-bio-name">${esc(name)}${years ? ` <span class="mini-bio-years">${esc(years)}</span>` : ''}</div>
-  ${items.map(i => `<div class="mini-bio-line">${i}</div>`).join('')}
+  ${allEvents.join('')}
   ${notes ? `<div class="mini-bio-notes">${esc(notes)}</div>` : ''}
 </div>`;
     }
@@ -1900,7 +2083,11 @@
 
     buildPages() {
       this._loadData();
-      this.traverseAllGenerations(this.rootId);
+      if (this.completeMode) {
+        this.traverseComplete(this.rootId);
+      } else {
+        this.traverseAllGenerations(this.rootId);
+      }
 
       // ── Ensure the focused person's own families appear first ──────
       const _rootFamIds = (this.individuals[this.rootId]?.fams || [])
@@ -2211,8 +2398,8 @@
     img.style.objectPosition = pctX + '% ' + pctY + '%';
   };
 
-  function initBook(DB, rootId, historicalNotes) {
-    const compiler = new BookCompiler(DB, rootId, historicalNotes);
+  function initBook(DB, rootId, historicalNotes, completeMode) {
+    const compiler = new BookCompiler(DB, rootId, historicalNotes, completeMode);
     const pages = compiler.buildPages();
     allPages = pages;
 
@@ -2223,8 +2410,11 @@
     const rootInd = compiler.individuals[rootId];
     const rootName = rootInd ? displayName(rootInd) : '';
     if (rootName) {
-      document.getElementById('lbrTitle').textContent = `Family History Book — ${rootName}`;
-      document.title = `myLineage — Family History Book — ${rootName}`;
+      const bookTitle = completeMode
+        ? `Family History Book Completo — ${rootName}`
+        : `Family History Book — ${rootName}`;
+      document.getElementById('lbrTitle').textContent = bookTitle;
+      document.title = `myLineage — ${bookTitle}`;
     }
 
     const container = document.getElementById('livro-book-wrap');
@@ -2367,6 +2557,7 @@
       clearInterval(waitDB);
 
       const paramId = getURLParam('person');
+      const completeMode = getURLParam('complete') === '1';
       let rootId = paramId;
       if (!rootId) {
         try {
@@ -2418,7 +2609,7 @@
               mes: n.mes || null
             }));
           try {
-            initBook(DB, rootId, histNotes.length ? histNotes : null);
+            initBook(DB, rootId, histNotes.length ? histNotes : null, completeMode);
           } catch (e) {
             console.error('[livro] Erro ao compilar o livro:', e);
             const loadingEl = document.getElementById('livro-loading');

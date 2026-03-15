@@ -1,0 +1,3005 @@
+openapi: 3.0.3
+
+info:
+  title: myLineage API
+  description: |
+    RESTful API for myLineage — a multi-tenant genealogy SaaS platform compatible with GEDCOM 7.
+
+    ## Authentication
+    All endpoints except `/api/auth/*` and `/api/invitations/by-token/{token}` require a
+    valid JWT access token passed as a Bearer token in the `Authorization` header.
+
+    Access tokens are short-lived (15 min). Use `POST /api/auth/refresh` with a refresh
+    token to obtain a new access token.
+
+    ## Role model
+    Tree operations enforce a 4-level role hierarchy per tree:
+    - **owner** — full control, can invite members and delete the tree
+    - **writer** — can create, update and delete genealogy records
+    - **reader** — read-only access to genealogy records
+    - **admin** — platform administrator; bypasses tree-level restrictions
+  version: 2.0.0
+  contact:
+    name: Miguel Bangueses
+    url: https://github.com/mbangas/myLineage
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: http://{host}:3000
+    description: Self-hosted
+    variables:
+      host:
+        default: localhost
+        description: Hostname or IP of the server
+
+tags:
+  - name: Auth
+    description: Registration, login, TOTP 2FA and token management
+  - name: Profile
+    description: Current user profile management
+  - name: Trees
+    description: Tree CRUD and member management
+  - name: Genealogy
+    description: Tree-scoped genealogy record CRUD (individuals, families, sources, etc.)
+  - name: GEDCOM
+    description: GEDCOM 7 import and export
+  - name: Invitations
+    description: Tree membership invitations
+  - name: Notifications
+    description: In-app notifications
+  - name: Admin
+    description: Platform administration (requires admin role)
+  - name: System
+    description: System information
+
+# ---------------------------------------------------------------------------
+# Security schemes
+# ---------------------------------------------------------------------------
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # -------------------------------------------------------------------------
+  # Reusable schemas
+  # -------------------------------------------------------------------------
+  schemas:
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: Credenciais inválidas
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          example: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 52024332-9218-4563-9acf-572afa872d30
+        email:
+          type: string
+          format: email
+          example: miguel.bangueses@gmail.com
+        name:
+          type: string
+          example: Miguel Bangueses
+        isAdmin:
+          type: boolean
+          example: false
+        totpEnabled:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+
+    TokenPair:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    AuthResponse:
+      allOf:
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+        - $ref: '#/components/schemas/TokenPair'
+
+    Tree:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: c90fe98f-7064-4055-9713-fa0f828d9088
+        name:
+          type: string
+          example: Família Bangueses
+        description:
+          type: string
+          example: Árvore genealógica da família Bangueses
+        ownerId:
+          type: string
+          format: uuid
+          example: 52024332-9218-4563-9acf-572afa872d30
+        role:
+          type: string
+          enum: [owner, writer, reader, admin]
+          example: owner
+        memberCount:
+          type: integer
+          example: 3
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TreeMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: 52024332-9218-4563-9acf-572afa872d30
+        email:
+          type: string
+          format: email
+          example: miguel.bangueses@gmail.com
+        name:
+          type: string
+          example: Miguel Bangueses
+        role:
+          type: string
+          enum: [owner, writer, reader]
+          example: writer
+        joinedAt:
+          type: string
+          format: date-time
+
+    IndividualName:
+      type: object
+      properties:
+        value:
+          type: string
+          example: João /Silva/
+        type:
+          type: string
+          example: birth
+        given:
+          type: string
+          example: João
+        surname:
+          type: string
+          example: Silva
+
+    GedcomEvent:
+      type: object
+      properties:
+        tag:
+          type: string
+          example: BIRT
+        date:
+          type: string
+          example: 15 MAR 1950
+        place:
+          type: string
+          example: Lisboa, Portugal
+        notes:
+          type: array
+          items:
+            type: string
+
+    Individual:
+      type: object
+      properties:
+        id:
+          type: string
+          example: I1
+        type:
+          type: string
+          enum: [INDI]
+          example: INDI
+        names:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndividualName'
+        sex:
+          type: string
+          enum: [M, F, U, X]
+          example: M
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/GedcomEvent'
+        attributes:
+          type: array
+          items:
+            type: object
+        famc:
+          type: string
+          nullable: true
+          example: F1
+        fams:
+          type: array
+          items:
+            type: string
+          example: [F2]
+        notes:
+          type: array
+          items:
+            type: string
+        sourceRefs:
+          type: array
+          items:
+            type: string
+        multimediaRefs:
+          type: array
+          items:
+            type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Family:
+      type: object
+      properties:
+        id:
+          type: string
+          example: F1
+        type:
+          type: string
+          enum: [FAM]
+        husb:
+          type: string
+          nullable: true
+          example: I1
+        wife:
+          type: string
+          nullable: true
+          example: I2
+        children:
+          type: array
+          items:
+            type: string
+          example: [I3, I4]
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/GedcomEvent'
+        notes:
+          type: array
+          items:
+            type: string
+        sourceRefs:
+          type: array
+          items:
+            type: string
+        multimediaRefs:
+          type: array
+          items:
+            type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Source:
+      type: object
+      properties:
+        id:
+          type: string
+          example: S1
+        type:
+          type: string
+          enum: [SOUR]
+        title:
+          type: string
+          example: Registo de Nascimento
+        author:
+          type: string
+          example: Conservatória do Registo Civil
+        publication:
+          type: string
+          example: 1950
+        abbreviation:
+          type: string
+          example: Reg. Nasc.
+        text:
+          type: string
+        repositoryRef:
+          type: string
+          nullable: true
+          example: R1
+        callNumber:
+          type: string
+        notes:
+          type: array
+          items:
+            type: string
+        multimediaRefs:
+          type: array
+          items:
+            type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Repository:
+      type: object
+      properties:
+        id:
+          type: string
+          example: R1
+        type:
+          type: string
+          enum: [REPO]
+        name:
+          type: string
+          example: Arquivo Nacional Torre do Tombo
+        address:
+          type: object
+          properties:
+            addr:
+              type: string
+            city:
+              type: string
+              example: Lisboa
+            state:
+              type: string
+            postal:
+              type: string
+            country:
+              type: string
+              example: Portugal
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        web:
+          type: string
+          format: uri
+        notes:
+          type: array
+          items:
+            type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MultimediaFile:
+      type: object
+      properties:
+        file:
+          type: string
+          description: Relative URL or absolute URI to the file
+          example: /uploads/c90fe98f-7064-4055-9713-fa0f828d9088/fotos/abc123.jpg
+        form:
+          type: string
+          example: jpeg
+        title:
+          type: string
+          example: João Silva em 1975
+
+    Multimedia:
+      type: object
+      properties:
+        id:
+          type: string
+          example: M1
+        type:
+          type: string
+          enum: [OBJE]
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/MultimediaFile'
+        notes:
+          type: array
+          items:
+            type: string
+        sourceRefs:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+          example: [family, 1975]
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Note:
+      type: object
+      properties:
+        id:
+          type: string
+          example: N1
+        type:
+          type: string
+          enum: [NOTE]
+        text:
+          type: string
+          example: Emigrou para o Brasil em 1920.
+        sourceRefs:
+          type: array
+          items:
+            type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Submitter:
+      type: object
+      properties:
+        id:
+          type: string
+          example: SUBM1
+        type:
+          type: string
+          enum: [SUBM]
+        name:
+          type: string
+          example: Miguel Bangueses
+        address:
+          type: object
+          properties:
+            addr:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            postal:
+              type: string
+            country:
+              type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        web:
+          type: string
+          format: uri
+        language:
+          type: string
+          example: Portuguese
+        notes:
+          type: array
+          items:
+            type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TreeStats:
+      type: object
+      properties:
+        individuals:
+          type: integer
+          example: 342
+        families:
+          type: integer
+          example: 148
+        sources:
+          type: integer
+          example: 56
+        multimedia:
+          type: integer
+          example: 120
+        notes:
+          type: integer
+          example: 78
+        repositories:
+          type: integer
+          example: 4
+        submitters:
+          type: integer
+          example: 1
+
+    Invitation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        treeId:
+          type: string
+          format: uuid
+          example: c90fe98f-7064-4055-9713-fa0f828d9088
+        treeName:
+          type: string
+          example: Família Bangueses
+        inviterName:
+          type: string
+          example: Miguel Bangueses
+        inviteeEmail:
+          type: string
+          format: email
+          example: ana.silva@gmail.com
+        role:
+          type: string
+          enum: [writer, reader]
+          example: reader
+        status:
+          type: string
+          enum: [pending, accepted, declined, expired]
+          example: pending
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        respondedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: invitation
+        data:
+          type: object
+          additionalProperties: true
+          example:
+            invitationId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+            treeId: c90fe98f-7064-4055-9713-fa0f828d9088
+            treeName: Família Bangueses
+            inviterName: Miguel Bangueses
+            role: reader
+        read:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+
+    UploadResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          example: /uploads/c90fe98f-7064-4055-9713-fa0f828d9088/fotos/abc123def456.jpg
+        filename:
+          type: string
+          example: abc123def456.jpg
+        size:
+          type: integer
+          example: 245890
+
+# ---------------------------------------------------------------------------
+# Reusable parameters
+# ---------------------------------------------------------------------------
+  parameters:
+    treeId:
+      name: treeId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: c90fe98f-7064-4055-9713-fa0f828d9088
+    entityId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      example: I1
+    userId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    invitationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    notificationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    includeDeleted:
+      name: includeDeleted
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Include soft-deleted records in the response
+    paginationLimit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+    paginationOffset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+# ===========================================================================
+# Paths
+# ===========================================================================
+paths:
+
+  # ── System ────────────────────────────────────────────────────────────────
+
+  /api/info:
+    get:
+      tags: [System]
+      summary: Server info
+      description: Returns version, database type, container info, CPU/RAM stats, and last 30 log lines.
+      operationId: getInfo
+      responses:
+        '200':
+          description: Server info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    example: 2.0.0
+                  platform:
+                    type: string
+                    example: myLineage
+                  database:
+                    type: string
+                    enum: [PostgreSQL, JSON (file)]
+                    example: PostgreSQL
+                  ip:
+                    type: string
+                    example: 192.168.1.100
+                  container:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      os:
+                        type: string
+                      created:
+                        type: string
+                        format: date-time
+                      internalIp:
+                        type: string
+                      cpu:
+                        type: string
+                      ram:
+                        type: string
+                      image:
+                        type: string
+                      logs:
+                        type: string
+
+  # ── Auth ──────────────────────────────────────────────────────────────────
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: joao.silva@gmail.com
+                password:
+                  type: string
+                  minLength: 8
+                  example: Segur0!2026
+                name:
+                  type: string
+                  example: João Silva
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Missing fields or password too short
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      description: |
+        Returns tokens on success, or a `requires2FA` flag when 2FA is needed.
+        - If `totpPending: true` — proceed to `POST /api/auth/login/totp`
+        - If `totpSetupRequired: true` — admin must set up TOTP first via `POST /api/auth/totp/setup`
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: joao.silva@gmail.com
+                password:
+                  type: string
+                  example: Segur0!2026
+      responses:
+        '200':
+          description: Successful login or 2FA challenge
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AuthResponse'
+                  - type: object
+                    description: TOTP required — proceed to /login/totp
+                    properties:
+                      requires2FA:
+                        type: boolean
+                        example: true
+                      totpPending:
+                        type: boolean
+                        example: true
+                      userId:
+                        type: string
+                        format: uuid
+                  - type: object
+                    description: Admin must set up TOTP before continuing
+                    properties:
+                      requires2FA:
+                        type: boolean
+                        example: true
+                      totpSetupRequired:
+                        type: boolean
+                        example: true
+                      userId:
+                        type: string
+                        format: uuid
+        '400':
+          description: Missing fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/auth/login/totp:
+    post:
+      tags: [Auth]
+      summary: Complete login with TOTP code
+      operationId: loginTotp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, code]
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  example: 52024332-9218-4563-9acf-572afa872d30
+                code:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "482031"
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Missing fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid TOTP code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: New token pair
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '400':
+          description: Missing refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (stateless — client discards tokens)
+      operationId: logout
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+
+  /api/auth/me:
+    get:
+      tags: [Profile]
+      summary: Get current user profile
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Profile]
+      summary: Update name or email
+      operationId: updateMe
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: João Manuel Silva
+                email:
+                  type: string
+                  format: email
+                  example: joao.manuel@gmail.com
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Nothing to update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/me/password:
+    put:
+      tags: [Profile]
+      summary: Change password
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  example: Segur0!2026
+                newPassword:
+                  type: string
+                  minLength: 8
+                  example: N0v4P@ss!
+      responses:
+        '200':
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '400':
+          description: Missing fields or new password too short
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Current password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/totp/setup:
+    post:
+      tags: [Auth]
+      summary: Generate TOTP secret and QR code URI
+      description: |
+        Accepts either a Bearer token (authenticated user) or a `userId` in the request
+        body (admin first-time setup flow before full authentication).
+      operationId: totpSetup
+      security:
+        - {}
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  description: Required when not using Bearer token
+      responses:
+        '200':
+          description: TOTP secret and OTP Auth URI
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
+                    example: JBSWY3DPEHPK3PXP
+                  uri:
+                    type: string
+                    example: "otpauth://totp/myLineage:joao@gmail.com?secret=JBSWY3DPEHPK3PXP&issuer=myLineage&algorithm=SHA1&digits=6&period=30"
+        '400':
+          description: userId missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/auth/totp/verify:
+    post:
+      tags: [Auth]
+      summary: Verify TOTP code and enable 2FA
+      operationId: totpVerify
+      security:
+        - {}
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  description: Required when not using Bearer token
+                code:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "482031"
+      responses:
+        '200':
+          description: TOTP enabled, tokens returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Missing code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid TOTP code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/totp:
+    delete:
+      tags: [Auth]
+      summary: Disable 2FA (TOTP)
+      operationId: totpDisable
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: TOTP disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── Trees ─────────────────────────────────────────────────────────────────
+
+  /api/trees:
+    get:
+      tags: [Trees]
+      summary: List trees the authenticated user has access to
+      description: Admins see all trees. Others see only trees they are members of.
+      operationId: listTrees
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of trees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tree'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Trees]
+      summary: Create a new tree
+      description: The authenticated user automatically becomes the owner.
+      operationId: createTree
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Família Bangueses
+                description:
+                  type: string
+                  example: Árvore genealógica da família Bangueses desde o século XIX
+      responses:
+        '201':
+          description: Tree created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tree'
+        '400':
+          description: Name is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/trees/{treeId}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+
+    get:
+      tags: [Trees]
+      summary: Get tree details
+      operationId: getTree
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tree details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tree'
+        '400':
+          description: Invalid treeId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Trees]
+      summary: Update tree name or description
+      description: Requires owner role (or admin).
+      operationId: updateTree
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Família Bangueses-Silva
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Updated tree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tree'
+        '400':
+          description: No fields to update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Trees]
+      summary: Delete tree and all associated data
+      description: Requires owner role. Irreversible.
+      operationId: deleteTree
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tree deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/members:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+
+    get:
+      tags: [Trees]
+      summary: List tree members
+      operationId: listMembers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TreeMember'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Trees]
+      summary: Add a member to the tree
+      description: Requires owner role. The user must already have an account.
+      operationId: addMember
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, role]
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  example: 52024332-9218-4563-9acf-572afa872d30
+                role:
+                  type: string
+                  enum: [writer, reader]
+                  example: reader
+      responses:
+        '201':
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreeMember'
+        '400':
+          description: Missing or invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: User is already a member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/trees/{treeId}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/userId'
+
+    put:
+      tags: [Trees]
+      summary: Change a member's role
+      description: Requires owner role.
+      operationId: updateMemberRole
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [writer, reader]
+                  example: writer
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreeMember'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Trees]
+      summary: Remove a member from the tree
+      description: Requires owner role. Cannot remove the owner.
+      operationId: removeMember
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Genealogy ─────────────────────────────────────────────────────────────
+
+  /api/trees/{treeId}/individuals:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List individuals
+      operationId: listIndividuals
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of individuals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Individual'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create an individual
+      description: Requires writer or owner role.
+      operationId: createIndividual
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Individual'
+      responses:
+        '201':
+          description: Individual created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Individual'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/individuals/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get an individual by ID
+      operationId: getIndividual
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Individual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Individual'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update an individual
+      description: Requires writer or owner role.
+      operationId: updateIndividual
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Individual'
+      responses:
+        '200':
+          description: Updated individual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Individual'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete an individual
+      description: Requires writer or owner role. Sets `deletedAt`; data is preserved.
+      operationId: deleteIndividual
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/families:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List families
+      operationId: listFamilies
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of families
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Family'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create a family
+      description: Requires writer or owner role.
+      operationId: createFamily
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Family'
+      responses:
+        '201':
+          description: Family created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/families/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get a family by ID
+      operationId: getFamily
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Family
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update a family
+      operationId: updateFamily
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Family'
+      responses:
+        '200':
+          description: Updated family
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete a family
+      operationId: deleteFamily
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/sources:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List sources
+      operationId: listSources
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Source'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create a source
+      operationId: createSource
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+      responses:
+        '201':
+          description: Source created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/sources/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get a source by ID
+      operationId: getSource
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update a source
+      operationId: updateSource
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+      responses:
+        '200':
+          description: Updated source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete a source
+      operationId: deleteSource
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/repositories:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List repositories
+      operationId: listRepositories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Repository'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create a repository
+      operationId: createRepository
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Repository'
+      responses:
+        '201':
+          description: Repository created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/repositories/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get a repository by ID
+      operationId: getRepository
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update a repository
+      operationId: updateRepository
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Repository'
+      responses:
+        '200':
+          description: Updated repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete a repository
+      operationId: deleteRepository
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/multimedia:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List multimedia objects
+      operationId: listMultimedia
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of multimedia objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Multimedia'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create a multimedia object
+      operationId: createMultimedia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Multimedia'
+      responses:
+        '201':
+          description: Multimedia created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Multimedia'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/multimedia/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get a multimedia object by ID
+      operationId: getMultimedia
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Multimedia object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Multimedia'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update a multimedia object
+      operationId: updateMultimedia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Multimedia'
+      responses:
+        '200':
+          description: Updated multimedia object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Multimedia'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete a multimedia object
+      operationId: deleteMultimedia
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/notes:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List notes
+      operationId: listNotes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create a note
+      operationId: createNote
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
+      responses:
+        '201':
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/notes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get a note by ID
+      operationId: getNote
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update a note
+      operationId: updateNote
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
+      responses:
+        '200':
+          description: Updated note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete a note
+      operationId: deleteNote
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trees/{treeId}/submitters:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/includeDeleted'
+    get:
+      tags: [Genealogy]
+      summary: List submitters
+      operationId: listSubmitters
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of submitters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submitter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Genealogy]
+      summary: Create a submitter
+      operationId: createSubmitter
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Submitter'
+      responses:
+        '201':
+          description: Submitter created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submitter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/submitters/{id}:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+      - $ref: '#/components/parameters/entityId'
+    get:
+      tags: [Genealogy]
+      summary: Get a submitter by ID
+      operationId: getSubmitter
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Submitter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submitter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Genealogy]
+      summary: Update a submitter
+      operationId: updateSubmitter
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Submitter'
+      responses:
+        '200':
+          description: Updated submitter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submitter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Genealogy]
+      summary: Soft-delete a submitter
+      operationId: deleteSubmitter
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Tree utilities ─────────────────────────────────────────────────────────
+
+  /api/trees/{treeId}/stats:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+    get:
+      tags: [Genealogy]
+      summary: Get tree statistics
+      operationId: getTreeStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistics per collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreeStats'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/upload:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+    post:
+      tags: [Genealogy]
+      summary: Upload a photo or image file
+      description: |
+        Accepts JPEG, PNG, GIF, WebP or BMP. Maximum size: 10 MB.
+        Requires writer or owner role.
+      operationId: uploadFile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          description: No file or invalid type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          description: File exceeds 10 MB limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/trees/{treeId}/bulk-replace:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+    post:
+      tags: [Genealogy]
+      summary: Bulk replace one or more collections
+      description: |
+        Replaces entire collections atomically. Used during GEDCOM import.
+        Requires owner role.
+      operationId: bulkReplace
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Keys are collection names; values are arrays of records
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+              example:
+                individuals:
+                  - id: I1
+                    type: INDI
+                    names: [{value: "João /Silva/"}]
+                    sex: M
+                    events: []
+                families:
+                  - id: F1
+                    type: FAM
+                    husb: I1
+                    wife: null
+                    children: []
+      responses:
+        '200':
+          description: Collections replaced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── GEDCOM ────────────────────────────────────────────────────────────────
+
+  /api/trees/{treeId}/gedcom/export:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+    get:
+      tags: [GEDCOM]
+      summary: Export tree as GEDCOM 7.0
+      operationId: gedcomExport
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: GEDCOM 7.0 file download
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/trees/{treeId}/gedcom/import:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+    post:
+      tags: [GEDCOM]
+      summary: Import a GEDCOM file (5.5, 5.5.1 or 7.0)
+      description: |
+        Parses the uploaded `.ged` file and replaces the tree's individuals, families,
+        sources, repositories, multimedia, notes and submitters. Requires owner role.
+      operationId: gedcomImport
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: GEDCOM .ged file
+      responses:
+        '200':
+          description: Import result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  imported:
+                    type: object
+                    properties:
+                      individuals:
+                        type: integer
+                        example: 342
+                      families:
+                        type: integer
+                        example: 148
+                      sources:
+                        type: integer
+                        example: 56
+        '400':
+          description: Invalid or missing GEDCOM file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Invitations (tree-scoped) ──────────────────────────────────────────────
+
+  /api/trees/{treeId}/invitations:
+    parameters:
+      - $ref: '#/components/parameters/treeId'
+
+    get:
+      tags: [Invitations]
+      summary: List invitations for a tree
+      description: Requires owner role.
+      operationId: listTreeInvitations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Invitations]
+      summary: Send an invitation to an email address
+      description: |
+        Creates a pending invitation and sends an email. If the invitee already has an
+        account, an in-app notification is also created. Requires owner role.
+      operationId: sendInvitation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: ana.silva@gmail.com
+                role:
+                  type: string
+                  enum: [writer, reader]
+                  example: reader
+      responses:
+        '201':
+          description: Invitation sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '400':
+          description: Missing or invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: User is already a member or pending invitation exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ── Invitations (user-scoped) ──────────────────────────────────────────────
+
+  /api/invitations:
+    get:
+      tags: [Invitations]
+      summary: List pending invitations for the authenticated user
+      operationId: listMyInvitations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of pending invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/invitations/{id}/accept:
+    parameters:
+      - $ref: '#/components/parameters/invitationId'
+    post:
+      tags: [Invitations]
+      summary: Accept an invitation
+      operationId: acceptInvitation
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Invitation accepted; user added as tree member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/invitations/{id}/decline:
+    parameters:
+      - $ref: '#/components/parameters/invitationId'
+    post:
+      tags: [Invitations]
+      summary: Decline an invitation
+      operationId: declineInvitation
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Invitation declined
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/invitations/by-token/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Invitation token from the email link
+    get:
+      tags: [Invitations]
+      summary: Get invitation details by token (public)
+      description: No authentication required. Used by the invite acceptance page.
+      operationId: getInvitationByToken
+      responses:
+        '200':
+          description: Invitation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Notifications ─────────────────────────────────────────────────────────
+
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications for the authenticated user
+      operationId: listNotifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Array of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notification count
+      operationId: getUnreadCount
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 3
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/notifications/read-all:
+    put:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      operationId: markAllRead
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/notifications/{id}/read:
+    parameters:
+      - $ref: '#/components/parameters/notificationId'
+    put:
+      tags: [Notifications]
+      summary: Mark a notification as read
+      operationId: markNotificationRead
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/notifications/{id}:
+    parameters:
+      - $ref: '#/components/parameters/notificationId'
+    delete:
+      tags: [Notifications]
+      summary: Delete a notification
+      operationId: deleteNotification
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Admin ─────────────────────────────────────────────────────────────────
+
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: Platform statistics
+      description: Requires admin role.
+      operationId: adminStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Aggregate statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: integer
+                    example: 42
+                  trees:
+                    type: integer
+                    example: 18
+                  collections:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                    example:
+                      individuals: 3420
+                      families: 1480
+                      sources: 560
+                  logins30d:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 156
+                      successful:
+                        type: integer
+                        example: 152
+                      failed:
+                        type: integer
+                        example: 4
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: List all users
+      description: Requires admin role.
+      operationId: adminListUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/paginationLimit'
+        - $ref: '#/components/parameters/paginationOffset'
+      responses:
+        '200':
+          description: Paginated list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/User'
+                        - type: object
+                          properties:
+                            treeCount:
+                              type: integer
+                              example: 3
+                  total:
+                    type: integer
+                    example: 42
+                  limit:
+                    type: integer
+                    example: 100
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/trees:
+    get:
+      tags: [Admin]
+      summary: List all trees
+      description: Requires admin role.
+      operationId: adminListTrees
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/paginationLimit'
+        - $ref: '#/components/parameters/paginationOffset'
+      responses:
+        '200':
+          description: Paginated list of trees
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trees:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Tree'
+                        - type: object
+                          properties:
+                            ownerEmail:
+                              type: string
+                              format: email
+                              example: miguel.bangueses@gmail.com
+                            ownerName:
+                              type: string
+                              example: Miguel Bangueses
+                            memberCount:
+                              type: integer
+                              example: 4
+                            individualCount:
+                              type: integer
+                              example: 342
+                  total:
+                    type: integer
+                    example: 18
+                  limit:
+                    type: integer
+                    example: 100
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/logins:
+    get:
+      tags: [Admin]
+      summary: Login audit log
+      description: Requires admin role.
+      operationId: adminLoginAudit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - $ref: '#/components/parameters/paginationOffset'
+      responses:
+        '200':
+          description: Paginated login audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logins:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        userId:
+                          type: string
+                          format: uuid
+                          nullable: true
+                        email:
+                          type: string
+                          format: email
+                        name:
+                          type: string
+                        ip:
+                          type: string
+                          example: 192.168.1.50
+                        userAgent:
+                          type: string
+                          example: Mozilla/5.0 ...
+                        success:
+                          type: boolean
+                          example: true
+                        createdAt:
+                          type: string
+                          format: date-time
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+# ---------------------------------------------------------------------------
+# Reusable responses
+# ---------------------------------------------------------------------------
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Token em falta ou inválido
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Sem permissão para executar esta ação
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Not found
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Internal server error
+
+# Default security — applied to all operations unless overridden
+security:
+  - bearerAuth: []

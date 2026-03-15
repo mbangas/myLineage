@@ -652,7 +652,11 @@
         title: 'Introdução',
         ref: 'intro',
         html: `<div class="livro-page-inner">
-  <div class="section-title">Introdução</div>
+  <div class="ftree-header" style="display:flex;flex-direction:row;align-items:center;gap:8px;text-align:left;margin-bottom:0;">
+    <div class="ftree-ornament" style="margin-bottom:0;flex-shrink:0;font-size:20px;opacity:0.7;"><i class="mdi mdi-tree" aria-hidden="true"></i></div>
+    <div class="section-title" style="margin:0;border-bottom:none;padding-bottom:0;">Introdução</div>
+  </div>
+  <div class="chapter-divider" style="margin-top:10px;margin-bottom:22px;"></div>
   <div class="intro-text">${esc(intro)}</div>
 </div>`
       };

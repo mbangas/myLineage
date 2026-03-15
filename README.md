@@ -10,10 +10,30 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![GEDCOM](https://img.shields.io/badge/GEDCOM-7.0-4c8bf5?style=flat-square)](https://gedcom.io)
+[![Testes](https://img.shields.io/badge/testes-Jest-C21325?style=flat-square&logo=jest&logoColor=white)](tests/)
 [![Licença](https://img.shields.io/badge/licença-MIT-blue?style=flat-square)](LICENSE)
 
 </div>
+
+---
+
+## Índice
+
+- [Sobre a aplicação](#sobre-a-aplicação)
+- [Funcionalidades](#funcionalidades-principais)
+- [Arquitectura](#arquitectura)
+- [Instalação](#setup)
+  - [Instalação automática (Proxmox / LXC)](#-instalação-automática-recomendado--docker-em-lxc-proxmox)
+  - [Instalação manual (development)](#instalação-manual-desenvolvimento-local)
+  - [Variáveis de ambiente](#variáveis-de-ambiente-docker-composeyml)
+  - [Como actualizar](#como-actualizar)
+- [Estrutura de ficheiros](#estrutura-de-ficheiros)
+- [API REST](#api-de-dados)
+- [Testes](#testes)
+- [Como obter ajuda](#como-obter-ajuda)
+- [Quem mantém e como contribuir](#quem-mantém-e-como-contribuir)
 
 ---
 
@@ -366,3 +386,94 @@ npm run test:coverage    # com relatório de cobertura
 | `tests/integration/trees-flow.test.js` | CRUD de árvores, isolamento de dados |
 
 Consulte **[tests/README.md](tests/README.md)** para detalhes completos.
+
+---
+
+## Como actualizar
+
+### Instalação com Docker Compose (desenvolvimento local)
+
+```bash
+cd myLineage
+git pull
+docker compose up -d --build
+```
+
+As migrações de base de dados são executadas automaticamente no arranque do servidor.
+
+### Instalação em produção (Proxmox / LXC)
+
+```bash
+cd /opt/mylineage
+git pull
+docker compose up -d --build
+```
+
+Consulte [setup/INSTALL.md](setup/INSTALL.md) para o guia completo com rollback e backup.
+
+---
+
+## Como obter ajuda
+
+| Recurso | Onde encontrar |
+|---|---|
+| **Guia de instalação detalhado** | [setup/INSTALL.md](setup/INSTALL.md) |
+| **Referência das APIs** | `http://<host>:3000/apis.html` (após instalar) |
+| **Manual de utilizador** | [docs/manual/index.html](docs/manual/index.html) |
+| **Documentação dos testes** | [tests/README.md](tests/README.md) |
+| **Issues / Relatar bugs** | [GitHub Issues](https://github.com/mbangas/myLineage/issues) |
+| **Pedidos de funcionalidade** | [GitHub Issues](https://github.com/mbangas/myLineage/issues) com label `enhancement` |
+
+### Problemas comuns
+
+| Sintoma | Solução rápida |
+|---|---|
+| Página em branco após instalar | Aguarde 30 s e recarregue — pode estar a iniciar |
+| `docker ps` não mostra o contentor | `docker logs mylineage` para ver o erro |
+| Instalador parou | `cat /tmp/mylineage_install_*.log` |
+| Não recebo emails de convite | Verifique as variáveis `SMTP_*` no `docker-compose.yml` |
+
+---
+
+## Quem mantém e como contribuir
+
+### Mantenedor
+
+**Miguel Bangueses** — [@mbangas](https://github.com/mbangas)
+
+### Contribuir com código
+
+1. Faça fork do repositório e crie um branch a partir de `main`:
+   ```bash
+   git checkout -b feature/nome-da-funcionalidade
+   ```
+2. Faça as alterações e adicione testes para qualquer nova lógica.
+3. Verifique que todos os testes passam:
+   ```bash
+   npm test
+   ```
+4. Abra um Pull Request com uma descrição clara do que foi alterado e porquê.
+
+### Convenções
+
+- **Idioma dos commits**: português ou inglês, mas seja consistente no PR
+- **Estilo de código**: JavaScript sem transpilador, `'use strict'`, sem dependências desnecessárias
+- **Testes**: qualquer nova funcionalidade de servidor deve ter testes em `tests/unit/` ou `tests/integration/`
+- **Segurança**: nunca incluir credenciais ou segredos no código; usar variáveis de ambiente
+
+### Relatar um bug
+
+Abra um [GitHub Issue](https://github.com/mbangas/myLineage/issues) com:
+- Versão do Node.js (`node -v`) e sistema operativo
+- Passos para reproduzir
+- Comportamento esperado vs. comportamento actual
+- Logs relevantes (`docker logs mylineage`)
+
+---
+
+<div align="center">
+
+**🌳 myLineage** · Genealogia Familiar · GEDCOM 7  
+[GitHub](https://github.com/mbangas/myLineage) · [Issues](https://github.com/mbangas/myLineage/issues)
+
+</div>
